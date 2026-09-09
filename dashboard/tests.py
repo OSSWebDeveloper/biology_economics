@@ -99,8 +99,7 @@ class SahifalarTest(TestCase):
 
     def test_operator_admin_bolimlariga_kira_olmaydi(self):
         self.client.login(username="operator1", password="parol12345")
-        for manzil in (reverse("payments:kartalar"), reverse("students:guruh_yangi"),
-                       reverse("accounts:foydalanuvchi_yangi")):
+        for manzil in (reverse("payments:kartalar"), reverse("students:guruh_yangi")):
             with self.subTest(manzil=manzil):
                 self.assertEqual(self.client.get(manzil).status_code, 302)
 

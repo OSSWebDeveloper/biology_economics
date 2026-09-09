@@ -15,5 +15,8 @@ urlpatterns = [
     path("<int:pk>/tahrirlash/", views.xodim_saqlash, name="xodim_tahrir"),
     path("<int:pk>/maosh/", views.maosh_tayinlash, name="maosh_tayinlash"),
     path("<int:pk>/holat/", views.xodim_ishdan_boshatish, name="xodim_holat"),
+    path("<int:pk>/hisob/", views.xodim_hisob, name="xodim_hisob"),
+    path("<int:pk>/hisob/boglash/", views.xodim_hisob_boglash, name="xodim_hisob_boglash"),
+    path("<int:pk>/hisob/uzish/", views.xodim_hisob_uzish, name="xodim_hisob_uzish"),
     path("<int:pk>/ochirish/", views.xodim_ochirish, name="xodim_ochirish"),
 ]

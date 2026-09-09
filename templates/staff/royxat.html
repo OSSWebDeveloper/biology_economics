@@ -53,6 +53,7 @@
             <th>Xodim</th>
             <th>Lavozim</th>
             <th>Telefon</th>
+            <th>Login</th>
             <th class="ong">Oylik maosh</th>
             <th class="ong">Shu oy avansi</th>
             <th class="ong">Qoldiq</th>
@@ -70,6 +71,10 @@
             </td>
             <td class="mayda">{{ x.lavozim|default:"-" }}</td>
             <td class="mayda tel">{{ x.telefon|default:"-" }}</td>
+            <td class="mayda">
+              {% if x.saytga_kiradi %}<span class="nishon yashil">{{ x.foydalanuvchi.username }}</span>
+              {% else %}<span class="och">-</span>{% endif %}
+            </td>
             <td class="ong pul">{{ x.oylik_maosh|som }}</td>
             <td class="ong pul och">{{ x.oy_avansi|som }}</td>
             <td class="ong pul {% if x.qoldiq_summa > 0 %}qarz{% else %}oldindan{% endif %}">
@@ -79,7 +84,7 @@
             <td class="ong"><a href="{% url 'staff:xodim' x.pk %}" class="tugma kichik">Ochish</a></td>
           </tr>
         {% empty %}
-          <tr><td colspan="8" class="hech-narsa">Xodim qo'shilmagan.</td></tr>
+          <tr><td colspan="9" class="hech-narsa">Xodim qo'shilmagan.</td></tr>
         {% endfor %}
         </tbody>
       </table>

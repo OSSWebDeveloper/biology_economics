@@ -13,6 +13,7 @@ from decimal import Decimal
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
+from accounts.models import Foydalanuvchi
 from payments.models import Karta, Tranzaksiya, Usul
 from payments.services import barcha_hisoblarni_yangila, oquvchi_balansi, oy_boshi
 from staff.models import Xodim, XodimTranzaksiya
@@ -39,13 +40,23 @@ class Command(BaseCommand):
     @transaction.atomic
     def handle(self, *args, **options):
         if options["tozala"]:
+            # Xodimlarga ochilgan sayt loginlari ham o'chadi, lekin admin va
+            # texnik superuser hisoblariga tegilmaydi.
+            hisob_idlar = list(
+                Xodim.objects.filter(foydalanuvchi__isnull=False)
+                .exclude(foydalanuvchi__is_superuser=True)
+                .exclude(foydalanuvchi__rol=Foydalanuvchi.Rol.ADMIN)
+                .values_list("foydalanuvchi_id", flat=True)
+            )
             Tranzaksiya.objects.all().delete()
             XodimTranzaksiya.objects.all().delete()
             Oquvchi.objects.all().delete()
             Xodim.objects.all().delete()
             Guruh.objects.all().delete()
             Karta.objects.all().delete()
-            self.stdout.write(self.style.WARNING("Barcha ma'lumot o'chirildi."))
+            ochirilgan = Foydalanuvchi.objects.filter(pk__in=hisob_idlar).delete()[0]
+            self.stdout.write(self.style.WARNING(
+                f"Barcha ma'lumot o'chirildi. Xodim loginlari: {ochirilgan} ta."))
             return
 
         tasodif = random.Random(2026)

@@ -125,23 +125,37 @@ python manage.py createsuperuser
 
 ### Shaxsiy sahifam
 
-Yon menyudagi **Sozlamalar —> Shaxsiy sahifam** bo'limi:
+Yon menyudagi **Sozlamalar —> Shaxsiy sahifam** bo'limida har bir foydalanuvchi
+(boshliq ham, o'qituvchi ham) **faqat o'zi haqidagi** ma'lumotni boshqaradi:
 
-* **Har bir foydalanuvchi** (admin ham, operator ham) o'z familiyasi, ismi,
-  telefoni va **loginini** o'zgartira oladi;
-* **parolini** o'zi almashtiradi — joriy parolni so'raydi, almashtirgandan keyin
-  saytdan chiqib ketmaydi;
-* **Admin** qo'shimcha ravishda barcha foydalanuvchilar ro'yxatini ko'radi:
-  har birining familiya-ismi, logini, **parolini** va rolini o'zgartiradi,
-  yangi foydalanuvchi qo'shadi yoki o'chiradi.
+* familiya, ism, telefon va **login**;
+* **parol** — joriy parolni so'raydi, almashtirgandan keyin saytdan chiqib ketmaydi.
 
-Texnik Django admin (superuser) hisobi bu ro'yxatda ko'rinmaydi va sayt
-panelidan o'zgartirib bo'lmaydi — ikkala panel mustaqil bo'lib qoladi.
+Ismini o'zgartirsa, xodim kartochkasidagi ismi ham avtomatik yangilanadi.
 
-> Har bir xodimga sayt logini shart emas. Xodimlarning oyligi va to'lovlari
-> "Xodimlar" bo'limida yuritiladi; login faqat saytga kiradiganlarga kerak.
+### Xodimlarga login berish
 
----
+Bu **yopiq tizim** — hech kim o'zi ro'yxatdan o'ta olmaydi. O'qituvchining
+saytga kirish logini uning **xodim kartochkasidan** beriladi:
+
+**Xodimlar —> xodimni ochish —> "Saytga kirish"** paneli (faqat admin ko'radi):
+
+* login va parol yozib **"Login yaratish"** — xodimga hisob ochiladi, ismi
+  kartochkadan olinadi;
+* keyinchalik shu paneldan **login, parol va huquqni** o'zgartirish mumkin
+  (parol bo'sh qoldirilsa, eskisi o'zgarmaydi);
+* **"Kirish huquqini olib tashlash"** — xodim saytga kira olmaydigan bo'ladi,
+  lekin oylik va to'lovlar tarixi joyida qoladi;
+* xodimning logini allaqachon bo'lsa, **"Mavjud hisobni bog'lash"** orqali
+  ulanadi.
+
+Xodimlar ro'yxatida "Login" ustuni kimda kirish borligini ko'rsatib turadi.
+Har bir xodimga login shart emas — oylik va to'lovlar loginsiz ham yuritiladi.
+
+Birinchi o'rnatishda kursxona boshlig'i uchun **`admin` hisobi ham, xodim
+kartochkasi ham** birga ochiladi (u ham boshliq, ham o'qituvchi).
+
+Texnik Django superuser hisobi bu tizimga umuman aralashmaydi.
 
 ## 4. Kurs to'lovi qanday hisoblanadi
 
@@ -213,11 +227,11 @@ Butunlay o'chirish (tarixi bilan) faqat adminda va alohida tasdiqlash bilan.
 | **O'quvchilar → Ro'yxat** | qidiruv, guruh/to'lov holati bo'yicha filtr; qatorga bosilsa to'lov oynachasi ochiladi |
 | **Guruhlar** | guruh nomi, dars jadvali, guruhning standart oylik to'lovi |
 | **Kurs to'lovlari** | barcha to'lovlar; amal turi, naqd/plastik, karta va sana bo'yicha filtr |
-| **Xodimlar** | oylik maosh, shu oy avansi, qoldiq |
+| **Xodimlar** | oylik maosh, shu oy avansi, qoldiq, saytga kirish logini |
 | **Oylik va avans** | xodimlarga berilgan pullar; naqd/plastik alohida |
 | **Moliya (statistika)** | kirim/chiqim, sof foyda, yig'ilish foizi, 12 oylik grafik, guruh va karta kesimi |
 | **Kartalar** | to'lov qabul qilinadigan plastik kartalar ro'yxati |
-| **Shaxsiy sahifam** | o'z ismi, logini va parolini o'zgartirish; admin uchun - barcha foydalanuvchilar |
+| **Shaxsiy sahifam** | o'z familiyasi, ismi, logini va parolini o'zgartirish |
 
 ---
 

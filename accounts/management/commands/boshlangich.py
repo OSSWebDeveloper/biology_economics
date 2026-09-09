@@ -46,14 +46,29 @@ class Command(BaseCommand):
             return
 
         parol = parol or "admin"
-        Foydalanuvchi.objects.create_user(
+        hisob = Foydalanuvchi.objects.create_user(
             username=login, password=parol,
             rol=Foydalanuvchi.Rol.ADMIN,
             first_name="Odil", last_name="Kenjayev",
             saytga_kira_oladi=True,
         )
+        self._xodim(hisob)
         self.stdout.write(self.style.SUCCESS("Sayt admin hisobi yaratildi."))
         self.stdout.write(self.style.WARNING(f"    login: {login}"))
         self.stdout.write(self.style.WARNING(f"    parol: {parol}"))
         self.stdout.write(self.style.WARNING(
             "    Saytga kirgach 'Shaxsiy sahifam' bo'limidan parolni almashtiring!"))
+
+    def _xodim(self, hisob):
+        """Kursxona boshlig'i ayni paytda o'qituvchi ham - unga xodim kartochkasi ochamiz."""
+        from staff.models import Xodim
+
+        if Xodim.objects.filter(foydalanuvchi=hisob).exists():
+            return
+        Xodim.objects.create(
+            ism=hisob.first_name or "Admin",
+            familiya=hisob.last_name or "",
+            lavozim="kursxona boshlig'i, o'qituvchi",
+            foydalanuvchi=hisob,
+        )
+        self.stdout.write("Xodimlar ro'yxatiga kartochka ochildi.")

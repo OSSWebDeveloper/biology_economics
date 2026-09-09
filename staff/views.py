@@ -6,11 +6,18 @@ from django.db.models import Q, Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
+from accounts.models import Foydalanuvchi
 from accounts.permissions import admin_talab
 from payments.models import Usul
 from payments.services import oy_boshi, oy_nomi
 
-from .forms import MaoshForm, XodimForm, XodimTolovForm
+from .forms import (
+    HisobBoglashForm,
+    MaoshForm,
+    XodimForm,
+    XodimHisobForm,
+    XodimTolovForm,
+)
 from .models import Xodim, XodimTranzaksiya
 from .services import (
     joriy_oy_avansi,
@@ -81,6 +88,8 @@ def xodim(request, pk):
 
     joriy_davr = oy_boshi(date.today())
     return render(request, "staff/xodim.html", {
+        "hisob_form": XodimHisobForm(hisob=obyekt.foydalanuvchi),
+        "boglash_form": HisobBoglashForm() if obyekt.foydalanuvchi is None else None,
         "xodim": obyekt,
         "tranzaksiyalar": tranzaksiyalar,
         "qoldiq": yiguvchi,
@@ -113,6 +122,7 @@ def xodim_saqlash(request, pk=None):
     form = XodimForm(request.POST or None, instance=obyekt)
     if request.method == "POST" and form.is_valid():
         yangi = form.save()
+        _ismni_hisobga_kochir(yangi)
         maoshlarni_yangila()
         messages.success(request, f"{yangi.toliq_ism} saqlandi.")
         return redirect("staff:xodim", pk=yangi.pk)
@@ -248,3 +258,90 @@ def oylik_tolovlari(request):
         "usullar": Usul.choices,
         "filtr": {"usul": usul, "tur": tur, "sanadan": sanadan, "sanagacha": sanagacha},
     })
+
+
+# --------------------------------------------------------------- sayt hisobi
+
+def _ismni_hisobga_kochir(xodim):
+    """Xodimning ismi o'zgarsa, uning sayt hisobidagi ismi ham yangilanadi."""
+    hisob = xodim.foydalanuvchi
+    if hisob is None:
+        return
+    hisob.first_name = xodim.ism
+    hisob.last_name = xodim.familiya
+    hisob.telefon = xodim.telefon
+    hisob.save(update_fields=["first_name", "last_name", "telefon"])
+
+
+@admin_talab
+def xodim_hisob(request, pk):
+    """Xodimga saytga kirish uchun login berish yoki uni o'zgartirish."""
+    obyekt = get_object_or_404(Xodim, pk=pk)
+    if request.method != "POST":
+        return redirect("staff:xodim", pk=pk)
+
+    form = XodimHisobForm(request.POST, hisob=obyekt.foydalanuvchi)
+    if not form.is_valid():
+        xatolar = "; ".join(" ".join(x) for x in form.errors.values())
+        messages.error(request, f"Saqlanmadi. {xatolar}")
+        return redirect("staff:xodim", pk=pk)
+
+    login = form.cleaned_data["login"]
+    parol = form.cleaned_data["parol"]
+    rol = form.cleaned_data["rol"]
+
+    hisob = obyekt.foydalanuvchi
+    if hisob is None:
+        hisob = Foydalanuvchi(username=login, rol=rol, saytga_kira_oladi=True)
+        hisob.first_name, hisob.last_name = obyekt.ism, obyekt.familiya
+        hisob.telefon = obyekt.telefon
+        hisob.set_password(parol)
+        hisob.save()
+        obyekt.foydalanuvchi = hisob
+        obyekt.save(update_fields=["foydalanuvchi"])
+        messages.success(request, f"{obyekt.toliq_ism} uchun login yaratildi: {login}")
+    else:
+        hisob.username = login
+        hisob.rol = rol
+        hisob.saytga_kira_oladi = True
+        if parol:
+            hisob.set_password(parol)
+        hisob.save()
+        _ismni_hisobga_kochir(obyekt)
+        messages.success(request, "Saytga kirish ma'lumotlari yangilandi.")
+    return redirect("staff:xodim", pk=pk)
+
+
+@admin_talab
+def xodim_hisob_boglash(request, pk):
+    """Mavjud sayt hisobini xodimga bog'lash."""
+    obyekt = get_object_or_404(Xodim, pk=pk)
+    if request.method != "POST" or obyekt.foydalanuvchi is not None:
+        return redirect("staff:xodim", pk=pk)
+
+    form = HisobBoglashForm(request.POST)
+    if form.is_valid():
+        obyekt.foydalanuvchi = form.cleaned_data["hisob"]
+        obyekt.save(update_fields=["foydalanuvchi"])
+        messages.success(
+            request, f"{obyekt.toliq_ism} '{obyekt.foydalanuvchi.username}' hisobiga bog'landi.")
+    else:
+        messages.error(request, "Hisob tanlanmadi.")
+    return redirect("staff:xodim", pk=pk)
+
+
+@admin_talab
+def xodim_hisob_uzish(request, pk):
+    """Xodimning saytga kirish huquqini olib tashlash."""
+    obyekt = get_object_or_404(Xodim, pk=pk)
+    if request.method == "POST" and obyekt.foydalanuvchi is not None:
+        if obyekt.foydalanuvchi == request.user:
+            messages.error(request, "O'zingizning kirish huquqingizni olib tashlay olmaysiz.")
+        else:
+            hisob = obyekt.foydalanuvchi
+            hisob.saytga_kira_oladi = False
+            hisob.save(update_fields=["saytga_kira_oladi"])
+            obyekt.foydalanuvchi = None
+            obyekt.save(update_fields=["foydalanuvchi"])
+            messages.success(request, f"{hisob.username} endi saytga kira olmaydi.")
+    return redirect("staff:xodim", pk=pk)

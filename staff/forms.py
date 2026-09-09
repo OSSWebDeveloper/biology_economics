@@ -2,6 +2,7 @@ from datetime import date
 
 from django import forms
 
+from accounts.models import Foydalanuvchi
 from dashboard.widgets import PulInput, SanaInput
 from payments.models import Usul
 
@@ -87,3 +88,58 @@ class MaoshForm(forms.Form):
         label="Shu oyning hisobini yangi maosh bo'yicha qayta hisoblansin",
         required=False, initial=True,
     )
+
+
+class XodimHisobForm(forms.Form):
+    """Xodimga sayt logini berish yoki uni o'zgartirish (faqat admin)."""
+
+    login = forms.CharField(label="Login", max_length=150,
+                            widget=forms.TextInput(attrs={"autocomplete": "off"}))
+    parol = forms.CharField(
+        label="Parol", required=False,
+        widget=forms.PasswordInput(attrs={"autocomplete": "new-password"}),
+    )
+    rol = forms.ChoiceField(label="Huquqi", choices=Foydalanuvchi.Rol.choices,
+                            initial=Foydalanuvchi.Rol.OPERATOR)
+
+    def __init__(self, *args, hisob=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.hisob = hisob
+        if hisob is None:
+            self.fields["parol"].required = True
+            self.fields["parol"].help_text = "Kamida 4 ta belgi."
+        else:
+            self.fields["login"].initial = hisob.username
+            self.fields["rol"].initial = hisob.rol
+            self.fields["parol"].help_text = "Bo'sh qoldirilsa, eski parol o'zgarmaydi."
+
+    def clean_login(self):
+        login = self.cleaned_data["login"].strip()
+        band = Foydalanuvchi.objects.filter(username=login)
+        if self.hisob is not None:
+            band = band.exclude(pk=self.hisob.pk)
+        if band.exists():
+            raise forms.ValidationError("Bu login band. Boshqasini tanlang.")
+        return login
+
+    def clean_parol(self):
+        parol = self.cleaned_data.get("parol") or ""
+        if parol and len(parol) < 4:
+            raise forms.ValidationError("Parol kamida 4 ta belgidan iborat bo'lsin.")
+        return parol
+
+
+class HisobBoglashForm(forms.Form):
+    """Mavjud sayt hisobini xodimga bog'lash."""
+
+    hisob = forms.ModelChoiceField(
+        label="Mavjud hisob", queryset=Foydalanuvchi.objects.none(),
+        empty_label="-- hisobni tanlang --",
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["hisob"].queryset = (
+            Foydalanuvchi.objects.filter(is_superuser=False, xodim__isnull=True)
+            .order_by("username")
+        )

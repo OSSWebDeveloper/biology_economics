@@ -56,11 +56,56 @@
 </div>
 
 <div class="setka" style="grid-template-columns: 340px minmax(0,1fr); align-items:start">
-  <div class="panel">
-    <div class="panel-sarlavha">Avans / oylik berish</div>
-    <div class="panel-ich">
-      {% include "staff/_tolov_forma.html" %}
+  <div>
+    <div class="panel">
+      <div class="panel-sarlavha">Avans / oylik berish</div>
+      <div class="panel-ich">
+        {% include "staff/_tolov_forma.html" %}
+      </div>
     </div>
+
+    {% if user.admin_mi %}
+    <div class="panel">
+      <div class="panel-sarlavha">
+        Saytga kirish
+        {% if xodim.foydalanuvchi %}
+          <span class="nishon yashil">{{ xodim.foydalanuvchi.username }}</span>
+        {% else %}
+          <span class="nishon kulrang">login yo'q</span>
+        {% endif %}
+      </div>
+      <div class="panel-ich">
+        <form method="post" action="{% url 'staff:xodim_hisob' xodim.pk %}" novalidate>
+          {% csrf_token %}
+          {% include "_maydon.html" with maydon=hisob_form.login %}
+          {% include "_maydon.html" with maydon=hisob_form.parol %}
+          {% include "_maydon.html" with maydon=hisob_form.rol %}
+          <button type="submit" class="tugma asosiy tola">
+            {% if xodim.foydalanuvchi %}Saqlash{% else %}Login yaratish{% endif %}
+          </button>
+        </form>
+
+        {% if xodim.foydalanuvchi %}
+        <form method="post" action="{% url 'staff:xodim_hisob_uzish' xodim.pk %}"
+              style="margin-top:10px"
+              onsubmit="return confirm('Kirish huquqi olib tashlansinmi?')">
+          {% csrf_token %}
+          <button type="submit" class="tugma tola">Kirish huquqini olib tashlash</button>
+        </form>
+        {% elif boglash_form and boglash_form.fields.hisob.queryset %}
+        <hr style="border:none;border-top:1px solid var(--chegara);margin:16px 0">
+        <form method="post" action="{% url 'staff:xodim_hisob_boglash' xodim.pk %}">
+          {% csrf_token %}
+          {% include "_maydon.html" with maydon=boglash_form.hisob %}
+          <button type="submit" class="tugma tola">Mavjud hisobni bog'lash</button>
+          <div class="yordam">
+            Bu xodimning logini allaqachon bor bo'lsa, shu yerdan bog'lang.
+          </div>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
   </div>
 
   <div class="panel">

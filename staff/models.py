@@ -29,6 +29,12 @@ class Xodim(models.Model):
     faol = models.BooleanField("Ishlayapti", default=True)
     ishdan_ketgan_sana = models.DateField("Ishdan ketgan sana", null=True, blank=True)
 
+    foydalanuvchi = models.OneToOneField(
+        settings.AUTH_USER_MODEL, verbose_name="Sayt hisobi",
+        on_delete=models.SET_NULL, null=True, blank=True, related_name="xodim",
+        help_text="Xodim saytga kirishi kerak bo'lsa, unga login beriladi.",
+    )
+
     izoh = models.TextField("Izoh", blank=True)
     yaratilgan = models.DateTimeField(auto_now_add=True)
 
@@ -57,6 +63,10 @@ class Xodim(models.Model):
     @property
     def bosh_harflar(self):
         return f"{self.familiya[:1]}{self.ism[:1]}".upper()
+
+    @property
+    def saytga_kiradi(self):
+        return self.foydalanuvchi is not None and self.foydalanuvchi.saytga_kira_oladi
 
     @property
     def qoldiq(self):
