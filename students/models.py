@@ -12,8 +12,6 @@ class Guruh(models.Model):
         validators=[MinValueValidator(0)],
         help_text="Yangi o'quvchi qo'shilganda shu summa avtomatik qo'yiladi.",
     )
-    jadval = models.CharField("Dars jadvali", max_length=200, blank=True,
-                              help_text="Masalan: Du/Chor/Jum 15:00")
     faol = models.BooleanField("Faol", default=True)
     yaratilgan = models.DateTimeField(auto_now_add=True)
 

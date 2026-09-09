@@ -28,10 +28,14 @@ U ketma-ket quyidagilarni bajaradi:
 | 4/7 | Fayllarni `C:\bio_moliya` ga ko'chiradi, **bazaga tegmaydi** |
 | 5/7 | Virtual muhit ochib, Django va boshqa kutubxonalarni o'rnatadi |
 | 6/7 | Bazani tayyorlaydi (`migrate`), birinchi marta bo'lsa admin hisobini ochadi |
-| 7/7 | Ish stoliga **"Biologiya kursi"** yorlig'ini qo'yadi |
+| 7/7 | Ish stoliga **ikkita yorliq** qo'yadi |
 
-Yorliqqa bosilsa: server fon rejimida (oynasiz) ishga tushadi va sayt **Chrome**'da
-ochiladi. Server allaqachon ishlayotgan bo'lsa — faqat Chrome ochiladi.
+Ish stolidagi ikkita yorliq:
+
+| Yorliq | Vazifasi |
+|---|---|
+| **Dasturga kirish** | server fon rejimida (oynasiz) ishga tushadi va sayt **Chrome**'da ochiladi. Server allaqachon ishlayotgan bo'lsa — faqat Chrome ochiladi |
+| **Serverni to'xtatish** | ishlab turgan serverni to'xtatadi va tasdiq oynasini ko'rsatadi |
 
 ### Sozlash
 
@@ -52,7 +56,8 @@ set "PORT=8000"
 
 | Fayl | Vazifasi |
 |---|---|
-| `Ishga_tushirish.vbs` | Ish stolidagi yorliq shuni chaqiradi |
+| `Ishga_tushirish.vbs` | "Dasturga kirish" yorlig'i shuni chaqiradi |
+| `Toxtatish.vbs` | "Serverni to'xtatish" yorlig'i shuni chaqiradi |
 | `Server.bat` | Serverni ishga tushiradi, hammasini `server.log` ga yozadi |
 | `Toxtatish.bat` | Fon rejimidagi serverni to'xtatadi |
 | `Tekshirish.bat` | Serverni oynali rejimda ochadi — xatoni ko'rish uchun |

@@ -5,7 +5,7 @@ from .models import Guruh, Oquvchi
 
 @admin.register(Guruh)
 class GuruhAdmin(admin.ModelAdmin):
-    list_display = ("nomi", "oylik_toluv", "jadval", "faol")
+    list_display = ("nomi", "oylik_toluv", "faol")
     list_filter = ("faol",)
     search_fields = ("nomi",)
 

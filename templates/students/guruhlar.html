@@ -18,7 +18,6 @@
         <thead>
           <tr>
             <th>Guruh</th>
-            <th>Dars jadvali</th>
             <th class="markaz">O'quvchilar</th>
             <th class="ong">Oylik to'lov</th>
             <th>Holat</th>
@@ -29,7 +28,6 @@
         {% for g in royxat %}
           <tr>
             <td><b>{{ g.nomi }}</b></td>
-            <td class="mayda och">{{ g.jadval|default:"-" }}</td>
             <td class="markaz">{{ g.oquvchilar_soni }}</td>
             <td class="ong pul">{{ g.oylik_toluv|som }}</td>
             <td>
@@ -46,7 +44,7 @@
             </td>
           </tr>
         {% empty %}
-          <tr><td colspan="6" class="hech-narsa">Hali guruh yaratilmagan.</td></tr>
+          <tr><td colspan="5" class="hech-narsa">Hali guruh yaratilmagan.</td></tr>
         {% endfor %}
         </tbody>
       </table>

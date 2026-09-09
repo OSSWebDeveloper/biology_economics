@@ -70,12 +70,9 @@ class Command(BaseCommand):
         ]
 
         guruhlar = [
-            Guruh.objects.create(nomi="9-sinf (DTM)", oylik_toluv=Decimal(500000),
-                                 jadval="Du/Chor/Jum 15:00"),
-            Guruh.objects.create(nomi="11-sinf (blok)", oylik_toluv=Decimal(700000),
-                                 jadval="Se/Pay/Sha 17:00"),
-            Guruh.objects.create(nomi="Abituriyent", oylik_toluv=Decimal(900000),
-                                 jadval="Har kuni 09:00"),
+            Guruh.objects.create(nomi="9-sinf (DTM)", oylik_toluv=Decimal(500000)),
+            Guruh.objects.create(nomi="11-sinf (blok)", oylik_toluv=Decimal(700000)),
+            Guruh.objects.create(nomi="Abituriyent", oylik_toluv=Decimal(900000)),
         ]
 
         oquvchilar = []

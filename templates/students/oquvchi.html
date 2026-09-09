@@ -54,7 +54,10 @@
   <div class="stat">
     <div class="yorliq">Guruh</div>
     <div class="qiymat" style="font-size:1.05rem">{{ oquvchi.guruh.nomi|default:"-" }}</div>
-    <div class="izoh">{{ oquvchi.guruh.jadval|default:"jadval kiritilmagan" }}</div>
+    <div class="izoh">
+      {% if oquvchi.guruh %}guruh narxi: {{ oquvchi.guruh.oylik_toluv|som }}
+      {% else %}guruhga biriktirilmagan{% endif %}
+    </div>
   </div>
 </div>
 

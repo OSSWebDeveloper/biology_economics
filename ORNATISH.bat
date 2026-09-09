@@ -10,7 +10,8 @@ set "GITHUB=https://github.com/OSSWebDeveloper/biology_economics"
 set "TARMOQ=main"
 set "JOY=C:\bio_moliya"
 set "PORT=8000"
-set "YORLIQ=Biologiya kursi"
+set "YORLIQ=Dasturga kirish"
+set "YORLIQ2=Serverni to'xtatish"
 set "PY_YUKLASH=https://www.python.org/ftp/python/3.12.10/python-3.12.10-amd64.exe"
 rem ============================================================
 
@@ -188,10 +189,13 @@ if errorlevel 1 (
 popd
 
 rem ============================================================
-call :sarlavha "7/7   Ish stoliga yorliq qo'yilmoqda"
+call :sarlavha "7/7   Ish stoliga yorliqlar qo'yilmoqda"
 rem ============================================================
-powershell -NoProfile -Command "$ws = New-Object -ComObject WScript.Shell; $d = [Environment]::GetFolderPath('CommonDesktopDirectory'); if (-not $d -or -not (Test-Path $d)) { $d = [Environment]::GetFolderPath('Desktop') }; $dest = Join-Path $d '%YORLIQ%.lnk'; $src = '%JOY%\%YORLIQ%.lnk'; if (Test-Path $src) { Copy-Item -LiteralPath $src -Destination $dest -Force; Write-Host '    Yorliq GitHub nusxasidan olindi.' } else { Write-Host '    Yorliq yangidan yasaldi.' }; $l = $ws.CreateShortcut($dest); $l.TargetPath = '%JOY%\Ishga_tushirish.vbs'; $l.WorkingDirectory = '%JOY%'; $l.IconLocation = '%JOY%\bio.ico'; $l.Description = 'Biologiya kursi - moliyaviy boshqaruv tizimi'; $l.Save(); Write-Host ('    Manzil: ' + $dest)"
-if errorlevel 1 echo    Ogohlantirish: yorliq yaratilmadi, %JOY%\Ishga_tushirish.vbs faylini o'zingiz ish stoliga tashlang.
+rem PowerShell uchun nomlardagi apostrof ikkilantiriladi
+set "YORLIQ_PS=%YORLIQ:'=''%"
+set "YORLIQ2_PS=%YORLIQ2:'=''%"
+powershell -NoProfile -Command "$ws = New-Object -ComObject WScript.Shell; $d = [Environment]::GetFolderPath('CommonDesktopDirectory'); if (-not $d -or -not (Test-Path $d)) { $d = [Environment]::GetFolderPath('Desktop') }; foreach ($eski in @('Biologiya kursi.lnk','Dasturni yopish.lnk')) { $y = Join-Path $d $eski; if (Test-Path $y) { Remove-Item -LiteralPath $y -Force; Write-Host ('    Eski yorliq olib tashlandi: ' + $eski) } }; $royxat = @( @('%YORLIQ_PS%','Ishga_tushirish.vbs','bio.ico','Biologiya kursi - dasturni ochish'), @('%YORLIQ2_PS%','Toxtatish.vbs','bio_stop.ico','Biologiya kursi - serverni toxtatish') ); foreach ($r in $royxat) { $dest = Join-Path $d ($r[0] + '.lnk'); $src = Join-Path '%JOY%' ($r[0] + '.lnk'); if (Test-Path $src) { Copy-Item -LiteralPath $src -Destination $dest -Force }; $l = $ws.CreateShortcut($dest); $l.TargetPath = Join-Path '%JOY%' $r[1]; $l.WorkingDirectory = '%JOY%'; $l.IconLocation = Join-Path '%JOY%' $r[2]; $l.Description = $r[3]; $l.Save(); Write-Host ('    ' + $dest) }"
+if errorlevel 1 echo    Ogohlantirish: yorliqlar yaratilmadi, %JOY% papkasidagi .lnk fayllarini o'zingiz ish stoliga ko'chiring.
 
 if exist "%ZIP%" del /q "%ZIP%" >nul 2>&1
 if exist "%VAQT%" rd /s /q "%VAQT%" >nul 2>&1
@@ -204,12 +208,12 @@ echo ============================================================
 echo    TAYYOR - o'rnatilgan versiya: !HOZIRGI_V!
 echo ============================================================
 echo.
-echo    Ish stolidagi "%YORLIQ%" yorlig'iga ikki marta bosing:
-echo    sayt fon rejimida ishga tushadi va Chrome'da ochiladi.
+echo    Ish stolida ikkita yorliq paydo bo'ldi:
+echo      "%YORLIQ%"  - sayt fon rejimida ishga tushadi va Chrome'da ochiladi
+echo      "%YORLIQ2%"  - ishlab turgan serverni to'xtatadi
 echo.
 echo    Manzil         : http://127.0.0.1:%PORT%/
 echo    Dastur papkasi : %JOY%
-echo    To'xtatish     : %JOY%\Toxtatish.bat
 echo    Xato izlash    : %JOY%\Tekshirish.bat
 echo.
 echo    Yangilanish chiqqanda shu faylni yana ishga tushiring -

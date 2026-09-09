@@ -41,7 +41,7 @@ class OquvchiForm(forms.ModelForm):
 class GuruhForm(forms.ModelForm):
     class Meta:
         model = Guruh
-        fields = ["nomi", "oylik_toluv", "jadval", "faol"]
+        fields = ["nomi", "oylik_toluv", "faol"]
         widgets = {"oylik_toluv": PulInput()}
 
 
