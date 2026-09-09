@@ -5,3 +5,4 @@
 *.vbs -text
 *.ico binary
 *.png binary
+*.lnk binary

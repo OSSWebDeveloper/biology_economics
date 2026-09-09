@@ -190,7 +190,7 @@ popd
 rem ============================================================
 call :sarlavha "7/7   Ish stoliga yorliq qo'yilmoqda"
 rem ============================================================
-powershell -NoProfile -Command "$ws = New-Object -ComObject WScript.Shell; $d = [Environment]::GetFolderPath('CommonDesktopDirectory'); if (-not $d -or -not (Test-Path $d)) { $d = [Environment]::GetFolderPath('Desktop') }; $l = $ws.CreateShortcut((Join-Path $d '%YORLIQ%.lnk')); $l.TargetPath = '%JOY%\Ishga_tushirish.vbs'; $l.WorkingDirectory = '%JOY%'; $l.IconLocation = '%JOY%\bio.ico'; $l.Description = 'Biologiya kursi - moliyaviy boshqaruv tizimi'; $l.Save(); Write-Host ('    Yorliq: ' + (Join-Path $d '%YORLIQ%.lnk'))"
+powershell -NoProfile -Command "$ws = New-Object -ComObject WScript.Shell; $d = [Environment]::GetFolderPath('CommonDesktopDirectory'); if (-not $d -or -not (Test-Path $d)) { $d = [Environment]::GetFolderPath('Desktop') }; $dest = Join-Path $d '%YORLIQ%.lnk'; $src = '%JOY%\%YORLIQ%.lnk'; if (Test-Path $src) { Copy-Item -LiteralPath $src -Destination $dest -Force; Write-Host '    Yorliq GitHub nusxasidan olindi.' } else { Write-Host '    Yorliq yangidan yasaldi.' }; $l = $ws.CreateShortcut($dest); $l.TargetPath = '%JOY%\Ishga_tushirish.vbs'; $l.WorkingDirectory = '%JOY%'; $l.IconLocation = '%JOY%\bio.ico'; $l.Description = 'Biologiya kursi - moliyaviy boshqaruv tizimi'; $l.Save(); Write-Host ('    Manzil: ' + $dest)"
 if errorlevel 1 echo    Ogohlantirish: yorliq yaratilmadi, %JOY%\Ishga_tushirish.vbs faylini o'zingiz ish stoliga tashlang.
 
 if exist "%ZIP%" del /q "%ZIP%" >nul 2>&1
