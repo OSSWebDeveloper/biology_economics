@@ -91,6 +91,25 @@ class ShaxsiySahifaTest(TestCase):
         self.assertTrue(self.operator.check_password("parol12345"))
 
 
+class ChiqishTest(TestCase):
+    """Yon menyudagi "Chiqish" tugmasi ishlashi kerak (Django 5+ da POST talab qilinadi)."""
+
+    def setUp(self):
+        self.admin = foydalanuvchi("admin1", Foydalanuvchi.Rol.ADMIN)
+        self.client.login(username="admin1", password="parol12345")
+
+    def test_yon_menyuda_chiqish_post_forma(self):
+        html = self.client.get(reverse("dashboard:bosh")).content.decode()
+        self.assertIn('action="/chiqish/"', html)
+        self.assertIn('class="chiqish-forma"', html)
+
+    def test_post_bilan_chiqadi(self):
+        javob = self.client.post(reverse("accounts:chiqish"))
+        self.assertEqual(javob.status_code, 302)
+        keyingi = self.client.get(reverse("dashboard:bosh"))
+        self.assertEqual(keyingi.status_code, 302)   # endi kirish sahifasiga yuboradi
+
+
 class BoshlangichTest(TestCase):
     def test_boshlangich_admin_hisobini_ochadi(self):
         from io import StringIO

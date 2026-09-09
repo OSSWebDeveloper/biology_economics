@@ -58,7 +58,10 @@
 
     <div class="yon-past">
       <a href="{% url 'accounts:shaxsiy' %}" style="color:#e2e8f0">{{ user.toliq_ism }}</a><br>
-      <a href="{% url 'accounts:chiqish' %}">Chiqish &rarr;</a>
+      <form method="post" action="{% url 'accounts:chiqish' %}" class="chiqish-forma">
+        {% csrf_token %}
+        <button type="submit">Chiqish &rarr;</button>
+      </form>
       {% if SAYT_VERSIYA %}<div style="opacity:.45;margin-top:6px">v{{ SAYT_VERSIYA }}</div>{% endif %}
     </div>
   </aside>
