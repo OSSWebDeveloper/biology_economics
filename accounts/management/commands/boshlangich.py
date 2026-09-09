@@ -21,7 +21,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument("--login", default="admin", help="Sayt admini logini")
-        parser.add_argument("--parol", default="", help="Parol (bo'sh bo'lsa tasodifiy)")
+        parser.add_argument("--parol", default="admin", help="Parol (standart: admin)")
 
     def handle(self, *args, **options):
         self._kalit()
@@ -45,8 +45,7 @@ class Command(BaseCommand):
             self.stdout.write(f"Hisoblar mavjud, o'zgartirilmadi. Sayt logini: {nomlar or 'yoq'}")
             return
 
-        parol = parol or "".join(secrets.choice(string.ascii_lowercase + string.digits)
-                                 for _ in range(10))
+        parol = parol or "admin"
         Foydalanuvchi.objects.create_user(
             username=login, password=parol,
             rol=Foydalanuvchi.Rol.ADMIN,
@@ -56,5 +55,5 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS("Sayt admin hisobi yaratildi."))
         self.stdout.write(self.style.WARNING(f"    login: {login}"))
         self.stdout.write(self.style.WARNING(f"    parol: {parol}"))
-        self.stdout.write("Parolni almashtirish: manage.py sayt_admin --login "
-                          f"{login} --parol YANGI_PAROL")
+        self.stdout.write(self.style.WARNING(
+            "    Saytga kirgach 'Shaxsiy sahifam' bo'limidan parolni almashtiring!"))

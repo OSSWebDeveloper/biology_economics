@@ -91,6 +91,7 @@ class SahifalarTest(TestCase):
             reverse("staff:xodim", args=[self.xodim.pk]),
             reverse("staff:xodim_oyna", args=[self.xodim.pk]),
             reverse("staff:tolovlar"),
+            reverse("accounts:shaxsiy"),
         ]
         for manzil in manzillar:
             with self.subTest(manzil=manzil):
@@ -98,7 +99,8 @@ class SahifalarTest(TestCase):
 
     def test_operator_admin_bolimlariga_kira_olmaydi(self):
         self.client.login(username="operator1", password="parol12345")
-        for manzil in (reverse("payments:kartalar"), reverse("students:guruh_yangi")):
+        for manzil in (reverse("payments:kartalar"), reverse("students:guruh_yangi"),
+                       reverse("accounts:foydalanuvchi_yangi")):
             with self.subTest(manzil=manzil):
                 self.assertEqual(self.client.get(manzil).status_code, 302)
 

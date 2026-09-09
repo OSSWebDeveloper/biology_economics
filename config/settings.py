@@ -75,12 +75,11 @@ DATABASES = {
 
 AUTH_USER_MODEL = "accounts.Foydalanuvchi"
 
+# Bu tizim faqat shu kompyuterda (127.0.0.1) ishlaydi va foydalanuvchilar
+# soni juda kam, shuning uchun parol qoidalari yengil qoldirilgan.
 AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-     "OPTIONS": {"min_length": 5}},
-    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
-    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
+     "OPTIONS": {"min_length": 4}},
 ]
 
 LANGUAGE_CODE = "uz"

@@ -45,8 +45,11 @@
         <span class="belgi">&#128200;</span> Moliya (statistika)
       </a>
 
-      {% if user.admin_mi %}
       <div class="bolim">Sozlamalar</div>
+      <a href="{% url 'accounts:shaxsiy' %}" class="{% if ns == 'accounts' %}faol{% endif %}">
+        <span class="belgi">&#128273;</span> Shaxsiy sahifam
+      </a>
+      {% if user.admin_mi %}
       <a href="{% url 'payments:kartalar' %}" class="{% if ns == 'payments' and 'karta' in un %}faol{% endif %}">
         <span class="belgi">&#128181;</span> Kartalar
       </a>
@@ -54,7 +57,7 @@
     </nav>
 
     <div class="yon-past">
-      {{ user.toliq_ism }}<br>
+      <a href="{% url 'accounts:shaxsiy' %}" style="color:#e2e8f0">{{ user.toliq_ism }}</a><br>
       <a href="{% url 'accounts:chiqish' %}">Chiqish &rarr;</a>
       {% if SAYT_VERSIYA %}<div style="opacity:.45;margin-top:6px">v{{ SAYT_VERSIYA }}</div>{% endif %}
     </div>

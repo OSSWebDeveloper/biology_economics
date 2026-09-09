@@ -38,13 +38,12 @@ ochiladi. Server allaqachon ishlayotgan bo'lsa — faqat Chrome ochiladi.
 `ORNATISH.bat` ning boshidagi bir necha qatorni o'zgartirsangiz kifoya:
 
 ```bat
-set "GITHUB=https://github.com/FOYDALANUVCHI/bio_moliya"
+set "GITHUB=https://github.com/OSSWebDeveloper/biology_economics"
 set "TARMOQ=main"
 set "JOY=C:\bio_moliya"
 set "PORT=8000"
 ```
 
-> **Diqqat:** `GITHUB` manzilini o'z repozitoriyangizga almashtiring.
 > Internet bo'lmasa yoki manzil noto'g'ri bo'lsa, `ORNATISH.bat` o'zi turgan
 > papkadagi nusxadan o'rnatadi — ya'ni butun papkani flashkada olib borib ham
 > o'rnatsa bo'ladi.
@@ -95,8 +94,17 @@ Bu ikkalasi **bir-biridan butunlay mustaqil**: sayt admini `/boshqaruv/` ga kira
 olmaydi, Django superuseri esa sayt paneliga kira olmaydi
 (`saytga_kira_oladi` bayrog'i o'chirilgan). Parollari ham boshqa-boshqa.
 
-Birinchi o'rnatishda sayt admin hisobi avtomatik ochiladi va login/parol
-`ORNATISH.bat` oynasida chiqadi. Parolni almashtirish:
+Dastur **o'z admini bilan keladi** - birinchi o'rnatishda avtomatik ochiladi:
+
+```
+login: admin
+parol: admin
+```
+
+> Saytga birinchi kirgandan keyin **"Shaxsiy sahifam"** bo'limidan parolni
+> albatta almashtiring.
+
+Buyruq orqali ham almashtirsa bo'ladi:
 
 ```bash
 python manage.py sayt_admin --login admin --parol "YANGI_PAROL"
@@ -111,12 +119,27 @@ python manage.py createsuperuser
 ### Rollar
 
 * **Sayt admini** — hamma narsa: xodim oyligini tayinlash, yozuvni o'chirish,
-  guruh va karta boshqarish.
+  guruh va karta boshqarish, foydalanuvchilarni boshqarish.
 * **Operator** — o'quvchi qo'shish/tahrirlash, to'lov qabul qilish, ro'yxatdan
   chiqarish, hisobotlarni ko'rish. Oylik tayinlash va o'chirish huquqi yo'q.
 
-Foydalanuvchi hisoblari Django admin yoki `sayt_admin` buyrug'i orqali
-boshqariladi — sayt panelida alohida bo'lim yo'q.
+### Shaxsiy sahifam
+
+Yon menyudagi **Sozlamalar —> Shaxsiy sahifam** bo'limi:
+
+* **Har bir foydalanuvchi** (admin ham, operator ham) o'z familiyasi, ismi,
+  telefoni va **loginini** o'zgartira oladi;
+* **parolini** o'zi almashtiradi — joriy parolni so'raydi, almashtirgandan keyin
+  saytdan chiqib ketmaydi;
+* **Admin** qo'shimcha ravishda barcha foydalanuvchilar ro'yxatini ko'radi:
+  har birining familiya-ismi, logini, **parolini** va rolini o'zgartiradi,
+  yangi foydalanuvchi qo'shadi yoki o'chiradi.
+
+Texnik Django admin (superuser) hisobi bu ro'yxatda ko'rinmaydi va sayt
+panelidan o'zgartirib bo'lmaydi — ikkala panel mustaqil bo'lib qoladi.
+
+> Har bir xodimga sayt logini shart emas. Xodimlarning oyligi va to'lovlari
+> "Xodimlar" bo'limida yuritiladi; login faqat saytga kiradiganlarga kerak.
 
 ---
 
@@ -194,6 +217,7 @@ Butunlay o'chirish (tarixi bilan) faqat adminda va alohida tasdiqlash bilan.
 | **Oylik va avans** | xodimlarga berilgan pullar; naqd/plastik alohida |
 | **Moliya (statistika)** | kirim/chiqim, sof foyda, yig'ilish foizi, 12 oylik grafik, guruh va karta kesimi |
 | **Kartalar** | to'lov qabul qilinadigan plastik kartalar ro'yxati |
+| **Shaxsiy sahifam** | o'z ismi, logini va parolini o'zgartirish; admin uchun - barcha foydalanuvchilar |
 
 ---
 
@@ -279,6 +303,11 @@ Quyidagilar mantiqiy standart bilan qilingan, klient boshqacha desa oson o'zgara
 ---
 
 ## 11. Xavfsizlik eslatmasi
+
+Parol qoidalari ataylab yengil qoldirilgan (kamida 4 ta belgi) - shuning uchun
+standart `admin` / `admin` juftligi ishlaydi. Sayt faqat shu kompyuterda
+ochilgani uchun bu xavfli emas, lekin baribir birinchi kirishdan keyin parolni
+almashtirish tavsiya etiladi.
 
 Sayt faqat `127.0.0.1` (shu kompyuter) uchun ochiladi — tarmoqdan kirib bo'lmaydi.
 Boshqa kompyuterlardan ham kirish kerak bo'lsa, `Server.bat` dagi manzilni

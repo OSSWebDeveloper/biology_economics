@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block sarlavha %}Shaxsiy sahifam - {{ SAYT_NOMI }}{% endblock %}
+{% block bolim_nomi %}Shaxsiy sahifam{% endblock %}
+
+{% block ichki %}
+<div class="setka k2" style="align-items:start">
+
+  <div class="panel">
+    <div class="panel-sarlavha">Ma'lumotlarim</div>
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <input type="hidden" name="amal" value="malumot">
+      <div class="panel-ich">
+        <div class="forma-setka">
+          {% include "_maydon.html" with maydon=malumot_form.last_name %}
+          {% include "_maydon.html" with maydon=malumot_form.first_name %}
+          {% include "_maydon.html" with maydon=malumot_form.telefon %}
+          {% include "_maydon.html" with maydon=malumot_form.username %}
+        </div>
+        <div class="bosq">
+          Rolingiz: <b>{% if user.admin_mi %}Sayt admini{% else %}Operator{% endif %}</b>
+          {% if not user.admin_mi %} &middot; rolni faqat admin o'zgartira oladi{% endif %}
+        </div>
+      </div>
+      <div class="oyna-past" style="border-radius:0 0 10px 10px">
+        <button type="submit" class="tugma asosiy">Saqlash</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="panel">
+    <div class="panel-sarlavha">Parolni o'zgartirish</div>
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <input type="hidden" name="amal" value="parol">
+      <div class="panel-ich">
+        {% if parol_form.non_field_errors %}
+          {% for xato in parol_form.non_field_errors %}
+          <div class="xabar error">{{ xato }}</div>
+          {% endfor %}
+        {% endif %}
+        {% include "_maydon.html" with maydon=parol_form.old_password %}
+        {% include "_maydon.html" with maydon=parol_form.new_password1 %}
+        {% include "_maydon.html" with maydon=parol_form.new_password2 %}
+      </div>
+      <div class="oyna-past" style="border-radius:0 0 10px 10px">
+        <button type="submit" class="tugma asosiy">Parolni o'zgartirish</button>
+      </div>
+    </form>
+  </div>
+
+</div>
+
+{% if user.admin_mi %}
+<div class="panel">
+  <div class="panel-sarlavha">
+    Boshqa foydalanuvchilar
+    <a href="{% url 'accounts:foydalanuvchi_yangi' %}" class="tugma kichik asosiy">
+      + Yangi foydalanuvchi
+    </a>
+  </div>
+  <div class="panel-ich zich">
+    <div class="jadval-qobiq">
+      <table class="jadval">
+        <thead>
+          <tr>
+            <th>Login</th>
+            <th>Familiya Ism</th>
+            <th>Telefon</th>
+            <th>Rol</th>
+            <th>Saytga kirish</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for f in boshqalar %}
+          <tr>
+            <td><b>{{ f.username }}</b></td>
+            <td>{{ f.toliq_ism }}</td>
+            <td class="tel mayda">{{ f.telefon|default:"-" }}</td>
+            <td>
+              {% if f.rol == 'admin' %}<span class="nishon kok">Sayt admini</span>
+              {% else %}<span class="nishon kulrang">Operator</span>{% endif %}
+              {% if f.is_superuser %}<span class="nishon sariq">Django admin</span>{% endif %}
+            </td>
+            <td>
+              {% if f.saytga_kira_oladi %}<span class="nishon yashil">Ha</span>
+              {% else %}<span class="nishon qizil">Yo'q</span>{% endif %}
+            </td>
+            <td class="ong">
+              <div class="tugmalar" style="justify-content:flex-end">
+                <a href="{% url 'accounts:foydalanuvchi_tahrir' f.pk %}" class="tugma kichik">
+                  Ism va parolini o'zgartirish
+                </a>
+                <form method="post" action="{% url 'accounts:foydalanuvchi_ochirish' f.pk %}"
+                      onsubmit="return confirm('{{ f.username }} hisobi o\'chirilsinmi?')">
+                  {% csrf_token %}
+                  <button type="submit" class="tugma kichik">&times;</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" class="hech-narsa">
+            Boshqa foydalanuvchi yo'q. Xodimga saytga kirish kerak bo'lsa,
+            "Yangi foydalanuvchi" tugmasidan qo'shing.
+          </td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="xabar info">
+  Bu ro'yxat <b>saytga kiradigan</b> hisoblar. Xodimlarning oyligi va to'lovlari
+  <a href="{% url 'staff:xodimlar' %}">Xodimlar</a> bo'limida yuritiladi -
+  har bir xodimga sayt logini shart emas.
+</div>
+{% endif %}
+{% endblock %}
