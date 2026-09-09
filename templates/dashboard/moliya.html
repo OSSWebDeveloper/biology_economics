@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+{% load moliya l10n %}
+
+{% block sarlavha %}Moliya - {{ SAYT_NOMI }}{% endblock %}
+{% block bolim_nomi %}Moliya (statistika){% endblock %}
+
+{% block ichki %}
+<form method="get" class="filtr" data-avto-filtr>
+  <div class="maydon">
+    <label>Davr</label>
+    <select name="davr">
+      <option value="bugun" {% if davr.kod == 'bugun' %}selected{% endif %}>Bugun</option>
+      <option value="hafta" {% if davr.kod == 'hafta' %}selected{% endif %}>Shu hafta</option>
+      <option value="oy" {% if davr.kod == 'oy' %}selected{% endif %}>Shu oy</option>
+      <option value="otgan_oy" {% if davr.kod == 'otgan_oy' %}selected{% endif %}>O'tgan oy</option>
+      <option value="yil" {% if davr.kod == 'yil' %}selected{% endif %}>Shu yil</option>
+      <option value="hammasi" {% if davr.kod == 'hammasi' %}selected{% endif %}>Butun davr</option>
+    </select>
+  </div>
+  <div class="maydon">
+    <label>Sanadan</label>
+    <input type="date" name="sanadan" value="{{ davr.sanadan }}">
+  </div>
+  <div class="maydon">
+    <label>Sanagacha</label>
+    <input type="date" name="sanagacha" value="{{ davr.sanagacha }}">
+  </div>
+  <button type="submit" class="tugma">Ko'rsatish</button>
+  <a href="{% url 'dashboard:moliya' %}" class="tugma">Tozalash</a>
+  <div class="maydon" style="margin-left:auto">
+    <div class="bosq">Tanlangan davr</div>
+    <b>{{ davr.nom }}</b>
+  </div>
+</form>
+
+<div class="setka k4" style="margin-bottom:18px">
+  <div class="stat yashil">
+    <div class="yorliq">Kirim (kurs to'lovlari)</div>
+    <div class="qiymat pul oldindan">{{ hisobot.kirim|som }}</div>
+    <div class="izoh">{{ hisobot.kirim_soni }} ta to'lov</div>
+  </div>
+  <div class="stat qizil">
+    <div class="yorliq">Chiqim (oylik, avans, qaytarish)</div>
+    <div class="qiymat pul qarz">{{ hisobot.chiqim|som }}</div>
+    <div class="izoh">avans: {{ hisobot.avans|som }}</div>
+  </div>
+  <div class="stat kok">
+    <div class="yorliq">Sof foyda</div>
+    <div class="qiymat pul {{ hisobot.sof_foyda|balans_klass }}">{{ hisobot.sof_foyda|som }}</div>
+    <div class="izoh">kirim - chiqim</div>
+  </div>
+  <div class="stat sariq">
+    <div class="yorliq">To'lovlar yig'ilishi</div>
+    <div class="qiymat">{{ hisobot.yigilish_foizi }}%</div>
+    <div class="izoh">hisoblangan: {{ hisobot.hisoblangan|som }}</div>
+  </div>
+</div>
+
+<div class="setka k2">
+  <div class="panel">
+    <div class="panel-sarlavha">Kirim tarkibi</div>
+    <div class="panel-ich">
+      <table class="jadval">
+        <tbody>
+          <tr><td>Naqd pul</td><td class="ong pul"><b>{{ hisobot.kirim_naqd|som }}</b></td></tr>
+          <tr><td>Plastik karta</td><td class="ong pul"><b>{{ hisobot.kirim_plastik|som }}</b></td></tr>
+          <tr><td>Berilgan chegirmalar</td><td class="ong pul och">{{ hisobot.chegirma|som }}</td></tr>
+          <tr><td>Qaytarilgan pul</td><td class="ong pul qarz">{{ hisobot.qaytarilgan|som }}</td></tr>
+          <tr><td><b>Jami kirim</b></td><td class="ong pul oldindan"><b>{{ hisobot.kirim|som }}</b></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-sarlavha">Chiqim tarkibi (xodimlar)</div>
+    <div class="panel-ich">
+      <table class="jadval">
+        <tbody>
+          <tr><td>Naqd berilgan</td><td class="ong pul"><b>{{ hisobot.chiqim_naqd|som }}</b></td></tr>
+          <tr><td>Plastikka o'tkazilgan</td><td class="ong pul"><b>{{ hisobot.chiqim_plastik|som }}</b></td></tr>
+          <tr><td>Shundan avans</td><td class="ong pul och">{{ hisobot.avans|som }}</td></tr>
+          <tr><td>Shundan oylik</td><td class="ong pul och">{{ hisobot.oylik|som }}</td></tr>
+          <tr><td><b>Jami chiqim</b></td><td class="ong pul qarz"><b>{{ hisobot.chiqim|som }}</b></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-sarlavha">Oxirgi 12 oy dinamikasi</div>
+  <div class="panel-ich">
+    <div class="grafik">
+      {% localize off %}
+      {% for oy in dinamika %}
+      <div class="ustun" title="{{ oy.nom }}: kirim {{ oy.kirim|som }}, chiqim {{ oy.chiqim|som }}">
+        <div class="juft">
+          <div class="zina kirim" style="height:{{ oy.kirim_foiz }}%"></div>
+          <div class="zina chiqim" style="height:{{ oy.chiqim_foiz }}%"></div>
+        </div>
+        <div class="oy">{{ oy.qisqa }}</div>
+      </div>
+      {% endfor %}
+      {% endlocalize %}
+    </div>
+    <div class="izoh-qatori">
+      <span class="k">Kirim (kurs to'lovlari)</span>
+      <span class="c">Chiqim (xodimlar oyligi)</span>
+    </div>
+  </div>
+</div>
+
+<div class="setka k3" style="margin-bottom:18px">
+  <div class="stat qizil">
+    <div class="yorliq">Hozirgi umumiy qarzdorlik</div>
+    <div class="qiymat pul qarz">{{ qarzdorlik.qarz|som }}</div>
+    <div class="izoh">{{ qarzdorlik.qarzdorlar }} ta o'quvchi</div>
+  </div>
+  <div class="stat yashil">
+    <div class="yorliq">Oldindan to'langan pul</div>
+    <div class="qiymat pul oldindan">{{ qarzdorlik.oldindan|som }}</div>
+    <div class="izoh">{{ qarzdorlik.oldindanlar }} ta o'quvchi</div>
+  </div>
+  <div class="stat sariq">
+    <div class="yorliq">Xodimlarga qarz</div>
+    <div class="qiymat pul">{{ qarzdorlik.xodim_qarzi|som }}</div>
+    <div class="izoh">to'lanmagan oylik</div>
+  </div>
+</div>
+
+<div class="setka k2">
+  <div class="panel">
+    <div class="panel-sarlavha">Guruhlar kesimi</div>
+    <div class="panel-ich zich">
+      <div class="jadval-qobiq">
+        <table class="jadval">
+          <thead>
+            <tr>
+              <th>Guruh</th>
+              <th class="markaz">O'quvchi</th>
+              <th class="ong">Hisoblangan</th>
+              <th class="ong">To'langan</th>
+              <th class="ong">Farq</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for q in guruhlar %}
+            <tr>
+              <td><b>{{ q.guruh.nomi }}</b></td>
+              <td class="markaz">{{ q.oquvchilar }}</td>
+              <td class="ong pul">{{ q.hisoblangan|som }}</td>
+              <td class="ong pul">{{ q.tolangan|som }}</td>
+              <td class="ong pul {{ q.farq|balans_klass }}">{{ q.farq|som }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="5" class="hech-narsa">Guruh yo'q.</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-sarlavha">Plastik to'lovlar - kartalar kesimi</div>
+    <div class="panel-ich zich">
+      <div class="jadval-qobiq">
+        <table class="jadval">
+          <thead>
+            <tr><th>Karta</th><th class="markaz">To'lovlar</th><th class="ong">Summa</th></tr>
+          </thead>
+          <tbody>
+          {% for k in kartalar %}
+            <tr>
+              <td>
+                {{ k.karta__nomi|default:"Nomsiz" }}
+                <div class="bosq tel">{{ k.karta__raqam|default:k.karta_raqami|default:"-" }}</div>
+              </td>
+              <td class="markaz">{{ k.soni }}</td>
+              <td class="ong pul"><b>{{ k.summa|som }}</b></td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="3" class="hech-narsa">Plastik to'lov bo'lmagan.</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

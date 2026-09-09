@@ -1,0 +1,11 @@
+{% comment %}Bitta forma maydonini chiqaradi. Ishlatilishi: {% include "_maydon.html" with maydon=form.ism %}{% endcomment %}
+<div class="maydon {% if maydon.errors %}xatoli{% endif %} {{ qoshimcha_klass }}">
+  {% if maydon.field.widget.input_type == "checkbox" %}
+    <label class="belgilash">{{ maydon }} {{ maydon.label }}</label>
+  {% else %}
+    <label for="{{ maydon.id_for_label }}">{{ maydon.label }}</label>
+    {{ maydon }}
+  {% endif %}
+  {% if maydon.help_text %}<div class="yordam">{{ maydon.help_text }}</div>{% endif %}
+  {% for xato in maydon.errors %}<div class="xato">{{ xato }}</div>{% endfor %}
+</div>

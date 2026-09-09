@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% load moliya %}
+
+{% block sarlavha %}Kurs to'lovlari - {{ SAYT_NOMI }}{% endblock %}
+{% block bolim_nomi %}Kurs to'lovlari{% endblock %}
+
+{% block ichki %}
+<div class="setka k4" style="margin-bottom:16px">
+  <div class="stat yashil">
+    <div class="yorliq">Jami qabul qilingan</div>
+    <div class="qiymat pul">{{ jamlar.jami_tolov|som }}</div>
+    <div class="izoh">so'm (filtr bo'yicha)</div>
+  </div>
+  <div class="stat">
+    <div class="yorliq">Naqd</div>
+    <div class="qiymat pul">{{ jamlar.naqd|som }}</div>
+  </div>
+  <div class="stat kok">
+    <div class="yorliq">Plastik</div>
+    <div class="qiymat pul">{{ jamlar.plastik|som }}</div>
+  </div>
+  <div class="stat">
+    <div class="yorliq">Yozuvlar soni</div>
+    <div class="qiymat">{{ jamlar.soni }}</div>
+  </div>
+</div>
+
+<form method="get" class="filtr" data-avto-filtr>
+  <div class="maydon keng">
+    <label>Qidiruv</label>
+    {{ filtr.q }}
+  </div>
+  <div class="maydon">
+    <label>Amal turi</label>
+    {{ filtr.tur }}
+  </div>
+  <div class="maydon">
+    <label>To'lov usuli</label>
+    {{ filtr.usul }}
+  </div>
+  <div class="maydon">
+    <label>Karta</label>
+    {{ filtr.karta }}
+  </div>
+  <div class="maydon">
+    <label>Sanadan</label>
+    {{ filtr.sanadan }}
+  </div>
+  <div class="maydon">
+    <label>Sanagacha</label>
+    {{ filtr.sanagacha }}
+  </div>
+  <button type="submit" class="tugma">Filtrlash</button>
+  <a href="{% url 'payments:tolovlar' %}" class="tugma">Tozalash</a>
+</form>
+
+<div class="panel">
+  <div class="panel-ich zich">
+    <div class="jadval-qobiq">
+      <table class="jadval">
+        <thead>
+          <tr>
+            <th>Sana</th>
+            <th>O'quvchi</th>
+            <th>Amal</th>
+            <th>Usul</th>
+            <th>Karta</th>
+            <th class="ong">Summa</th>
+            <th>Kiritdi</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for t in sahifa %}
+          <tr>
+            <td class="mayda">{{ t.sana|date:"d.m.Y" }}</td>
+            <td><a href="{% url 'students:oquvchi' t.oquvchi.pk %}">{{ t.oquvchi.toliq_ism }}</a></td>
+            <td class="mayda">
+              {{ t.get_tur_display }}
+              {% if t.izoh %}<div class="bosq">{{ t.izoh }}</div>{% endif %}
+            </td>
+            <td class="mayda">{{ t.get_usul_display|default:"-" }}</td>
+            <td class="mayda tel">{{ t.karta_korinishi|default:"-" }}</td>
+            <td class="ong pul {% if t.ishorali_summa < 0 %}qarz{% else %}oldindan{% endif %}">
+              <b>{{ t.summa|som }}</b>
+            </td>
+            <td class="mayda och">{{ t.yaratgan.toliq_ism|default:"tizim" }}</td>
+            <td class="ong">
+              {% if user.admin_mi and t.tur != 'hisob' %}
+              <form method="post" action="{% url 'payments:tolov_ochirish' t.pk %}"
+                    onsubmit="return confirm('Yozuv o\'chirilsinmi?')">
+                {% csrf_token %}
+                <input type="hidden" name="keyingi" value="{{ request.get_full_path }}">
+                <button type="submit" class="tugma kichik">&times;</button>
+              </form>
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="8" class="hech-narsa">Yozuv topilmadi.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if sahifa.paginator.num_pages > 1 %}
+    <div class="sahifalar">
+      {% if sahifa.has_previous %}<a href="?{% sorov_bilan sahifa=sahifa.previous_page_number %}">&larr;</a>{% endif %}
+      <span class="joriy">{{ sahifa.number }} / {{ sahifa.paginator.num_pages }}</span>
+      {% if sahifa.has_next %}<a href="?{% sorov_bilan sahifa=sahifa.next_page_number %}">&rarr;</a>{% endif %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

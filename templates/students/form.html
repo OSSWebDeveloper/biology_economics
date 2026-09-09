@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block sarlavha %}{{ sarlavha }} - {{ SAYT_NOMI }}{% endblock %}
+{% block bolim_nomi %}{{ sarlavha }}{% endblock %}
+
+{% block ichki %}
+<div class="panel" style="max-width:760px">
+  <div class="panel-sarlavha">{{ sarlavha }}</div>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    <div class="panel-ich">
+      <div class="forma-setka">
+        {% include "_maydon.html" with maydon=form.familiya %}
+        {% include "_maydon.html" with maydon=form.ism %}
+        {% include "_maydon.html" with maydon=form.telefon %}
+        {% include "_maydon.html" with maydon=form.ota_telefon %}
+        {% include "_maydon.html" with maydon=form.ona_telefon %}
+        {% include "_maydon.html" with maydon=form.guruh %}
+        {% include "_maydon.html" with maydon=form.oylik_toluv %}
+        {% include "_maydon.html" with maydon=form.boshlangan_sana %}
+        <div class="tola">
+          {% include "_maydon.html" with maydon=form.izoh %}
+        </div>
+      </div>
+      <div class="xabar info mayda">
+        Kurs puli oyning kunlariga bo'linib hisoblanadi. O'quvchi oy o'rtasida kelsa,
+        faqat kelgan kunidan oy oxirigacha bo'lgan kunlar uchun pul yoziladi.
+      </div>
+    </div>
+    <div class="oyna-past" style="border-radius:0 0 10px 10px">
+      <a href="{% if obyekt %}{% url 'students:oquvchi' obyekt.pk %}{% else %}{% url 'students:oquvchilar' %}{% endif %}" class="tugma">Bekor qilish</a>
+      <button type="submit" class="tugma asosiy">Saqlash</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

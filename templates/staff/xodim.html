@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% load moliya %}
+
+{% block sarlavha %}{{ xodim.toliq_ism }} - {{ SAYT_NOMI }}{% endblock %}
+{% block bolim_nomi %}Xodim kartochkasi{% endblock %}
+
+{% block ichki %}
+<div class="qator orasi" style="margin-bottom:16px">
+  <div>
+    <h1 style="margin-bottom:4px">
+      {{ xodim.toliq_ism }}
+      {% if not xodim.faol %}<span class="nishon kulrang">ishdan ketgan</span>{% endif %}
+    </h1>
+    <div class="bosq">
+      {{ xodim.lavozim|default:"lavozim ko'rsatilmagan" }} &middot;
+      {{ xodim.ishga_kirgan_sana|date:"d.m.Y" }} dan
+      {% if xodim.ishdan_ketgan_sana %} &middot; ketgan {{ xodim.ishdan_ketgan_sana|date:"d.m.Y" }}{% endif %}
+    </div>
+  </div>
+  {% if user.admin_mi %}
+  <div class="tugmalar">
+    <a href="{% url 'staff:xodim_tahrir' xodim.pk %}" class="tugma">Tahrirlash</a>
+    <button type="button" class="tugma" data-ochish="#maosh-oynasi">Oylik tayinlash</button>
+    <form method="post" action="{% url 'staff:xodim_holat' xodim.pk %}">
+      {% csrf_token %}
+      <button type="submit" class="tugma">
+        {% if xodim.faol %}Ishdan bo'shatish{% else %}Ishga qaytarish{% endif %}
+      </button>
+    </form>
+    <a href="{% url 'staff:xodim_ochirish' xodim.pk %}" class="tugma xavf">O'chirish</a>
+  </div>
+  {% endif %}
+</div>
+
+<div class="setka k4" style="margin-bottom:18px">
+  <div class="stat {{ holat.rang }}">
+    <div class="yorliq">{{ holat.nom }}</div>
+    <div class="qiymat pul">{{ holat.summa|som }}</div>
+    <div class="izoh">so'm</div>
+  </div>
+  <div class="stat">
+    <div class="yorliq">Oylik maosh</div>
+    <div class="qiymat pul">{{ xodim.oylik_maosh|som }}</div>
+    <div class="izoh">adminni tayinlagani</div>
+  </div>
+  <div class="stat sariq">
+    <div class="yorliq">{{ joriy_oy }} avansi</div>
+    <div class="qiymat pul">{{ oy_avansi|som }}</div>
+    <div class="izoh">shu oyda berilgan</div>
+  </div>
+  <div class="stat">
+    <div class="yorliq">Aloqa</div>
+    <div class="qiymat tel" style="font-size:1.05rem">{{ xodim.telefon|default:"-" }}</div>
+    <div class="izoh tel">{{ xodim.karta_raqami|default:"karta kiritilmagan" }}</div>
+  </div>
+</div>
+
+<div class="setka" style="grid-template-columns: 340px minmax(0,1fr); align-items:start">
+  <div class="panel">
+    <div class="panel-sarlavha">Avans / oylik berish</div>
+    <div class="panel-ich">
+      {% include "staff/_tolov_forma.html" %}
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-sarlavha">
+      Hisob-kitob tarixi
+      <span class="bosq">{{ tranzaksiyalar|length }} ta yozuv</span>
+    </div>
+    <div class="panel-ich zich">
+      <div class="jadval-qobiq">
+        <table class="jadval">
+          <thead>
+            <tr>
+              <th>Sana</th>
+              <th>Amal</th>
+              <th>Usul</th>
+              <th class="ong">Summa</th>
+              <th class="ong">Qoldiq</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for t in tranzaksiyalar %}
+            <tr>
+              <td class="mayda">{{ t.sana|date:"d.m.Y" }}</td>
+              <td>
+                {{ t.get_tur_display }}
+                {% if t.izoh %}<div class="bosq">{{ t.izoh }}</div>{% endif %}
+              </td>
+              <td class="mayda">
+                {% if t.usul %}{{ t.get_usul_display }}{% endif %}
+                {% if t.karta_raqami %}<div class="bosq tel">{{ t.karta_raqami }}</div>{% endif %}
+              </td>
+              <td class="ong pul {% if t.ishorali_summa > 0 %}qarz{% else %}oldindan{% endif %}">
+                {{ t.summa|som }}
+              </td>
+              <td class="ong pul">{{ t.qoldiq|som }}</td>
+              <td class="ong">
+                {% if user.admin_mi and t.tur != 'hisob' %}
+                <form method="post" action="{% url 'staff:tolov_ochirish' t.pk %}"
+                      onsubmit="return confirm('Yozuv o\'chirilsinmi?')">
+                  {% csrf_token %}
+                  <input type="hidden" name="keyingi" value="{{ request.get_full_path }}">
+                  <button type="submit" class="tugma kichik">&times;</button>
+                </form>
+                {% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="6" class="hech-narsa">Hali yozuv yo'q.</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if xodim.izoh %}
+<div class="panel">
+  <div class="panel-sarlavha">Izoh</div>
+  <div class="panel-ich">{{ xodim.izoh|linebreaksbr }}</div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block oynachalar %}
+{% if user.admin_mi %}
+<div class="oyna-fon" id="maosh-oynasi">
+  <div class="oyna">
+    <div class="oyna-sarlavha">
+      <h2>Oylik maosh tayinlash</h2>
+      <button type="button" class="yopish" data-oddiy-yopish>&times;</button>
+    </div>
+    <form method="post" action="{% url 'staff:maosh_tayinlash' xodim.pk %}">
+      {% csrf_token %}
+      <div class="oyna-ich">
+        <p class="och mayda">
+          Yangi maosh keyingi oylardan boshlab to'liq qo'llanadi.
+          Xodim oy o'rtasida ishga kirgan bo'lsa, birinchi oy kunlarga bo'lib hisoblanadi.
+        </p>
+        {% include "_maydon.html" with maydon=maosh_form.oylik_maosh %}
+        {% include "_maydon.html" with maydon=maosh_form.qayta_hisobla %}
+      </div>
+      <div class="oyna-past">
+        <button type="button" class="tugma" data-oddiy-yopish>Bekor qilish</button>
+        <button type="submit" class="tugma asosiy">Tayinlash</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

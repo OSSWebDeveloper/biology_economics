@@ -1,0 +1,96 @@
+{% load static %}<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block sarlavha %}{{ SAYT_NOMI }}{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#127807;</text></svg>">
+</head>
+<body>
+{% with ns=request.resolver_match.namespace un=request.resolver_match.url_name %}
+<div class="qobiq">
+  <aside class="yon">
+    <div class="yon-logo">
+      <b>&#127807; {{ SAYT_NOMI }}</b>
+      <span>{{ SAYT_TAGLINE }}</span>
+    </div>
+
+    <nav class="yon-menyu">
+      <a href="{% url 'dashboard:bosh' %}" class="{% if ns == 'dashboard' and un == 'bosh' %}faol{% endif %}">
+        <span class="belgi">&#9635;</span> Bosh sahifa
+      </a>
+
+      <div class="bolim">O'quvchilar</div>
+      <a href="{% url 'students:oquvchilar' %}" class="{% if ns == 'students' and 'guruh' not in un %}faol{% endif %}">
+        <span class="belgi">&#128100;</span> Ro'yxat
+      </a>
+      <a href="{% url 'students:guruhlar' %}" class="{% if ns == 'students' and 'guruh' in un %}faol{% endif %}">
+        <span class="belgi">&#128101;</span> Guruhlar
+      </a>
+      <a href="{% url 'payments:tolovlar' %}" class="{% if ns == 'payments' and 'karta' not in un %}faol{% endif %}">
+        <span class="belgi">&#128179;</span> Kurs to'lovlari
+      </a>
+
+      <div class="bolim">Xodimlar</div>
+      <a href="{% url 'staff:xodimlar' %}" class="{% if ns == 'staff' and un != 'tolovlar' %}faol{% endif %}">
+        <span class="belgi">&#128188;</span> Xodimlar
+      </a>
+      <a href="{% url 'staff:tolovlar' %}" class="{% if ns == 'staff' and un == 'tolovlar' %}faol{% endif %}">
+        <span class="belgi">&#128176;</span> Oylik va avans
+      </a>
+
+      <div class="bolim">Hisobot</div>
+      <a href="{% url 'dashboard:moliya' %}" class="{% if un == 'moliya' %}faol{% endif %}">
+        <span class="belgi">&#128200;</span> Moliya (statistika)
+      </a>
+
+      {% if user.admin_mi %}
+      <div class="bolim">Sozlamalar</div>
+      <a href="{% url 'payments:kartalar' %}" class="{% if ns == 'payments' and 'karta' in un %}faol{% endif %}">
+        <span class="belgi">&#128181;</span> Kartalar
+      </a>
+      {% endif %}
+    </nav>
+
+    <div class="yon-past">
+      {{ user.toliq_ism }}<br>
+      <a href="{% url 'accounts:chiqish' %}">Chiqish &rarr;</a>
+      {% if SAYT_VERSIYA %}<div style="opacity:.45;margin-top:6px">v{{ SAYT_VERSIYA }}</div>{% endif %}
+    </div>
+  </aside>
+
+  <div class="asos">
+    <header class="ustki">
+      <div class="sarlavha">{% block bolim_nomi %}{% endblock %}</div>
+      <div class="foydalanuvchi">
+        <span class="och mayda">{% if user.admin_mi %}Admin{% else %}Operator{% endif %}</span>
+        <span class="avatar">{{ user.toliq_ism|slice:":1"|upper }}</span>
+      </div>
+    </header>
+
+    <main class="tana">
+      {% if messages %}
+      <div class="xabarlar">
+        {% for xabar in messages %}
+        <div class="xabar {{ xabar.tags }}">{{ xabar }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% block ichki %}{% endblock %}
+    </main>
+  </div>
+</div>
+{% endwith %}
+
+<div class="oyna-fon" id="oyna-fon">
+  <div class="oyna" id="oyna-ich"></div>
+</div>
+
+{% block oynachalar %}{% endblock %}
+
+<script src="{% static 'js/app.js' %}"></script>
+{% block skript %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% load moliya %}
+
+{% block sarlavha %}Bosh sahifa - {{ SAYT_NOMI }}{% endblock %}
+{% block bolim_nomi %}Bosh sahifa{% endblock %}
+
+{% block ichki %}
+<div class="panel">
+  <div class="panel-sarlavha">Tezkor amallar</div>
+  <div class="panel-ich">
+    <div class="tugmalar">
+      <a href="{% url 'students:oquvchi_yangi' %}" class="tugma asosiy">+ Yangi o'quvchi</a>
+      <a href="{% url 'students:oquvchilar' %}?holat=qarzdor" class="tugma">Qarzdorlar ro'yxati</a>
+      <a href="{% url 'payments:tolovlar' %}" class="tugma">Kurs to'lovlari</a>
+      <a href="{% url 'staff:xodimlar' %}" class="tugma">Xodimlar oyligi</a>
+      <a href="{% url 'dashboard:moliya' %}" class="tugma">Moliya hisoboti</a>
+    </div>
+    {% if qarzdorlik.xodim_qarzi %}
+    <div class="xabar warning" style="margin-top:14px">
+      Xodimlarga to'lanmagan oylik: <b>{{ qarzdorlik.xodim_qarzi|som }} so'm</b>.
+      <a href="{% url 'staff:xodimlar' %}">Ko'rish</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="setka k5" style="margin-bottom:18px">
+  <div class="stat yashil">
+    <div class="yorliq">Bugungi tushum</div>
+    <div class="qiymat pul oldindan">{{ holat.bugun_kirim|som }}</div>
+    <div class="izoh">so'm</div>
+  </div>
+  <div class="stat kok">
+    <div class="yorliq">{{ holat.oy_nomi }} tushumi</div>
+    <div class="qiymat pul">{{ holat.oy_kirim|som }}</div>
+    <div class="izoh">chiqim: {{ holat.oy_chiqim|som }}</div>
+  </div>
+  <div class="stat">
+    <div class="yorliq">Kursga keladi</div>
+    <div class="qiymat">{{ holat.faol_oquvchilar }}</div>
+    <div class="izoh">shu oyda yangi: {{ holat.yangi_oquvchilar }}</div>
+  </div>
+  <div class="stat qizil">
+    <div class="yorliq">Umumiy qarzdorlik</div>
+    <div class="qiymat pul qarz">{{ qarzdorlik.qarz|som }}</div>
+    <div class="izoh">{{ qarzdorlik.qarzdorlar }} ta o'quvchi</div>
+  </div>
+  <div class="stat sariq">
+    <div class="yorliq">Oldindan to'langan</div>
+    <div class="qiymat pul oldindan">{{ qarzdorlik.oldindan|som }}</div>
+    <div class="izoh">{{ qarzdorlik.oldindanlar }} ta o'quvchi</div>
+  </div>
+</div>
+
+<div class="setka k2">
+  <div class="panel">
+    <div class="panel-sarlavha">
+      Eng katta qarzdorlar
+      <a href="{% url 'students:oquvchilar' %}?holat=qarzdor&tartib=balans" class="bosq">Hammasi &rarr;</a>
+    </div>
+    <div class="panel-ich zich">
+      <div class="jadval-qobiq">
+        <table class="jadval">
+          <tbody>
+          {% for o in qarzdorlar %}
+            <tr class="bosiladigan" data-oyna="{% url 'students:oquvchi_oyna' o.pk %}">
+              <td>
+                <span class="bosh-harf">{{ o.bosh_harflar }}</span>
+                <b>{{ o.toliq_ism }}</b>
+                <div class="bosq" style="margin-left:38px">{{ o.guruh.nomi|default:"guruhsiz" }}</div>
+              </td>
+              <td class="mayda tel">{{ o.telefon|default:o.ota_telefon|default:"-" }}</td>
+              <td class="ong pul qarz"><b>{{ o.balans_summa|som }}</b></td>
+            </tr>
+          {% empty %}
+            <tr><td class="hech-narsa">Qarzdor yo'q. Barchasi to'lagan.</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-sarlavha">
+      Oxirgi to'lovlar
+      <a href="{% url 'payments:tolovlar' %}" class="bosq">Hammasi &rarr;</a>
+    </div>
+    <div class="panel-ich zich">
+      <div class="jadval-qobiq">
+        <table class="jadval">
+          <tbody>
+          {% for t in oxirgi_tolovlar %}
+            <tr>
+              <td class="mayda">{{ t.sana|date:"d.m.Y" }}</td>
+              <td><a href="{% url 'students:oquvchi' t.oquvchi.pk %}">{{ t.oquvchi.toliq_ism }}</a></td>
+              <td class="mayda och">{{ t.get_usul_display }}</td>
+              <td class="ong pul oldindan"><b>{{ t.summa|som }}</b></td>
+            </tr>
+          {% empty %}
+            <tr><td class="hech-narsa">Hali to'lov qabul qilinmagan.</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

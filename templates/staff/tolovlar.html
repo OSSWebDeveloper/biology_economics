@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% load moliya %}
+
+{% block sarlavha %}Oylik va avans - {{ SAYT_NOMI }}{% endblock %}
+{% block bolim_nomi %}Xodimlarga berilgan pullar{% endblock %}
+
+{% block ichki %}
+<div class="setka k4" style="margin-bottom:16px">
+  <div class="stat qizil">
+    <div class="yorliq">Jami berilgan</div>
+    <div class="qiymat pul">{{ jamlar.jami|som }}</div>
+    <div class="izoh">so'm (filtr bo'yicha)</div>
+  </div>
+  <div class="stat">
+    <div class="yorliq">Naqd</div>
+    <div class="qiymat pul">{{ jamlar.naqd|som }}</div>
+  </div>
+  <div class="stat kok">
+    <div class="yorliq">Plastik</div>
+    <div class="qiymat pul">{{ jamlar.plastik|som }}</div>
+  </div>
+  <div class="stat sariq">
+    <div class="yorliq">Shundan avans</div>
+    <div class="qiymat pul">{{ jamlar.avans|som }}</div>
+  </div>
+</div>
+
+<form method="get" class="filtr" data-avto-filtr>
+  <div class="maydon">
+    <label>Amal turi</label>
+    <select name="tur">
+      <option value="">Barchasi</option>
+      {% for kod, nom in turlar %}
+      <option value="{{ kod }}" {% if filtr.tur == kod %}selected{% endif %}>{{ nom }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="maydon">
+    <label>To'lov usuli</label>
+    <select name="usul">
+      <option value="">Naqd va plastik</option>
+      {% for kod, nom in usullar %}
+      <option value="{{ kod }}" {% if filtr.usul == kod %}selected{% endif %}>{{ nom }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="maydon">
+    <label>Sanadan</label>
+    <input type="date" name="sanadan" value="{{ filtr.sanadan }}">
+  </div>
+  <div class="maydon">
+    <label>Sanagacha</label>
+    <input type="date" name="sanagacha" value="{{ filtr.sanagacha }}">
+  </div>
+  <button type="submit" class="tugma">Filtrlash</button>
+  <a href="{% url 'staff:tolovlar' %}" class="tugma">Tozalash</a>
+</form>
+
+<div class="panel">
+  <div class="panel-ich zich">
+    <div class="jadval-qobiq">
+      <table class="jadval">
+        <thead>
+          <tr>
+            <th>Sana</th>
+            <th>Xodim</th>
+            <th>Amal</th>
+            <th>Usul</th>
+            <th>Karta</th>
+            <th class="ong">Summa</th>
+            <th>Kiritdi</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for t in sahifa %}
+          <tr>
+            <td class="mayda">{{ t.sana|date:"d.m.Y" }}</td>
+            <td><a href="{% url 'staff:xodim' t.xodim.pk %}">{{ t.xodim.toliq_ism }}</a></td>
+            <td class="mayda">
+              {{ t.get_tur_display }}
+              {% if t.izoh %}<div class="bosq">{{ t.izoh }}</div>{% endif %}
+            </td>
+            <td class="mayda">{{ t.get_usul_display|default:"-" }}</td>
+            <td class="mayda tel">{{ t.karta_raqami|default:"-" }}</td>
+            <td class="ong pul {% if t.chiqim_mi %}qarz{% endif %}"><b>{{ t.summa|som }}</b></td>
+            <td class="mayda och">{{ t.yaratgan.toliq_ism|default:"tizim" }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="7" class="hech-narsa">Yozuv topilmadi.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if sahifa.paginator.num_pages > 1 %}
+    <div class="sahifalar">
+      {% if sahifa.has_previous %}<a href="?{% sorov_bilan sahifa=sahifa.previous_page_number %}">&larr;</a>{% endif %}
+      <span class="joriy">{{ sahifa.number }} / {{ sahifa.paginator.num_pages }}</span>
+      {% if sahifa.has_next %}<a href="?{% sorov_bilan sahifa=sahifa.next_page_number %}">&rarr;</a>{% endif %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,57 @@
+{% load moliya %}
+<div class="oyna-sarlavha">
+  <div>
+    <h2 style="margin-bottom:2px">{{ oquvchi.toliq_ism }}</h2>
+    <div class="bosq">
+      {{ oquvchi.guruh.nomi|default:"Guruhsiz" }} &middot;
+      {{ oquvchi.boshlangan_sana|date:"d.m.Y" }} dan &middot;
+      oylik {{ oquvchi.oylik_toluv|som }} so'm
+    </div>
+  </div>
+  <button type="button" class="yopish" data-yopish>&times;</button>
+</div>
+
+<div class="oyna-ich">
+  <div class="setka k2" style="margin-bottom:16px">
+    <div class="stat {{ holat.rang }}">
+      <div class="yorliq">{{ holat.nom }}</div>
+      <div class="qiymat pul {{ balans|balans_klass }}">{{ holat.summa|som }}</div>
+      <div class="izoh">so'm</div>
+    </div>
+    <div class="stat">
+      <div class="yorliq">Telefonlar</div>
+      <div class="mayda tel" style="margin-top:4px">
+        {% for yorliq, raqam in oquvchi.telefonlar %}
+          <div><span class="och">{{ yorliq }}:</span> <b>{{ raqam }}</b></div>
+        {% empty %}<span class="och">Kiritilmagan</span>{% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <h3>To'lov kiritish</h3>
+  {% include "payments/_tolov_forma.html" with oyna_ichida=1 keyingi=keyingi %}
+
+  {% if oxirgilar %}
+  <h3 style="margin-top:20px">Oxirgi amallar</h3>
+  <div class="jadval-qobiq">
+    <table class="jadval">
+      <tbody>
+      {% for t in oxirgilar %}
+        <tr>
+          <td class="mayda">{{ t.sana|date:"d.m.Y" }}</td>
+          <td class="mayda">{{ t.get_tur_display }}{% if t.izoh %} <span class="och">- {{ t.izoh }}</span>{% endif %}</td>
+          <td class="ong pul mayda {% if t.ishorali_summa < 0 %}qarz{% else %}oldindan{% endif %}">
+            {{ t.ishorali_summa|som }}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</div>
+
+<div class="oyna-past">
+  <a href="{% url 'students:oquvchi' oquvchi.pk %}" class="tugma">To'liq kartochka</a>
+  <button type="button" class="tugma" data-yopish>Yopish</button>
+</div>

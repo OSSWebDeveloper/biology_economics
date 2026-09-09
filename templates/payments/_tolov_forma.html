@@ -1,0 +1,30 @@
+{% comment %}O'quvchiga to'lov / chegirma / qarz kiritish formasi{% endcomment %}
+<form method="post" action="{% url 'payments:tolov_qoshish' oquvchi.pk %}" data-tolov-forma novalidate>
+  {% csrf_token %}
+  <input type="hidden" name="keyingi" value="{{ keyingi|default:request.get_full_path }}">
+
+  {% include "_maydon.html" with maydon=tolov_form.tur %}
+
+  <div class="forma-setka">
+    {% include "_maydon.html" with maydon=tolov_form.summa %}
+    {% include "_maydon.html" with maydon=tolov_form.sana %}
+  </div>
+
+  <div data-usul-quti>
+    {% include "_maydon.html" with maydon=tolov_form.usul %}
+  </div>
+
+  <div data-karta-quti>
+    <div class="forma-setka">
+      {% include "_maydon.html" with maydon=tolov_form.karta %}
+      {% include "_maydon.html" with maydon=tolov_form.karta_raqami %}
+    </div>
+  </div>
+
+  {% include "_maydon.html" with maydon=tolov_form.izoh %}
+
+  <div class="tugmalar" style="margin-top:4px">
+    <button type="submit" class="tugma asosiy">Saqlash</button>
+    {% if oyna_ichida %}<button type="button" class="tugma" data-yopish>Bekor qilish</button>{% endif %}
+  </div>
+</form>

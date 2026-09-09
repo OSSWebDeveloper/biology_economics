@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block sarlavha %}O'chirish - {{ SAYT_NOMI }}{% endblock %}
+{% block bolim_nomi %}Xodimni butunlay o'chirish{% endblock %}
+
+{% block ichki %}
+<div class="panel" style="max-width:560px">
+  <div class="panel-sarlavha">Diqqat!</div>
+  <div class="panel-ich">
+    <p>
+      <b>{{ xodim.toliq_ism }}</b> va uning barcha oylik/avans yozuvlari
+      ({{ xodim.tranzaksiyalar.count }} ta) butunlay o'chiriladi.
+    </p>
+    <div class="xabar warning">
+      Xodim ishdan bo'shagan bo'lsa, o'chirish o'rniga "Ishdan bo'shatish"ni tanlang -
+      shunda to'lovlar tarixi hisobotlarda qoladi.
+    </div>
+    <form method="post" style="margin-top:14px">
+      {% csrf_token %}
+      <div class="tugmalar">
+        <a href="{% url 'staff:xodim' xodim.pk %}" class="tugma">Bekor qilish</a>
+        <button type="submit" class="tugma xavf">Ha, butunlay o'chirilsin</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

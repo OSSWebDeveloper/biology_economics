@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block sarlavha %}{{ sarlavha }} - {{ SAYT_NOMI }}{% endblock %}
+{% block bolim_nomi %}{{ sarlavha }}{% endblock %}
+
+{% block ichki %}
+<div class="panel" style="max-width:640px">
+  <div class="panel-sarlavha">{{ sarlavha }}</div>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    <div class="panel-ich">
+      {% if form.non_field_errors %}
+        {% for xato in form.non_field_errors %}<div class="xabar error">{{ xato }}</div>{% endfor %}
+      {% endif %}
+      {% block maydonlar %}
+        {% for maydon in form %}{% include "_maydon.html" %}{% endfor %}
+      {% endblock %}
+    </div>
+    <div class="oyna-past" style="border-radius:0 0 10px 10px">
+      <a href="{% block bekor %}/{% endblock %}" class="tugma">Bekor qilish</a>
+      <button type="submit" class="tugma asosiy">Saqlash</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

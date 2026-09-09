@@ -1,0 +1,7 @@
+# .bat va .vbs fayllari CRLF bilan aynan saqlansin - GitHub ZIP'idan
+# yuklanganda ham Windows ularni to'g'ri o'qishi uchun.
+*.bat -text
+*.cmd -text
+*.vbs -text
+*.ico binary
+*.png binary

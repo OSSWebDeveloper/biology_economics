@@ -1,0 +1,41 @@
+{% load static %}<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kirish - {{ SAYT_NOMI }}</title>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#127807;</text></svg>">
+</head>
+<body>
+<div class="kirish-sahifa">
+  <div class="kirish-quti">
+    <div class="kirish-belgi">&#127807;</div>
+    <h1>{{ SAYT_NOMI }}</h1>
+    <div class="tag">{{ SAYT_TAGLINE }}</div>
+
+    {% if form.non_field_errors %}
+      {% for xato in form.non_field_errors %}
+        <div class="xabar error" style="margin-bottom:14px">{{ xato }}</div>
+      {% endfor %}
+    {% endif %}
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <div class="maydon {% if form.username.errors %}xatoli{% endif %}">
+        <label for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+        {{ form.username }}
+        {% for xato in form.username.errors %}<div class="xato">{{ xato }}</div>{% endfor %}
+      </div>
+      <div class="maydon {% if form.password.errors %}xatoli{% endif %}">
+        <label for="{{ form.password.id_for_label }}">{{ form.password.label }}</label>
+        {{ form.password }}
+        {% for xato in form.password.errors %}<div class="xato">{{ xato }}</div>{% endfor %}
+      </div>
+      <input type="hidden" name="next" value="{{ next }}">
+      <button type="submit" class="tugma asosiy tola" style="margin-top:6px">Kirish</button>
+    </form>
+  </div>
+</div>
+</body>
+</html>

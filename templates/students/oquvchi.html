@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% load moliya %}
+
+{% block sarlavha %}{{ oquvchi.toliq_ism }} - {{ SAYT_NOMI }}{% endblock %}
+{% block bolim_nomi %}O'quvchi kartochkasi{% endblock %}
+
+{% block ichki %}
+<div class="qator orasi" style="margin-bottom:16px">
+  <div>
+    <h1 style="margin-bottom:4px">
+      {{ oquvchi.toliq_ism }}
+      {% if not oquvchi.faol %}<span class="nishon kulrang">ro'yxatdan chiqarilgan</span>{% endif %}
+    </h1>
+    <div class="bosq">
+      {{ oquvchi.guruh.nomi|default:"Guruhsiz" }} &middot;
+      kursga {{ oquvchi.boshlangan_sana|date:"d.m.Y" }} dan
+      {% if oquvchi.chiqarilgan_sana %} &middot; chiqarilgan {{ oquvchi.chiqarilgan_sana|date:"d.m.Y" }}
+        {% if oquvchi.chiqarish_sababi %}({{ oquvchi.chiqarish_sababi }}){% endif %}
+      {% endif %}
+    </div>
+  </div>
+  <div class="tugmalar">
+    <a href="{% url 'students:oquvchi_tahrir' oquvchi.pk %}" class="tugma">Tahrirlash</a>
+    {% if oquvchi.faol %}
+      <button type="button" class="tugma" data-ochish="#chiqarish-oynasi">Ro'yxatdan chiqarish</button>
+    {% else %}
+      <button type="button" class="tugma asosiy" data-ochish="#qaytarish-oynasi">Ro'yxatga qaytarish</button>
+    {% endif %}
+    {% if user.admin_mi %}
+      <a href="{% url 'students:oquvchi_ochirish' oquvchi.pk %}" class="tugma xavf">O'chirish</a>
+    {% endif %}
+  </div>
+</div>
+
+<div class="setka k4" style="margin-bottom:18px">
+  <div class="stat {{ holat.rang }}">
+    <div class="yorliq">{{ holat.nom }}</div>
+    <div class="qiymat pul {{ balans|balans_klass }}">{{ holat.summa|som }}</div>
+    <div class="izoh">so'm</div>
+  </div>
+  <div class="stat">
+    <div class="yorliq">Oylik kurs to'lovi</div>
+    <div class="qiymat pul">{{ oquvchi.oylik_toluv|som }}</div>
+    <div class="izoh">bir oy uchun</div>
+  </div>
+  <div class="stat">
+    <div class="yorliq">O'quvchi telefoni</div>
+    <div class="qiymat tel" style="font-size:1.05rem">{{ oquvchi.telefon|default:"-" }}</div>
+    <div class="izoh">
+      {% if oquvchi.ota_telefon %}Ota: {{ oquvchi.ota_telefon }}{% endif %}
+      {% if oquvchi.ona_telefon %} &middot; Ona: {{ oquvchi.ona_telefon }}{% endif %}
+    </div>
+  </div>
+  <div class="stat">
+    <div class="yorliq">Guruh</div>
+    <div class="qiymat" style="font-size:1.05rem">{{ oquvchi.guruh.nomi|default:"-" }}</div>
+    <div class="izoh">{{ oquvchi.guruh.jadval|default:"jadval kiritilmagan" }}</div>
+  </div>
+</div>
+
+<div class="setka" style="grid-template-columns: 340px minmax(0,1fr); align-items:start">
+  <div class="panel">
+    <div class="panel-sarlavha">To'lov kiritish</div>
+    <div class="panel-ich">
+      {% include "payments/_tolov_forma.html" %}
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-sarlavha">
+      Hisob-kitob tarixi
+      <span class="bosq">{{ tranzaksiyalar|length }} ta yozuv</span>
+    </div>
+    <div class="panel-ich zich">
+      <div class="jadval-qobiq">
+        <table class="jadval">
+          <thead>
+            <tr>
+              <th>Sana</th>
+              <th>Amal</th>
+              <th>Usul</th>
+              <th class="ong">Summa</th>
+              <th class="ong">Qoldiq</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for t in tranzaksiyalar %}
+            <tr>
+              <td class="mayda">{{ t.sana|date:"d.m.Y" }}</td>
+              <td>
+                {{ t.get_tur_display }}
+                {% if t.izoh %}<div class="bosq">{{ t.izoh }}</div>{% endif %}
+              </td>
+              <td class="mayda">
+                {% if t.usul %}{{ t.get_usul_display }}{% endif %}
+                {% if t.karta_korinishi %}<div class="bosq tel">{{ t.karta_korinishi }}</div>{% endif %}
+              </td>
+              <td class="ong pul {% if t.ishorali_summa < 0 %}qarz{% else %}oldindan{% endif %}">
+                {{ t.ishorali_summa|som }}
+              </td>
+              <td class="ong pul {{ t.qoldiq|balans_klass }}">{{ t.qoldiq|som }}</td>
+              <td class="ong">
+                {% if user.admin_mi and t.tur != 'hisob' %}
+                <form method="post" action="{% url 'payments:tolov_ochirish' t.pk %}"
+                      onsubmit="return confirm('Yozuv o\'chirilsinmi?')">
+                  {% csrf_token %}
+                  <input type="hidden" name="keyingi" value="{{ request.get_full_path }}">
+                  <button type="submit" class="tugma kichik">&times;</button>
+                </form>
+                {% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="6" class="hech-narsa">Hali yozuv yo'q.</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if oquvchi.izoh %}
+<div class="panel">
+  <div class="panel-sarlavha">Izoh</div>
+  <div class="panel-ich">{{ oquvchi.izoh|linebreaksbr }}</div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block oynachalar %}
+<div class="oyna-fon" id="chiqarish-oynasi">
+  <div class="oyna">
+    <div class="oyna-sarlavha">
+      <h2>Ro'yxatdan chiqarish</h2>
+      <button type="button" class="yopish" data-oddiy-yopish>&times;</button>
+    </div>
+    <form method="post" action="{% url 'students:oquvchi_chiqarish' oquvchi.pk %}">
+      {% csrf_token %}
+      <div class="oyna-ich">
+        <p class="och mayda">
+          {{ oquvchi.toliq_ism }} kursga keladiganlar ro'yxatidan chiqariladi.
+          Moliyaviy tarixi saqlanib qoladi.
+        </p>
+        {% include "_maydon.html" with maydon=chiqarish_form.chiqarilgan_sana %}
+        {% include "_maydon.html" with maydon=chiqarish_form.sabab %}
+        {% include "_maydon.html" with maydon=chiqarish_form.qayta_hisobla %}
+      </div>
+      <div class="oyna-past">
+        <button type="button" class="tugma" data-oddiy-yopish>Bekor qilish</button>
+        <button type="submit" class="tugma xavf">Chiqarish</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="oyna-fon" id="qaytarish-oynasi">
+  <div class="oyna">
+    <div class="oyna-sarlavha">
+      <h2>Ro'yxatga qaytarish</h2>
+      <button type="button" class="yopish" data-oddiy-yopish>&times;</button>
+    </div>
+    <form method="post" action="{% url 'students:oquvchi_qaytarish' oquvchi.pk %}">
+      {% csrf_token %}
+      <div class="oyna-ich">
+        {% include "_maydon.html" with maydon=qaytarish_form.boshlangan_sana %}
+      </div>
+      <div class="oyna-past">
+        <button type="button" class="tugma" data-oddiy-yopish>Bekor qilish</button>
+        <button type="submit" class="tugma asosiy">Qaytarish</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

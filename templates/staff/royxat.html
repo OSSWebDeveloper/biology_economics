@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% load moliya %}
+
+{% block sarlavha %}Xodimlar - {{ SAYT_NOMI }}{% endblock %}
+{% block bolim_nomi %}Xodimlar{% endblock %}
+
+{% block ichki %}
+<div class="setka k3" style="margin-bottom:16px">
+  <div class="stat kok">
+    <div class="yorliq">Xodimlar</div>
+    <div class="qiymat">{{ jamlar.jami }}</div>
+  </div>
+  <div class="stat">
+    <div class="yorliq">Oylik fondi</div>
+    <div class="qiymat pul">{{ jamlar.oylik_fond|som }}</div>
+    <div class="izoh">bir oyga jami maosh</div>
+  </div>
+  <div class="stat qizil">
+    <div class="yorliq">To'lanishi kerak</div>
+    <div class="qiymat pul qarz">{{ jamlar.qarzimiz|som }}</div>
+    <div class="izoh">hisoblangan, lekin berilmagan</div>
+  </div>
+</div>
+
+<div class="tab-menyu">
+  <a href="?royxat=faol" class="{% if filtr.royxat == 'faol' %}faol{% endif %}">Ishlayotganlar</a>
+  <a href="?royxat=ketgan" class="{% if filtr.royxat == 'ketgan' %}faol{% endif %}">Ishdan ketganlar</a>
+  <a href="?royxat=hammasi" class="{% if filtr.royxat == 'hammasi' %}faol{% endif %}">Hammasi</a>
+</div>
+
+<form method="get" class="filtr">
+  <input type="hidden" name="royxat" value="{{ filtr.royxat }}">
+  <div class="maydon keng">
+    <label>Qidiruv</label>
+    <input type="text" name="q" value="{{ filtr.q }}" placeholder="Ism, lavozim yoki telefon">
+  </div>
+  <button type="submit" class="tugma">Qidirish</button>
+  {% if user.admin_mi %}
+  <a href="{% url 'staff:xodim_yangi' %}" class="tugma asosiy">+ Yangi xodim</a>
+  {% endif %}
+</form>
+
+<div class="panel">
+  <div class="panel-sarlavha">
+    Oylik hisob-kitob
+    <span class="bosq">{{ joriy_oy }}</span>
+  </div>
+  <div class="panel-ich zich">
+    <div class="jadval-qobiq">
+      <table class="jadval">
+        <thead>
+          <tr>
+            <th>Xodim</th>
+            <th>Lavozim</th>
+            <th>Telefon</th>
+            <th class="ong">Oylik maosh</th>
+            <th class="ong">Shu oy avansi</th>
+            <th class="ong">Qoldiq</th>
+            <th>Holat</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for x in royxat %}
+          <tr class="bosiladigan" data-oyna="{% url 'staff:xodim_oyna' x.pk %}">
+            <td>
+              <span class="bosh-harf">{{ x.bosh_harflar }}</span>
+              <b>{{ x.toliq_ism }}</b>
+              {% if not x.faol %}<span class="nishon kulrang" style="margin-left:6px">ketgan</span>{% endif %}
+            </td>
+            <td class="mayda">{{ x.lavozim|default:"-" }}</td>
+            <td class="mayda tel">{{ x.telefon|default:"-" }}</td>
+            <td class="ong pul">{{ x.oylik_maosh|som }}</td>
+            <td class="ong pul och">{{ x.oy_avansi|som }}</td>
+            <td class="ong pul {% if x.qoldiq_summa > 0 %}qarz{% else %}oldindan{% endif %}">
+              <b>{{ x.qoldiq_summa|som }}</b>
+            </td>
+            <td><span class="nishon {{ x.holat_info.rang }}">{{ x.holat_info.nom }}</span></td>
+            <td class="ong"><a href="{% url 'staff:xodim' x.pk %}" class="tugma kichik">Ochish</a></td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="8" class="hech-narsa">Xodim qo'shilmagan.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="bosq">Qatorga bosilsa avans/oylik berish oynachasi ochiladi.</div>
+{% endblock %}

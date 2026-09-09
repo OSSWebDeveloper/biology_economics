@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% load moliya %}
+
+{% block sarlavha %}O'quvchilar - {{ SAYT_NOMI }}{% endblock %}
+{% block bolim_nomi %}O'quvchilar ro'yxati{% endblock %}
+
+{% block ichki %}
+<div class="qator orasi" style="margin-bottom:16px">
+  <div class="setka k3" style="flex:1">
+    <div class="stat kok">
+      <div class="yorliq">Ro'yxatda</div>
+      <div class="qiymat">{{ jamlar.jami }}</div>
+      <div class="izoh">filtrga mos o'quvchilar</div>
+    </div>
+    <div class="stat qizil">
+      <div class="yorliq">Qarzdor</div>
+      <div class="qiymat">{{ jamlar.qarzdor }}</div>
+      <div class="izoh">to'lovi kechikkan</div>
+    </div>
+    <div class="stat yashil">
+      <div class="yorliq">Oldindan to'lagan</div>
+      <div class="qiymat">{{ jamlar.oldindan }}</div>
+      <div class="izoh">hisobida puli bor</div>
+    </div>
+  </div>
+</div>
+
+<div class="tab-menyu">
+  <a href="?royxat=faol" class="{% if filtr.royxat == 'faol' %}faol{% endif %}">Kursga keladiganlar</a>
+  <a href="?royxat=chiqarilgan" class="{% if filtr.royxat == 'chiqarilgan' %}faol{% endif %}">Chiqarilganlar</a>
+  <a href="?royxat=hammasi" class="{% if filtr.royxat == 'hammasi' %}faol{% endif %}">Hammasi</a>
+</div>
+
+<form method="get" class="filtr" data-avto-filtr>
+  <input type="hidden" name="royxat" value="{{ filtr.royxat }}">
+  <div class="maydon keng">
+    <label>Qidiruv</label>
+    <input type="text" name="q" value="{{ filtr.q }}" placeholder="Ism, familiya yoki telefon raqami">
+  </div>
+  <div class="maydon">
+    <label>Guruh</label>
+    <select name="guruh">
+      <option value="">Barcha guruhlar</option>
+      {% for g in guruhlar %}
+      <option value="{{ g.pk }}" {% if filtr.guruh == g.pk|stringformat:"s" %}selected{% endif %}>{{ g.nomi }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="maydon">
+    <label>To'lov holati</label>
+    <select name="holat">
+      <option value="">Barchasi</option>
+      <option value="qarzdor" {% if filtr.holat == 'qarzdor' %}selected{% endif %}>Qarzdorlar</option>
+      <option value="oldindan" {% if filtr.holat == 'oldindan' %}selected{% endif %}>Oldindan to'laganlar</option>
+      <option value="toza" {% if filtr.holat == 'toza' %}selected{% endif %}>Qarzi yo'q</option>
+    </select>
+  </div>
+  <div class="maydon">
+    <label>Tartib</label>
+    <select name="tartib">
+      <option value="ism" {% if filtr.tartib == 'ism' %}selected{% endif %}>Familiya bo'yicha</option>
+      <option value="balans" {% if filtr.tartib == 'balans' %}selected{% endif %}>Eng ko'p qarzdor</option>
+      <option value="balans_teskari" {% if filtr.tartib == 'balans_teskari' %}selected{% endif %}>Eng ko'p oldindan</option>
+      <option value="yangi" {% if filtr.tartib == 'yangi' %}selected{% endif %}>Yangi kelganlar</option>
+    </select>
+  </div>
+  <button type="submit" class="tugma">Filtrlash</button>
+  <a href="{% url 'students:oquvchilar' %}" class="tugma">Tozalash</a>
+  <a href="{% url 'students:oquvchi_yangi' %}" class="tugma asosiy">+ Yangi o'quvchi</a>
+</form>
+
+<div class="panel">
+  <div class="panel-ich zich">
+    <div class="jadval-qobiq">
+      <table class="jadval">
+        <thead>
+          <tr>
+            <th>O'quvchi</th>
+            <th>Telefonlar</th>
+            <th>Guruh</th>
+            <th class="ong">Oylik</th>
+            <th class="ong">Balans</th>
+            <th>Holat</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for o in sahifa %}
+          <tr class="bosiladigan" data-oyna="{% url 'students:oquvchi_oyna' o.pk %}">
+            <td>
+              <span class="bosh-harf">{{ o.bosh_harflar }}</span>
+              <b>{{ o.toliq_ism }}</b>
+              {% if not o.faol %}<span class="nishon kulrang" style="margin-left:6px">chiqarilgan</span>{% endif %}
+              <div class="bosq" style="margin-left:38px">{{ o.boshlangan_sana|date:"d.m.Y" }} dan</div>
+            </td>
+            <td class="tel mayda">
+              {% for yorliq, raqam in o.telefonlar %}
+                <div><span class="och">{{ yorliq }}:</span> {{ raqam }}</div>
+              {% empty %}<span class="och">-</span>{% endfor %}
+            </td>
+            <td>{{ o.guruh.nomi|default:"-" }}</td>
+            <td class="ong pul">{{ o.oylik_toluv|som }}</td>
+            <td class="ong pul {{ o.balans_summa|balans_klass }}"><b>{{ o.balans_summa|som }}</b></td>
+            <td><span class="nishon {{ o.holat_info.rang }}">{{ o.holat_info.nom }}</span></td>
+            <td class="ong">
+              <a href="{% url 'students:oquvchi' o.pk %}" class="tugma kichik">Ochish</a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="7" class="hech-narsa">Bu shartlarga mos o'quvchi topilmadi.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if sahifa.paginator.num_pages > 1 %}
+    <div class="sahifalar">
+      {% if sahifa.has_previous %}
+        <a href="?{% sorov_bilan sahifa=sahifa.previous_page_number %}">&larr;</a>
+      {% endif %}
+      <span class="joriy">{{ sahifa.number }} / {{ sahifa.paginator.num_pages }}</span>
+      {% if sahifa.has_next %}
+        <a href="?{% sorov_bilan sahifa=sahifa.next_page_number %}">&rarr;</a>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="bosq">Qatorga bosilsa to'lov oynachasi ochiladi.</div>
+{% endblock %}

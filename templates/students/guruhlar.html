@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load moliya %}
+
+{% block sarlavha %}Guruhlar - {{ SAYT_NOMI }}{% endblock %}
+{% block bolim_nomi %}Guruhlar{% endblock %}
+
+{% block ichki %}
+{% if user.admin_mi %}
+<div class="tugmalar" style="margin-bottom:14px">
+  <a href="{% url 'students:guruh_yangi' %}" class="tugma asosiy">+ Yangi guruh</a>
+</div>
+{% endif %}
+
+<div class="panel">
+  <div class="panel-ich zich">
+    <div class="jadval-qobiq">
+      <table class="jadval">
+        <thead>
+          <tr>
+            <th>Guruh</th>
+            <th>Dars jadvali</th>
+            <th class="markaz">O'quvchilar</th>
+            <th class="ong">Oylik to'lov</th>
+            <th>Holat</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for g in royxat %}
+          <tr>
+            <td><b>{{ g.nomi }}</b></td>
+            <td class="mayda och">{{ g.jadval|default:"-" }}</td>
+            <td class="markaz">{{ g.oquvchilar_soni }}</td>
+            <td class="ong pul">{{ g.oylik_toluv|som }}</td>
+            <td>
+              {% if g.faol %}<span class="nishon yashil">Faol</span>
+              {% else %}<span class="nishon kulrang">Arxiv</span>{% endif %}
+            </td>
+            <td class="ong">
+              <div class="tugmalar" style="justify-content:flex-end">
+                <a href="{% url 'students:oquvchilar' %}?guruh={{ g.pk }}" class="tugma kichik">O'quvchilar</a>
+                {% if user.admin_mi %}
+                <a href="{% url 'students:guruh_tahrir' g.pk %}" class="tugma kichik">Tahrir</a>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" class="hech-narsa">Hali guruh yaratilmagan.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
