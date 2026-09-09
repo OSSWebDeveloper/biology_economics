@@ -6,7 +6,7 @@ title Biologiya kursi - avtomatik o'rnatish
 rem ============================================================
 rem   SOZLAMALAR - kerak bo'lsa faqat shu qatorlarni o'zgartiring
 rem ============================================================
-set "GITHUB=https://github.com/FOYDALANUVCHI/bio_moliya"
+set "GITHUB=https://github.com/OSSWebDeveloper/biology_economics"
 set "TARMOQ=main"
 set "JOY=C:\bio_moliya"
 set "PORT=8000"
