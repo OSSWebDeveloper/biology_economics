@@ -287,11 +287,11 @@ def xodim_hisob(request, pk):
 
     login = form.cleaned_data["login"]
     parol = form.cleaned_data["parol"]
-    rol = form.cleaned_data["rol"]
 
     hisob = obyekt.foydalanuvchi
     if hisob is None:
-        hisob = Foydalanuvchi(username=login, rol=rol, saytga_kira_oladi=True)
+        hisob = Foydalanuvchi(username=login, rol=Foydalanuvchi.Rol.OQITUVCHI,
+                              saytga_kira_oladi=True)
         hisob.first_name, hisob.last_name = obyekt.ism, obyekt.familiya
         hisob.telefon = obyekt.telefon
         hisob.set_password(parol)
@@ -301,7 +301,6 @@ def xodim_hisob(request, pk):
         messages.success(request, f"{obyekt.toliq_ism} uchun login yaratildi: {login}")
     else:
         hisob.username = login
-        hisob.rol = rol
         hisob.saytga_kira_oladi = True
         if parol:
             hisob.set_password(parol)

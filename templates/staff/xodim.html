@@ -71,7 +71,6 @@
           {% csrf_token %}
           {% include "_maydon.html" with maydon=hisob_form.login %}
           {% include "_maydon.html" with maydon=hisob_form.parol %}
-          {% include "_maydon.html" with maydon=hisob_form.rol %}
           <button type="submit" class="tugma asosiy tola">
             {% if xodim.foydalanuvchi %}Saqlash{% else %}Login yaratish{% endif %}
           </button>

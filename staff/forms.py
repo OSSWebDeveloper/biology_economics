@@ -48,9 +48,6 @@ class XodimHisobForm(forms.Form):
         label="Parol", required=False,
         widget=forms.PasswordInput(attrs={"autocomplete": "new-password"}),
     )
-    rol = forms.ChoiceField(label="Huquqi", choices=Foydalanuvchi.Rol.choices,
-                            initial=Foydalanuvchi.Rol.OQITUVCHI)
-
     def __init__(self, *args, hisob=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.hisob = hisob
@@ -59,7 +56,6 @@ class XodimHisobForm(forms.Form):
             self.fields["parol"].help_text = "Kamida 4 ta belgi."
         else:
             self.fields["login"].initial = hisob.username
-            self.fields["rol"].initial = hisob.rol
             self.fields["parol"].help_text = "Bo'sh qoldirilsa, eski parol o'zgarmaydi."
 
     def clean_login(self):

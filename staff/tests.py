@@ -117,7 +117,7 @@ class XodimHisobiTest(TestCase):
 
     def test_xodimga_login_yaratiladi(self):
         javob = self.client.post(self._hisob_url(), {
-            "login": "olim", "parol": "kurs2026", "rol": Foydalanuvchi.Rol.OQITUVCHI,
+            "login": "olim", "parol": "kurs2026",
         })
         self.assertEqual(javob.status_code, 302)
         self.xodim.refresh_from_db()
@@ -126,11 +126,12 @@ class XodimHisobiTest(TestCase):
         self.assertEqual(hisob.username, "olim")
         self.assertTrue(hisob.check_password("kurs2026"))
         self.assertEqual(hisob.toliq_ism, "Karimov Olim")   # ism xodimdan olinadi
+        self.assertEqual(hisob.rol, Foydalanuvchi.Rol.OQITUVCHI)
         self.assertTrue(self.xodim.saytga_kiradi)
 
     def test_yaratilgan_login_bilan_saytga_kiriladi(self):
         self.client.post(self._hisob_url(), {
-            "login": "olim", "parol": "kurs2026", "rol": Foydalanuvchi.Rol.OQITUVCHI})
+            "login": "olim", "parol": "kurs2026"})
         self.client.logout()
         javob = self.client.post(reverse("accounts:kirish"),
                                  {"username": "olim", "password": "kurs2026"})
@@ -138,32 +139,33 @@ class XodimHisobiTest(TestCase):
 
     def test_parol_va_login_ozgartiriladi(self):
         self.client.post(self._hisob_url(), {
-            "login": "olim", "parol": "kurs2026", "rol": Foydalanuvchi.Rol.OQITUVCHI})
+            "login": "olim", "parol": "kurs2026"})
         self.client.post(self._hisob_url(), {
-            "login": "olim_yangi", "parol": "boshqa77", "rol": Foydalanuvchi.Rol.ADMIN})
+            "login": "olim_yangi", "parol": "boshqa77"})
         self.xodim.refresh_from_db()
         hisob = self.xodim.foydalanuvchi
         self.assertEqual(hisob.username, "olim_yangi")
         self.assertTrue(hisob.check_password("boshqa77"))
-        self.assertEqual(hisob.rol, Foydalanuvchi.Rol.ADMIN)
+        # xodimga ochilgan hisob doim o'qituvchi bo'ladi
+        self.assertEqual(hisob.rol, Foydalanuvchi.Rol.OQITUVCHI)
 
     def test_parol_bosh_qoldirilsa_ozgarmaydi(self):
         self.client.post(self._hisob_url(), {
-            "login": "olim", "parol": "kurs2026", "rol": Foydalanuvchi.Rol.OQITUVCHI})
+            "login": "olim", "parol": "kurs2026"})
         self.client.post(self._hisob_url(), {
-            "login": "olim", "parol": "", "rol": Foydalanuvchi.Rol.OQITUVCHI})
+            "login": "olim", "parol": ""})
         self.xodim.refresh_from_db()
         self.assertTrue(self.xodim.foydalanuvchi.check_password("kurs2026"))
 
     def test_band_login_qabul_qilinmaydi(self):
         self.client.post(self._hisob_url(), {
-            "login": "admin1", "parol": "kurs2026", "rol": Foydalanuvchi.Rol.OQITUVCHI})
+            "login": "admin1", "parol": "kurs2026"})
         self.xodim.refresh_from_db()
         self.assertIsNone(self.xodim.foydalanuvchi)
 
     def test_xodim_ismi_ozgarsa_hisob_ismi_ham_ozgaradi(self):
         self.client.post(self._hisob_url(), {
-            "login": "olim", "parol": "kurs2026", "rol": Foydalanuvchi.Rol.OQITUVCHI})
+            "login": "olim", "parol": "kurs2026"})
         self.client.post(reverse("staff:xodim_tahrir", args=[self.xodim.pk]), {
             "ism": "Olimjon", "familiya": "Karimov",
             "telefon": "+998 90 000 00 00",
@@ -184,7 +186,7 @@ class XodimHisobiTest(TestCase):
 
     def test_kirish_huquqi_olib_tashlanadi(self):
         self.client.post(self._hisob_url(), {
-            "login": "olim", "parol": "kurs2026", "rol": Foydalanuvchi.Rol.OQITUVCHI})
+            "login": "olim", "parol": "kurs2026"})
         self.client.post(reverse("staff:xodim_hisob_uzish", args=[self.xodim.pk]))
         self.xodim.refresh_from_db()
         self.assertIsNone(self.xodim.foydalanuvchi)
@@ -202,7 +204,7 @@ class XodimHisobiTest(TestCase):
             username="oper", password="parol12345", rol=Foydalanuvchi.Rol.OQITUVCHI)
         self.client.login(username="oper", password="parol12345")
         self.client.post(self._hisob_url(), {
-            "login": "olim", "parol": "kurs2026", "rol": Foydalanuvchi.Rol.ADMIN})
+            "login": "olim", "parol": "kurs2026"})
         self.xodim.refresh_from_db()
         self.assertIsNone(self.xodim.foydalanuvchi)
 
