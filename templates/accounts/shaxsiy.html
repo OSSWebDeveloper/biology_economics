@@ -18,10 +18,6 @@
           {% include "_maydon.html" with maydon=malumot_form.telefon %}
           {% include "_maydon.html" with maydon=malumot_form.username %}
         </div>
-        <div class="bosq">
-          Rolingiz: <b>{% if user.admin_mi %}Sayt admini{% else %}Operator{% endif %}</b>
-          {% if not user.admin_mi %} &middot; rolni faqat admin o'zgartira oladi{% endif %}
-        </div>
       </div>
       <div class="oyna-past" style="border-radius:0 0 10px 10px">
         <button type="submit" class="tugma asosiy">Saqlash</button>
