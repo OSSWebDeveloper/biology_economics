@@ -17,11 +17,6 @@ class SaytKirish(auth_views.LoginView):
     authentication_form = SaytKirishForm
     redirect_authenticated_user = True
 
-    def form_valid(self, form):
-        javob = super().form_valid(form)
-        messages.success(self.request, f"Xush kelibsiz, {self.request.user.toliq_ism}!")
-        return javob
-
 
 class SaytChiqish(auth_views.LogoutView):
     next_page = reverse_lazy("accounts:kirish")

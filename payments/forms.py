@@ -89,3 +89,23 @@ class TolovFiltrForm(forms.Form):
                               widget=SanaInput())
     sanagacha = forms.DateField(label="Sanagacha", required=False,
                                 widget=SanaInput())
+
+
+class TezTolovForm(forms.Form):
+    """Ro'yxatdagi "To'lov" tugmasi uchun eng sodda forma.
+
+    Faqat ikki narsa so'raladi: naqdmi yoki plastikmi, va qancha.
+    """
+
+    usul = forms.ChoiceField(label="To'lov usuli", choices=Usul.choices,
+                             widget=forms.RadioSelect, initial=Usul.NAQD)
+    summa = forms.DecimalField(
+        label="Summa (so'm)", max_digits=12, decimal_places=2,
+        widget=PulInput(attrs={"placeholder": "0", "autofocus": True}),
+    )
+
+    def clean_summa(self):
+        summa = self.cleaned_data["summa"]
+        if summa <= 0:
+            raise forms.ValidationError("Summa noldan katta bo'lsin.")
+        return summa

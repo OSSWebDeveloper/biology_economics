@@ -15,12 +15,6 @@
       <a href="{% url 'staff:xodimlar' %}" class="tugma">Xodimlar oyligi</a>
       <a href="{% url 'dashboard:moliya' %}" class="tugma">Moliya hisoboti</a>
     </div>
-    {% if qarzdorlik.xodim_qarzi %}
-    <div class="xabar warning" style="margin-top:14px">
-      Xodimlarga to'lanmagan oylik: <b>{{ qarzdorlik.xodim_qarzi|som }} so'm</b>.
-      <a href="{% url 'staff:xodimlar' %}">Ko'rish</a>
-    </div>
-    {% endif %}
   </div>
 </div>
 

@@ -103,7 +103,11 @@
             <td class="ong pul {{ o.balans_summa|balans_klass }}"><b>{{ o.balans_summa|som }}</b></td>
             <td><span class="nishon {{ o.holat_info.rang }}">{{ o.holat_info.nom }}</span></td>
             <td class="ong">
-              <a href="{% url 'students:oquvchi' o.pk %}" class="tugma kichik">Ochish</a>
+              <div class="tugmalar" style="justify-content:flex-end">
+                <button type="button" class="tugma kichik asosiy"
+                        data-tolov="{% url 'payments:tez_tolov_oyna' o.pk %}">To'lov</button>
+                <a href="{% url 'students:oquvchi' o.pk %}" class="tugma kichik">Ochish</a>
+              </div>
             </td>
           </tr>
         {% empty %}
@@ -127,5 +131,5 @@
   </div>
 </div>
 
-<div class="bosq">Qatorga bosilsa to'lov oynachasi ochiladi.</div>
+<div class="bosq">"To'lov" tugmasi tez to'lov oynachasini ochadi, qatorga bosilsa to'liq ma'lumot chiqadi.</div>
 {% endblock %}

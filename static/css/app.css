@@ -219,6 +219,18 @@ input:focus, select:focus, textarea:focus {
 .xato { font-size: .78rem; color: var(--qizil); margin-top: 4px; }
 .maydon.xatoli input, .maydon.xatoli select { border-color: var(--qizil); }
 label.belgilash { display: flex; align-items: center; gap: 8px; font-size: .86rem; font-weight: 500; }
+
+.usul-tanlov { display: flex; gap: 10px; }
+.usul-tanlov .usul {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 12px 10px; border: 1px solid var(--chegara); border-radius: 10px;
+  cursor: pointer; font-size: .9rem; font-weight: 550; background: #fff;
+}
+.usul-tanlov .usul:hover { background: #f8fafc; }
+.usul-tanlov .usul input { width: auto; margin: 0; }
+.usul-tanlov .usul:has(input:checked) {
+  border-color: var(--asosiy); background: var(--asosiy-juda-och); color: var(--asosiy);
+}
 label.belgilash input { width: auto; }
 
 .forma-setka { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 16px; }

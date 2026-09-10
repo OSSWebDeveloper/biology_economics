@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Q, Sum
@@ -7,7 +9,7 @@ from django.urls import reverse
 from accounts.permissions import admin_talab
 from students.models import Oquvchi
 
-from .forms import KartaForm, TolovFiltrForm, TolovForm
+from .forms import KartaForm, TezTolovForm, TolovFiltrForm, TolovForm
 from .models import Karta, Tranzaksiya, Usul
 
 
@@ -81,6 +83,46 @@ def tolov_qoshish(request, oquvchi_id):
             f"{form.fields[m].label if m in form.fields else m}: {' '.join(x)}"
             for m, x in form.errors.items()
         )
+        messages.error(request, f"Saqlanmadi. {xatolar}")
+    return redirect(qaytish)
+
+
+def tez_tolov_oyna(request, oquvchi_id):
+    """Ro'yxatdagi "To'lov" tugmasi ochadigan sodda oynacha."""
+    oquvchi = get_object_or_404(Oquvchi, pk=oquvchi_id)
+    keyingi = request.GET.get("keyingi") or ""
+    return render(request, "payments/_tez_tolov.html", {
+        "oquvchi": oquvchi,
+        "balans": oquvchi.balans,
+        "form": TezTolovForm(),
+        "keyingi": keyingi if keyingi.startswith("/") else "",
+    })
+
+
+def tez_tolov(request, oquvchi_id):
+    """Sodda oynachadan kelgan to'lovni saqlaydi."""
+    oquvchi = get_object_or_404(Oquvchi, pk=oquvchi_id)
+    qaytish = _qaytish_manzili(request, reverse("students:oquvchilar"))
+    if request.method != "POST":
+        return redirect(qaytish)
+
+    form = TezTolovForm(request.POST)
+    if form.is_valid():
+        Tranzaksiya.objects.create(
+            oquvchi=oquvchi,
+            tur=Tranzaksiya.Tur.TOLOV,
+            summa=form.cleaned_data["summa"],
+            sana=date.today(),
+            usul=form.cleaned_data["usul"],
+            yaratgan=request.user,
+        )
+        messages.success(
+            request,
+            f"{oquvchi.toliq_ism}: {form.cleaned_data['summa']:,.0f} so'm "
+            f"qabul qilindi.".replace(",", " "),
+        )
+    else:
+        xatolar = "; ".join(" ".join(x) for x in form.errors.values())
         messages.error(request, f"Saqlanmadi. {xatolar}")
     return redirect(qaytish)
 

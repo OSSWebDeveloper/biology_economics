@@ -92,6 +92,7 @@ class SahifalarTest(TestCase):
             reverse("staff:xodim_oyna", args=[self.xodim.pk]),
             reverse("staff:tolovlar"),
             reverse("accounts:shaxsiy"),
+            reverse("payments:tez_tolov_oyna", args=[1]),
         ]
         for manzil in manzillar:
             with self.subTest(manzil=manzil):
@@ -114,6 +115,40 @@ class SahifalarTest(TestCase):
         tolov = Tranzaksiya.objects.get(oquvchi=self.oquvchi, tur=Tranzaksiya.Tur.TOLOV)
         self.assertEqual(tolov.summa, Decimal(320000))
         self.assertEqual(tolov.karta_raqami, self.karta.raqam)
+
+    def test_tez_tolov_oynasida_faqat_usul_va_summa_boladi(self):
+        javob = self.client.get(
+            reverse("payments:tez_tolov_oyna", args=[self.oquvchi.pk]))
+        self.assertEqual(javob.status_code, 200)
+        html = javob.content.decode()
+        self.assertIn("To'lov usuli", html)
+        self.assertIn('name="summa"', html)
+        # ortiqcha maydonlar bo'lmasligi kerak
+        for maydon in ('name="tur"', 'name="sana"', 'name="izoh"',
+                       'name="karta"', 'name="karta_raqami"'):
+            self.assertNotIn(maydon, html)
+
+    def test_tez_tolov_saqlanadi(self):
+        javob = self.client.post(
+            reverse("payments:tez_tolov", args=[self.oquvchi.pk]),
+            {"usul": Usul.PLASTIK, "summa": "250 000"},
+        )
+        self.assertEqual(javob.status_code, 302)
+        tolov = Tranzaksiya.objects.get(oquvchi=self.oquvchi,
+                                        tur=Tranzaksiya.Tur.TOLOV)
+        self.assertEqual(tolov.summa, Decimal(250000))
+        self.assertEqual(tolov.usul, Usul.PLASTIK)
+
+    def test_tez_tolovda_summa_nol_bolsa_saqlanmaydi(self):
+        self.client.post(reverse("payments:tez_tolov", args=[self.oquvchi.pk]),
+                         {"usul": Usul.NAQD, "summa": "0"})
+        self.assertFalse(Tranzaksiya.objects.filter(
+            tur=Tranzaksiya.Tur.TOLOV).exists())
+
+    def test_royxatda_tolov_tugmasi_bor(self):
+        html = self.client.get(reverse("students:oquvchilar")).content.decode()
+        self.assertIn("data-tolov=", html)
+        self.assertIn(">To'lov</button>", html)
 
     def test_plastik_tolov_kartasiz_saqlanmaydi(self):
         self.client.post(
