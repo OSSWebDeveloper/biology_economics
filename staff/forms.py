@@ -49,7 +49,7 @@ class XodimHisobForm(forms.Form):
         widget=forms.PasswordInput(attrs={"autocomplete": "new-password"}),
     )
     rol = forms.ChoiceField(label="Huquqi", choices=Foydalanuvchi.Rol.choices,
-                            initial=Foydalanuvchi.Rol.OPERATOR)
+                            initial=Foydalanuvchi.Rol.OQITUVCHI)
 
     def __init__(self, *args, hisob=None, **kwargs):
         super().__init__(*args, **kwargs)

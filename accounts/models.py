@@ -8,15 +8,16 @@ class Foydalanuvchi(AbstractUser):
     DIQQAT: Bu model Django admin (/boshqaruv/) uchun ham, sayt paneli uchun ham
     ishlatiladi, lekin kirish huquqlari ALOHIDA:
       * Django admin  -> faqat is_superuser=True bo'lgan hisoblar kira oladi.
-      * Sayt paneli   -> rol = admin yoki operator bo'lgan faol hisoblar.
+      * Sayt paneli   -> rol = admin yoki o'qituvchi bo'lgan faol hisoblar.
     Ya'ni sayt admini Django admin paroli bilan bir xil bo'lishi shart emas.
     """
 
     class Rol(models.TextChoices):
-        ADMIN = "admin", "Sayt admini"
-        OPERATOR = "operator", "Operator"
+        ADMIN = "admin", "Admin"
+        OQITUVCHI = "oqituvchi", "O'qituvchi"
 
-    rol = models.CharField("Rol", max_length=20, choices=Rol.choices, default=Rol.OPERATOR)
+    rol = models.CharField("Rol", max_length=20, choices=Rol.choices,
+                           default=Rol.OQITUVCHI)
     telefon = models.CharField("Telefon", max_length=30, blank=True)
     saytga_kira_oladi = models.BooleanField(
         "Sayt paneliga kira oladi", default=True,
@@ -41,3 +42,16 @@ class Foydalanuvchi(AbstractUser):
     def admin_mi(self):
         """Sayt admini (to'liq huquq) yoki superuser."""
         return self.rol == self.Rol.ADMIN or self.is_superuser
+
+    @property
+    def oqituvchi_mi(self):
+        return not self.admin_mi
+
+    @property
+    def guruhlari(self):
+        """Shu o'qituvchiga biriktirilgan guruhlar."""
+        from students.models import Guruh
+
+        if self.admin_mi:
+            return Guruh.objects.all()
+        return Guruh.objects.filter(oqituvchi__foydalanuvchi=self)

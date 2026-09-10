@@ -21,10 +21,17 @@ class OquvchiForm(forms.ModelForm):
             "ona_telefon": forms.TextInput(attrs={"placeholder": "+998 90 123 45 67"}),
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, foydalanuvchi=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["guruh"].queryset = Guruh.objects.filter(faol=True)
-        self.fields["guruh"].empty_label = "-- Guruhsiz --"
+        guruhlar = Guruh.objects.filter(faol=True)
+        if foydalanuvchi is not None and not foydalanuvchi.admin_mi:
+            # O'qituvchi faqat o'z guruhiga o'quvchi qo'sha oladi
+            guruhlar = guruhlar.filter(oqituvchi__foydalanuvchi=foydalanuvchi)
+            self.fields["guruh"].required = True
+            self.fields["guruh"].empty_label = None
+        else:
+            self.fields["guruh"].empty_label = "-- Guruhsiz --"
+        self.fields["guruh"].queryset = guruhlar
         if self.instance.pk is None:
             self.fields["boshlangan_sana"].initial = date.today()
 
@@ -45,8 +52,15 @@ class OquvchiForm(forms.ModelForm):
 class GuruhForm(forms.ModelForm):
     class Meta:
         model = Guruh
-        fields = ["nomi", "oylik_toluv", "faol"]
+        fields = ["nomi", "oqituvchi", "oylik_toluv", "faol"]
         widgets = {"oylik_toluv": PulInput()}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        from staff.models import Xodim
+
+        self.fields["oqituvchi"].queryset = Xodim.objects.filter(faol=True)
+        self.fields["oqituvchi"].empty_label = "-- O'qituvchi biriktirilmagan --"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

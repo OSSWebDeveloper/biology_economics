@@ -16,11 +16,12 @@ class Command(BaseCommand):
         parser.add_argument("--parol", required=True, help="Sayt paneli paroli")
         parser.add_argument("--ism", default="", help="Ism")
         parser.add_argument("--familiya", default="", help="Familiya")
-        parser.add_argument("--operator", action="store_true",
-                            help="Admin emas, oddiy operator sifatida yaratish")
+        parser.add_argument("--oqituvchi", action="store_true",
+                            help="Admin emas, o'qituvchi sifatida yaratish")
 
     def handle(self, *args, **options):
-        rol = Foydalanuvchi.Rol.OPERATOR if options["operator"] else Foydalanuvchi.Rol.ADMIN
+        rol = (Foydalanuvchi.Rol.OQITUVCHI if options["oqituvchi"]
+               else Foydalanuvchi.Rol.ADMIN)
         obyekt, yangi = Foydalanuvchi.objects.get_or_create(
             username=options["login"],
             defaults={"rol": rol},

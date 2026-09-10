@@ -22,15 +22,16 @@
 
       <div class="bolim">O'quvchilar</div>
       <a href="{% url 'students:oquvchilar' %}" class="{% if ns == 'students' and 'guruh' not in un %}faol{% endif %}">
-        <span class="belgi">&#128100;</span> Ro'yxat
+        <span class="belgi">&#128100;</span> {% if user.admin_mi %}Ro'yxat{% else %}Mening o'quvchilarim{% endif %}
       </a>
       <a href="{% url 'students:guruhlar' %}" class="{% if ns == 'students' and 'guruh' in un %}faol{% endif %}">
-        <span class="belgi">&#128101;</span> Guruhlar
+        <span class="belgi">&#128101;</span> {% if user.admin_mi %}Guruhlar{% else %}Guruhlarim{% endif %}
       </a>
       <a href="{% url 'payments:tolovlar' %}" class="{% if ns == 'payments' %}faol{% endif %}">
         <span class="belgi">&#128179;</span> Kurs to'lovlari
       </a>
 
+      {% if user.admin_mi %}
       <div class="bolim">Xodimlar</div>
       <a href="{% url 'staff:xodimlar' %}" class="{% if ns == 'staff' and un != 'tolovlar' %}faol{% endif %}">
         <span class="belgi">&#128188;</span> Xodimlar
@@ -43,6 +44,7 @@
       <a href="{% url 'dashboard:moliya' %}" class="{% if un == 'moliya' %}faol{% endif %}">
         <span class="belgi">&#128200;</span> Moliya (statistika)
       </a>
+      {% endif %}
 
       <div class="bolim">Sozlamalar</div>
       <a href="{% url 'accounts:shaxsiy' %}" class="{% if ns == 'accounts' %}faol{% endif %}">
@@ -64,7 +66,7 @@
     <header class="ustki">
       <div class="sarlavha">{% block bolim_nomi %}{% endblock %}</div>
       <div class="foydalanuvchi">
-        <span class="och mayda">{% if user.admin_mi %}Admin{% else %}Operator{% endif %}</span>
+        <span class="och mayda">{% if user.admin_mi %}Admin{% else %}O'qituvchi{% endif %}</span>
         <span class="avatar">{{ user.toliq_ism|slice:":1"|upper }}</span>
       </div>
     </header>

@@ -35,6 +35,7 @@ def _qaytish_manzili(request, standart):
     return standart
 
 
+@admin_talab
 def xodimlar(request):
     maoshlarni_yangila()
 
@@ -73,6 +74,7 @@ def xodimlar(request):
     })
 
 
+@admin_talab
 def xodim(request, pk):
     obyekt = get_object_or_404(Xodim, pk=pk)
     maoshlarni_yangila()
@@ -100,6 +102,7 @@ def xodim(request, pk):
     })
 
 
+@admin_talab
 def tez_oylik_oyna(request, pk):
     """Ro'yxatdagi "To'lov" tugmasi ochadigan sodda oynacha."""
     obyekt = get_object_or_404(Xodim, pk=pk)
@@ -112,6 +115,7 @@ def tez_oylik_oyna(request, pk):
     })
 
 
+@admin_talab
 def tez_oylik(request, pk):
     """Sodda oynachadan kelgan avans/oylikni saqlaydi."""
     obyekt = get_object_or_404(Xodim, pk=pk)
@@ -223,6 +227,7 @@ def tolov_ochirish(request, pk):
     return redirect(qaytish)
 
 
+@admin_talab
 def oylik_tolovlari(request):
     """Xodimlarga berilgan pullar ro'yxati (naqd / plastik alohida)."""
     usul = request.GET.get("usul") or ""

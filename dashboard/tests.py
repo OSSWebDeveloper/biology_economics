@@ -55,7 +55,7 @@ class SahifalarTest(TestCase):
         )
         cls.operator = Foydalanuvchi.objects.create_user(
             username="operator1", password="parol12345",
-            rol=Foydalanuvchi.Rol.OPERATOR,
+            rol=Foydalanuvchi.Rol.OQITUVCHI,
         )
         cls.guruh = Guruh.objects.create(nomi="11-sinf", oylik_toluv=Decimal(600000))
         cls.oquvchi = Oquvchi.objects.create(

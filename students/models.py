@@ -12,6 +12,12 @@ class Guruh(models.Model):
         "Oylik kurs to'lovi (so'm)", max_digits=12, decimal_places=2, default=0,
         validators=[MinValueValidator(0)],
     )
+    oqituvchi = models.ForeignKey(
+        "staff.Xodim", verbose_name="O'qituvchi", on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="guruhlar",
+        help_text="Guruhga biriktirilgan o'qituvchi shu guruh o'quvchilarini ko'radi.",
+    )
+
     faol = models.BooleanField("Faol", default=True)
     yaratilgan = models.DateTimeField(auto_now_add=True)
 

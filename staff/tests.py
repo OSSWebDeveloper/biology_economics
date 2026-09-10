@@ -117,7 +117,7 @@ class XodimHisobiTest(TestCase):
 
     def test_xodimga_login_yaratiladi(self):
         javob = self.client.post(self._hisob_url(), {
-            "login": "olim", "parol": "kurs2026", "rol": Foydalanuvchi.Rol.OPERATOR,
+            "login": "olim", "parol": "kurs2026", "rol": Foydalanuvchi.Rol.OQITUVCHI,
         })
         self.assertEqual(javob.status_code, 302)
         self.xodim.refresh_from_db()
@@ -130,7 +130,7 @@ class XodimHisobiTest(TestCase):
 
     def test_yaratilgan_login_bilan_saytga_kiriladi(self):
         self.client.post(self._hisob_url(), {
-            "login": "olim", "parol": "kurs2026", "rol": Foydalanuvchi.Rol.OPERATOR})
+            "login": "olim", "parol": "kurs2026", "rol": Foydalanuvchi.Rol.OQITUVCHI})
         self.client.logout()
         javob = self.client.post(reverse("accounts:kirish"),
                                  {"username": "olim", "password": "kurs2026"})
@@ -138,7 +138,7 @@ class XodimHisobiTest(TestCase):
 
     def test_parol_va_login_ozgartiriladi(self):
         self.client.post(self._hisob_url(), {
-            "login": "olim", "parol": "kurs2026", "rol": Foydalanuvchi.Rol.OPERATOR})
+            "login": "olim", "parol": "kurs2026", "rol": Foydalanuvchi.Rol.OQITUVCHI})
         self.client.post(self._hisob_url(), {
             "login": "olim_yangi", "parol": "boshqa77", "rol": Foydalanuvchi.Rol.ADMIN})
         self.xodim.refresh_from_db()
@@ -149,21 +149,21 @@ class XodimHisobiTest(TestCase):
 
     def test_parol_bosh_qoldirilsa_ozgarmaydi(self):
         self.client.post(self._hisob_url(), {
-            "login": "olim", "parol": "kurs2026", "rol": Foydalanuvchi.Rol.OPERATOR})
+            "login": "olim", "parol": "kurs2026", "rol": Foydalanuvchi.Rol.OQITUVCHI})
         self.client.post(self._hisob_url(), {
-            "login": "olim", "parol": "", "rol": Foydalanuvchi.Rol.OPERATOR})
+            "login": "olim", "parol": "", "rol": Foydalanuvchi.Rol.OQITUVCHI})
         self.xodim.refresh_from_db()
         self.assertTrue(self.xodim.foydalanuvchi.check_password("kurs2026"))
 
     def test_band_login_qabul_qilinmaydi(self):
         self.client.post(self._hisob_url(), {
-            "login": "admin1", "parol": "kurs2026", "rol": Foydalanuvchi.Rol.OPERATOR})
+            "login": "admin1", "parol": "kurs2026", "rol": Foydalanuvchi.Rol.OQITUVCHI})
         self.xodim.refresh_from_db()
         self.assertIsNone(self.xodim.foydalanuvchi)
 
     def test_xodim_ismi_ozgarsa_hisob_ismi_ham_ozgaradi(self):
         self.client.post(self._hisob_url(), {
-            "login": "olim", "parol": "kurs2026", "rol": Foydalanuvchi.Rol.OPERATOR})
+            "login": "olim", "parol": "kurs2026", "rol": Foydalanuvchi.Rol.OQITUVCHI})
         self.client.post(reverse("staff:xodim_tahrir", args=[self.xodim.pk]), {
             "ism": "Olimjon", "familiya": "Karimov",
             "telefon": "+998 90 000 00 00",
@@ -174,7 +174,7 @@ class XodimHisobiTest(TestCase):
 
     def test_mavjud_hisob_boglanadi(self):
         mavjud = Foydalanuvchi.objects.create_user(
-            username="eski", password="parol12345", rol=Foydalanuvchi.Rol.OPERATOR)
+            username="eski", password="parol12345", rol=Foydalanuvchi.Rol.OQITUVCHI)
         javob = self.client.post(
             reverse("staff:xodim_hisob_boglash", args=[self.xodim.pk]),
             {"hisob": mavjud.pk})
@@ -184,7 +184,7 @@ class XodimHisobiTest(TestCase):
 
     def test_kirish_huquqi_olib_tashlanadi(self):
         self.client.post(self._hisob_url(), {
-            "login": "olim", "parol": "kurs2026", "rol": Foydalanuvchi.Rol.OPERATOR})
+            "login": "olim", "parol": "kurs2026", "rol": Foydalanuvchi.Rol.OQITUVCHI})
         self.client.post(reverse("staff:xodim_hisob_uzish", args=[self.xodim.pk]))
         self.xodim.refresh_from_db()
         self.assertIsNone(self.xodim.foydalanuvchi)
@@ -199,7 +199,7 @@ class XodimHisobiTest(TestCase):
 
     def test_operator_login_yarata_olmaydi(self):
         operator = Foydalanuvchi.objects.create_user(
-            username="oper", password="parol12345", rol=Foydalanuvchi.Rol.OPERATOR)
+            username="oper", password="parol12345", rol=Foydalanuvchi.Rol.OQITUVCHI)
         self.client.login(username="oper", password="parol12345")
         self.client.post(self._hisob_url(), {
             "login": "olim", "parol": "kurs2026", "rol": Foydalanuvchi.Rol.ADMIN})

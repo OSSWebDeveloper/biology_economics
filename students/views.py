@@ -22,6 +22,14 @@ from .forms import ChiqarishForm, GuruhForm, OquvchiForm, QaytarishForm
 from .models import Guruh, Oquvchi
 
 
+def _koradigan_oquvchilar(foydalanuvchi):
+    """Admin hammasini, o'qituvchi esa faqat o'z guruhlaridagilarni ko'radi."""
+    qs = Oquvchi.objects.select_related("guruh")
+    if not foydalanuvchi.admin_mi:
+        qs = qs.filter(guruh__oqituvchi__foydalanuvchi=foydalanuvchi)
+    return qs
+
+
 def oquvchilar(request):
     """Kursga keladiganlar ro'yxati + to'lov holati bo'yicha filtr."""
     barcha_hisoblarni_yangila()
@@ -32,7 +40,7 @@ def oquvchilar(request):
     holat = request.GET.get("holat") or ""
     tartib = request.GET.get("tartib") or "ism"
 
-    qs = Oquvchi.objects.select_related("guruh")
+    qs = _koradigan_oquvchilar(request.user)
     if royxat_turi == "chiqarilgan":
         qs = qs.filter(faol=False)
     elif royxat_turi != "hammasi":
@@ -72,7 +80,7 @@ def oquvchilar(request):
 
     return render(request, "students/royxat.html", {
         "sahifa": sahifa,
-        "guruhlar": Guruh.objects.filter(faol=True),
+        "guruhlar": request.user.guruhlari.filter(faol=True),
         "jamlar": jamlar,
         "filtr": {"q": qidiruv, "guruh": guruh_id, "holat": holat,
                   "royxat": royxat_turi, "tartib": tartib},
@@ -82,7 +90,7 @@ def oquvchilar(request):
 
 def oquvchi(request, pk):
     """O'quvchining to'liq kartochkasi: hisob-kitob tarixi."""
-    obyekt = get_object_or_404(Oquvchi.objects.select_related("guruh"), pk=pk)
+    obyekt = get_object_or_404(_koradigan_oquvchilar(request.user), pk=pk)
     hisoblarni_yarat(obyekt)
 
     tranzaksiyalar = list(obyekt.tranzaksiyalar.select_related("yaratgan")
@@ -106,8 +114,10 @@ def oquvchi(request, pk):
 
 
 def oquvchi_saqlash(request, pk=None):
-    obyekt = get_object_or_404(Oquvchi, pk=pk) if pk else None
-    form = OquvchiForm(request.POST or None, instance=obyekt)
+    obyekt = (get_object_or_404(_koradigan_oquvchilar(request.user), pk=pk)
+              if pk else None)
+    form = OquvchiForm(request.POST or None, instance=obyekt,
+                       foydalanuvchi=request.user)
     if request.method == "POST" and form.is_valid():
         yangi = form.save()
         hisoblarni_yarat(yangi)
@@ -122,7 +132,7 @@ def oquvchi_saqlash(request, pk=None):
 
 def oquvchi_chiqarish(request, pk):
     """Kursga keladiganlar ro'yxatidan chiqarish (tarix saqlanib qoladi)."""
-    obyekt = get_object_or_404(Oquvchi, pk=pk)
+    obyekt = get_object_or_404(_koradigan_oquvchilar(request.user), pk=pk)
     if request.method != "POST":
         return redirect("students:oquvchi", pk=pk)
 
@@ -150,7 +160,7 @@ def oquvchi_chiqarish(request, pk):
 
 
 def oquvchi_qaytarish(request, pk):
-    obyekt = get_object_or_404(Oquvchi, pk=pk)
+    obyekt = get_object_or_404(_koradigan_oquvchilar(request.user), pk=pk)
     if request.method != "POST":
         return redirect("students:oquvchi", pk=pk)
 
@@ -180,7 +190,7 @@ def oquvchi_ochirish(request, pk):
 # ---------------------------------------------------------------- guruhlar
 
 def guruhlar(request):
-    royxat = Guruh.objects.annotate(
+    royxat = request.user.guruhlari.select_related("oqituvchi").annotate(
         oquvchilar_soni=Count("oquvchilar", filter=Q(oquvchilar__faol=True))
     )
     return render(request, "students/guruhlar.html", {"royxat": royxat})

@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
 from accounts.permissions import admin_talab
-from students.models import Oquvchi
+from students.views import _koradigan_oquvchilar
 
 from .forms import TezTolovForm, TolovFiltrForm, TolovForm
 from .models import Tranzaksiya, Usul
@@ -24,6 +24,8 @@ def tolovlar(request):
     """Barcha moliyaviy amallar ro'yxati + filtr."""
     filtr = TolovFiltrForm(request.GET or None)
     qs = Tranzaksiya.objects.select_related("oquvchi", "yaratgan")
+    if not request.user.admin_mi:
+        qs = qs.filter(oquvchi__guruh__oqituvchi__foydalanuvchi=request.user)
 
     if filtr.is_valid():
         m = filtr.cleaned_data
@@ -57,7 +59,7 @@ def tolovlar(request):
 
 def tolov_qoshish(request, oquvchi_id):
     """Oynachadagi to'lov formasini qabul qiladi."""
-    oquvchi = get_object_or_404(Oquvchi, pk=oquvchi_id)
+    oquvchi = get_object_or_404(_koradigan_oquvchilar(request.user), pk=oquvchi_id)
     qaytish = _qaytish_manzili(request, reverse("students:oquvchi", args=[oquvchi.pk]))
 
     if request.method != "POST":
@@ -85,7 +87,7 @@ def tolov_qoshish(request, oquvchi_id):
 
 def tez_tolov_oyna(request, oquvchi_id):
     """Ro'yxatdagi "To'lov" tugmasi ochadigan sodda oynacha."""
-    oquvchi = get_object_or_404(Oquvchi, pk=oquvchi_id)
+    oquvchi = get_object_or_404(_koradigan_oquvchilar(request.user), pk=oquvchi_id)
     keyingi = request.GET.get("keyingi") or ""
     return render(request, "payments/_tez_tolov.html", {
         "oquvchi": oquvchi,
@@ -97,7 +99,7 @@ def tez_tolov_oyna(request, oquvchi_id):
 
 def tez_tolov(request, oquvchi_id):
     """Sodda oynachadan kelgan to'lovni saqlaydi."""
-    oquvchi = get_object_or_404(Oquvchi, pk=oquvchi_id)
+    oquvchi = get_object_or_404(_koradigan_oquvchilar(request.user), pk=oquvchi_id)
     qaytish = _qaytish_manzili(request, reverse("students:oquvchilar"))
     if request.method != "POST":
         return redirect(qaytish)

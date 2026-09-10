@@ -9,7 +9,7 @@ from staff.models import Xodim
 from .models import Foydalanuvchi
 
 
-def foydalanuvchi(login, rol=Foydalanuvchi.Rol.OPERATOR, parol="parol12345", **qo):
+def foydalanuvchi(login, rol=Foydalanuvchi.Rol.OQITUVCHI, parol="parol12345", **qo):
     return Foydalanuvchi.objects.create_user(username=login, password=parol, rol=rol, **qo)
 
 

@@ -123,10 +123,27 @@ python manage.py createsuperuser
 
 ### Rollar
 
-* **Sayt admini** — hamma narsa: xodim oyligini tayinlash, yozuvni o'chirish,
-  guruh boshqarish, xodimlarga login berish.
-* **Operator** — o'quvchi qo'shish/tahrirlash, to'lov qabul qilish, ro'yxatdan
-  chiqarish, hisobotlarni ko'rish. Oylik tayinlash va o'chirish huquqi yo'q.
+Tizimda ikkita rol bor: **Admin** va **O'qituvchi**.
+
+**Admin** — hamma narsani ko'radi va boshqaradi: barcha o'quvchilar, guruhlar,
+xodimlar, oyliklar, moliyaviy hisobot. **Guruhni faqat admin yaratadi** va
+guruhga o'qituvchini biriktiradi.
+
+**O'qituvchi** — faqat **o'ziga biriktirilgan guruhlar** bilan ishlaydi:
+
+| Ko'radi | Ko'rmaydi |
+|---|---|
+| o'z guruhlaridagi o'quvchilar | boshqa guruhlar va ularning o'quvchilari |
+| o'z o'quvchilarining to'lovlari | xodimlar, oylik va avans |
+| o'z guruhlari ro'yxati | moliyaviy hisobot (statistika) |
+| Shaxsiy sahifam | guruh yaratish/tahrirlash |
+
+O'qituvchi **o'z guruhiga o'quvchi qo'sha oladi**, ularni tahrirlaydi,
+ro'yxatdan chiqaradi va **to'lov qabul qiladi**. Yangi o'quvchi formasida
+guruh ro'yxatida faqat o'zining guruhlari chiqadi.
+
+O'qituvchining bosh sahifasi ham boshqacha: u yerda guruhlari, o'quvchilari
+soni va qarzdorlik holati ko'rinadi.
 
 ### Shaxsiy sahifam
 
@@ -274,8 +291,8 @@ python manage.py boshlangich
 # Sayt admini yaratish / parolini yangilash
 python manage.py sayt_admin --login admin --parol "yangi_parol"
 
-# Operator qo'shish
-python manage.py sayt_admin --login operator1 --parol "parol" --operator
+# O'qituvchi hisobini qo'shish
+python manage.py sayt_admin --login olim --parol "parol" --oqituvchi
 ```
 
 ### Namunaviy ma'lumot
