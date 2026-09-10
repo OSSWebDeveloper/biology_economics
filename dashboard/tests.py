@@ -185,3 +185,41 @@ class SahifalarTest(TestCase):
         )
         self.xodim.refresh_from_db()
         self.assertEqual(self.xodim.oylik_maosh, Decimal(3000000))
+
+
+class YigilishFoiziTest(TestCase):
+    """Oldindan to'lov ko'p bo'lsa ham foiz 100 dan oshmasin."""
+
+    def test_ortiqcha_tolov_100_foizda_toxtaydi(self):
+        from dashboard.services import moliya_hisoboti
+
+        guruh = Guruh.objects.create(nomi="A", oylik_toluv=Decimal(100000))
+        oquvchi = Oquvchi.objects.create(
+            ism="Ali", familiya="Valiyev", guruh=guruh,
+            boshlangan_sana=date(2026, 1, 1))
+        Tranzaksiya.objects.create(
+            oquvchi=oquvchi, tur=Tranzaksiya.Tur.HISOB,
+            summa=Decimal(50000), sana=date(2026, 2, 1))
+        Tranzaksiya.objects.create(
+            oquvchi=oquvchi, tur=Tranzaksiya.Tur.TOLOV,
+            summa=Decimal(500000), sana=date(2026, 2, 5), usul=Usul.NAQD)
+
+        hisobot = moliya_hisoboti(date(2026, 2, 1), date(2026, 2, 28))
+        self.assertEqual(hisobot["yigilish_foizi"], 100.0)
+
+    def test_kam_tolov_haqiqiy_foizni_beradi(self):
+        from dashboard.services import moliya_hisoboti
+
+        guruh = Guruh.objects.create(nomi="A", oylik_toluv=Decimal(100000))
+        oquvchi = Oquvchi.objects.create(
+            ism="Ali", familiya="Valiyev", guruh=guruh,
+            boshlangan_sana=date(2026, 1, 1))
+        Tranzaksiya.objects.create(
+            oquvchi=oquvchi, tur=Tranzaksiya.Tur.HISOB,
+            summa=Decimal(100000), sana=date(2026, 2, 1))
+        Tranzaksiya.objects.create(
+            oquvchi=oquvchi, tur=Tranzaksiya.Tur.TOLOV,
+            summa=Decimal(40000), sana=date(2026, 2, 5), usul=Usul.NAQD)
+
+        hisobot = moliya_hisoboti(date(2026, 2, 1), date(2026, 2, 28))
+        self.assertEqual(hisobot["yigilish_foizi"], 40.0)

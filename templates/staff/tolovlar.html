@@ -59,6 +59,7 @@
             <th>Usul</th>
             <th class="ong">Summa</th>
             <th>Kiritdi</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -73,9 +74,19 @@
             <td class="mayda">{{ t.get_usul_display|default:"-" }}</td>
             <td class="ong pul {% if t.chiqim_mi %}qarz{% endif %}"><b>{{ t.summa|som }}</b></td>
             <td class="mayda och">{{ t.yaratgan.toliq_ism|default:"tizim" }}</td>
+            <td class="ong">
+              {% if t.tur != 'hisob' %}
+              <form method="post" action="{% url 'staff:tolov_ochirish' t.pk %}"
+                    onsubmit="return confirm('Yozuv o\'chirilsinmi?')">
+                {% csrf_token %}
+                <input type="hidden" name="keyingi" value="{{ request.get_full_path }}">
+                <button type="submit" class="tugma kichik">&times;</button>
+              </form>
+              {% endif %}
+            </td>
           </tr>
         {% empty %}
-          <tr><td colspan="6" class="hech-narsa">Yozuv topilmadi.</td></tr>
+          <tr><td colspan="7" class="hech-narsa">Yozuv topilmadi.</td></tr>
         {% endfor %}
         </tbody>
       </table>

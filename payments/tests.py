@@ -291,3 +291,15 @@ class NarxMerosTest(TestCase):
         oquvchi = form.save()
         self.assertIsNone(oquvchi.oylik_toluv)
         self.assertEqual(oquvchi.amaldagi_oylik, Decimal(600000))
+
+
+class TolovUsuliRoyxatiTest(TestCase):
+    """Sayt to'liq o'zbekcha: bo'sh variant ham inglizcha bo'lmasin."""
+
+    def test_bosh_variant_ozbekcha(self):
+        from .forms import TolovForm
+
+        html = str(TolovForm()["usul"])
+        self.assertIn("-- tanlang --", html)
+        self.assertNotIn("Select an option", html)
+        self.assertNotIn("---------", html)

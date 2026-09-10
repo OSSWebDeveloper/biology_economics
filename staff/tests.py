@@ -254,3 +254,77 @@ class TezOylikTest(TestCase):
     def test_royxatda_tolov_tugmasi_bor(self):
         html = self.client.get(reverse("staff:xodimlar")).content.decode()
         self.assertIn("data-tolov=", html)
+
+
+class XodimHolatiVaLoginTest(TestCase):
+    """Xodim holati o'zgarganda uning sayt logini ham shu holatga o'tadi."""
+
+    def setUp(self):
+        self.admin = Foydalanuvchi.objects.create_user(
+            username="admin1", password="parol12345", rol=Foydalanuvchi.Rol.ADMIN)
+        self.hisob = Foydalanuvchi.objects.create_user(
+            username="olim", password="parol12345",
+            rol=Foydalanuvchi.Rol.OQITUVCHI, saytga_kira_oladi=True)
+        self.xodim = xodim_yarat(foydalanuvchi=self.hisob)
+        self.client.login(username="admin1", password="parol12345")
+
+    def kira_oladimi(self):
+        self.hisob.refresh_from_db()
+        return self.hisob.saytga_kira_oladi
+
+    def test_ishdan_boshatilsa_saytga_kira_olmaydi(self):
+        self.client.post(reverse("staff:xodim_holat", args=[self.xodim.pk]))
+        self.assertFalse(self.kira_oladimi())
+
+    def test_ishga_qaytarilsa_kirish_tiklanadi(self):
+        self.client.post(reverse("staff:xodim_holat", args=[self.xodim.pk]))
+        self.client.post(reverse("staff:xodim_holat", args=[self.xodim.pk]))
+        self.assertTrue(self.kira_oladimi())
+
+    def test_ochirilgan_xodim_saytga_kira_olmaydi(self):
+        self.client.post(reverse("staff:xodim_ochirish", args=[self.xodim.pk]))
+        self.assertFalse(Xodim.objects.filter(pk=self.xodim.pk).exists())
+        # Hisobning o'zi tarix uchun qoladi, lekin kirish yopiladi
+        self.assertTrue(Foydalanuvchi.objects.filter(pk=self.hisob.pk).exists())
+        self.assertFalse(self.kira_oladimi())
+
+    def test_mavjud_hisob_boglansa_kirish_ochiladi(self):
+        self.client.post(reverse("staff:xodim_hisob_uzish", args=[self.xodim.pk]))
+        self.assertFalse(self.kira_oladimi())
+
+        self.client.post(reverse("staff:xodim_hisob_boglash", args=[self.xodim.pk]),
+                         {"hisob": str(self.hisob.pk)})
+        self.xodim.refresh_from_db()
+        self.assertEqual(self.xodim.foydalanuvchi, self.hisob)
+        self.assertTrue(self.kira_oladimi())
+
+    def test_ozini_ishdan_boshata_olmaydi(self):
+        ozi = Xodim.objects.create(ism="Odil", familiya="Kenjayev",
+                                   oylik_maosh=Decimal(0),
+                                   ishga_kirgan_sana=SENTABR,
+                                   foydalanuvchi=self.admin)
+        self.client.post(reverse("staff:xodim_holat", args=[ozi.pk]))
+        ozi.refresh_from_db()
+        self.assertTrue(ozi.faol)
+
+
+class OylikRoyxatiTest(TestCase):
+    """Oylik va avans ro'yxatidan yozuvni o'chirish mumkin."""
+
+    def setUp(self):
+        self.admin = Foydalanuvchi.objects.create_user(
+            username="admin1", password="parol12345", rol=Foydalanuvchi.Rol.ADMIN)
+        self.xodim = xodim_yarat()
+        self.yozuv = XodimTranzaksiya.objects.create(
+            xodim=self.xodim, tur=XodimTranzaksiya.Tur.AVANS,
+            summa=Decimal(500000), sana=date.today(), usul=Usul.NAQD)
+        self.client.login(username="admin1", password="parol12345")
+
+    def test_royxatda_ochirish_tugmasi_bor(self):
+        html = self.client.get(reverse("staff:tolovlar")).content.decode()
+        self.assertIn(reverse("staff:tolov_ochirish", args=[self.yozuv.pk]), html)
+
+    def test_royxatdan_ochirib_boladi(self):
+        self.client.post(reverse("staff:tolov_ochirish", args=[self.yozuv.pk]),
+                         {"keyingi": reverse("staff:tolovlar")})
+        self.assertFalse(XodimTranzaksiya.objects.filter(pk=self.yozuv.pk).exists())

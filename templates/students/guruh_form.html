@@ -1,2 +1,22 @@
 {% extends "_umumiy_form.html" %}
 {% block bekor %}{% url "students:guruhlar" %}{% endblock %}
+
+{% block panel_ostida %}
+{% if obyekt %}
+<div class="panel" style="max-width:640px;margin-top:14px">
+  <div class="panel-ich">
+    <form method="post" action="{% url 'students:guruh_ochirish' obyekt.pk %}"
+          onsubmit="return confirm('Guruh o\'chirilsinmi? O\'quvchilar guruhsiz qoladi.')">
+      {% csrf_token %}
+      <div class="tugmalar" style="justify-content:space-between;align-items:center">
+        <div class="bosq" style="max-width:380px">
+          O'chirilsa, guruhdagi {{ obyekt.oquvchilar.count }} ta o'quvchi guruhsiz
+          qoladi. Ularning o'zi va to'lov tarixi saqlanib qoladi.
+        </div>
+        <button type="submit" class="tugma xavf">Guruhni o'chirish</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

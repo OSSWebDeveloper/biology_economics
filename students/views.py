@@ -231,6 +231,7 @@ def guruh_saqlash(request, pk=None):
         return redirect("students:guruhlar")
     return render(request, "students/guruh_form.html", {
         "form": form,
+        "obyekt": obyekt,
         "sarlavha": "Guruhni tahrirlash" if obyekt else "Yangi guruh",
     })
 

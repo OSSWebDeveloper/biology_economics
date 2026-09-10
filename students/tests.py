@@ -240,3 +240,37 @@ class GuruhOynasiTest(TestCase):
         self.client.login(username="olim", password="parol12345")
         javob = self.client.get(reverse("students:guruh_oyna", args=[self.guruh.pk]))
         self.assertEqual(javob.status_code, 404)
+
+
+class GuruhniOchirishTest(TestCase):
+    """Guruhni tahrirlash sahifasidan o'chirish mumkin."""
+
+    def setUp(self):
+        self.admin = Foydalanuvchi.objects.create_user(
+            username="admin1", password="parol12345", rol=Foydalanuvchi.Rol.ADMIN)
+        self.guruh = Guruh.objects.create(nomi="11-sinf", oylik_toluv=Decimal(600000),
+                                          oqituvchi=self.admin)
+        self.oquvchi = oquvchi_yarat(self.guruh, "Zilola", "Valiyeva")
+        self.client.login(username="admin1", password="parol12345")
+
+    def test_tahrir_sahifasida_ochirish_tugmasi_bor(self):
+        html = self.client.get(
+            reverse("students:guruh_tahrir", args=[self.guruh.pk])).content.decode()
+        self.assertIn(reverse("students:guruh_ochirish", args=[self.guruh.pk]), html)
+
+    def test_yangi_guruh_sahifasida_ochirish_tugmasi_yoq(self):
+        html = self.client.get(reverse("students:guruh_yangi")).content.decode()
+        self.assertNotIn("Guruhni o'chirish", html)
+
+    def test_ochirilsa_oquvchi_guruhsiz_qoladi(self):
+        self.client.post(reverse("students:guruh_ochirish", args=[self.guruh.pk]))
+        self.assertFalse(Guruh.objects.filter(pk=self.guruh.pk).exists())
+        self.oquvchi.refresh_from_db()
+        self.assertIsNone(self.oquvchi.guruh)
+
+    def test_oqituvchi_guruhni_ochira_olmaydi(self):
+        Foydalanuvchi.objects.create_user(
+            username="olim", password="parol12345", rol=Foydalanuvchi.Rol.OQITUVCHI)
+        self.client.login(username="olim", password="parol12345")
+        self.client.post(reverse("students:guruh_ochirish", args=[self.guruh.pk]))
+        self.assertTrue(Guruh.objects.filter(pk=self.guruh.pk).exists())

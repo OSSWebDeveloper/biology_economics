@@ -192,14 +192,35 @@ def maosh_tayinlash(request, pk):
     return redirect("staff:xodim", pk=pk)
 
 
+def _kirishni_moslash(xodim, kira_olsin):
+    """Xodim holati o'zgarganda uning sayt logini ham shu holatga o'tadi."""
+    hisob = xodim.foydalanuvchi
+    if hisob is None or hisob.saytga_kira_oladi == kira_olsin:
+        return False
+    hisob.saytga_kira_oladi = kira_olsin
+    hisob.save(update_fields=["saytga_kira_oladi"])
+    return True
+
+
 @admin_talab
 def xodim_ishdan_boshatish(request, pk):
     obyekt = get_object_or_404(Xodim, pk=pk)
     if request.method == "POST":
+        if obyekt.faol and obyekt.foydalanuvchi == request.user:
+            messages.error(request, "O'zingizni ishdan bo'shata olmaysiz.")
+            return redirect("staff:xodim", pk=pk)
+
         obyekt.faol = not obyekt.faol
         obyekt.save()
+        # Ishdan ketgan odam saytga kira olmasin, qaytgani esa qayta kirsin
+        kirish_ozgardi = _kirishni_moslash(obyekt, obyekt.faol)
+
         holat = "ishga qaytarildi" if obyekt.faol else "ishdan bo'shatildi"
-        messages.success(request, f"{obyekt.toliq_ism} {holat}.")
+        xabar = f"{obyekt.toliq_ism} {holat}."
+        if kirish_ozgardi:
+            xabar += (" Saytga kirish huquqi qaytarildi."
+                      if obyekt.faol else " Saytga kirish huquqi to'xtatildi.")
+        messages.success(request, xabar)
     return redirect("staff:xodim", pk=pk)
 
 
@@ -208,8 +229,15 @@ def xodim_ochirish(request, pk):
     obyekt = get_object_or_404(Xodim, pk=pk)
     if request.method == "POST":
         ism = obyekt.toliq_ism
+        # Login hisobning o'zi qoladi (tarixdagi "kiritdi" yozuvlari uchun),
+        # lekin o'chirilgan xodim endi saytga kira olmaydi
+        login = obyekt.foydalanuvchi.username if obyekt.foydalanuvchi else None
+        _kirishni_moslash(obyekt, False)
         obyekt.delete()
-        messages.success(request, f"{ism} va uning to'lovlar tarixi o'chirildi.")
+        xabar = f"{ism} va uning to'lovlar tarixi o'chirildi."
+        if login:
+            xabar += f" '{login}' logini ham saytga kira olmaydi."
+        messages.success(request, xabar)
         return redirect("staff:xodimlar")
     return render(request, "staff/ochirish.html", {"xodim": obyekt})
 
@@ -321,6 +349,9 @@ def xodim_hisob_boglash(request, pk):
     if form.is_valid():
         obyekt.foydalanuvchi = form.cleaned_data["hisob"]
         obyekt.save(update_fields=["foydalanuvchi"])
+        # Bog'langan hisob darrov ishlasin, aks holda kartochkada login
+        # ko'rinadi-yu, odam saytga kira olmaydi
+        _kirishni_moslash(obyekt, obyekt.faol)
         messages.success(
             request, f"{obyekt.toliq_ism} '{obyekt.foydalanuvchi.username}' hisobiga bog'landi.")
     else:

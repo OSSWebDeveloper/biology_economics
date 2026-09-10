@@ -87,7 +87,10 @@ def moliya_hisoboti(boshi, oxiri):
     chiqim = chiqim_naqd + chiqim_plastik + qaytarilgan_summa
 
     hisoblangan_summa = _yigindi(hisoblangan)
+    # Oldindan to'laganlar borligi uchun kirim hisoblangandan ko'p bo'lishi
+    # mumkin. "830%" kabi son chalkashtiradi, shuning uchun 100 da to'xtaymiz.
     yigilish = (kirim / hisoblangan_summa * 100) if hisoblangan_summa else NOL
+    yigilish = min(yigilish, Decimal(100))
 
     return {
         "kirim": kirim,

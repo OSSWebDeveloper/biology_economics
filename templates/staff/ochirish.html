@@ -11,6 +11,11 @@
       <b>{{ xodim.toliq_ism }}</b> va uning barcha oylik/avans yozuvlari
       ({{ xodim.tranzaksiyalar.count }} ta) butunlay o'chiriladi.
     </p>
+    {% if xodim.foydalanuvchi %}
+    <p>
+      <b>{{ xodim.foydalanuvchi.username }}</b> logini ham saytga kira olmay qoladi.
+    </p>
+    {% endif %}
     <div class="xabar warning">
       Xodim ishdan bo'shagan bo'lsa, o'chirish o'rniga "Ishdan bo'shatish"ni tanlang -
       shunda to'lovlar tarixi hisobotlarda qoladi.

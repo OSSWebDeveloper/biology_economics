@@ -72,7 +72,7 @@
             </td>
             <td class="mayda">{{ t.get_usul_display|default:"-" }}</td>
             <td class="ong pul {% if t.ishorali_summa < 0 %}qarz{% else %}oldindan{% endif %}">
-              <b>{{ t.summa|som }}</b>
+              <b>{{ t.ishorali_summa|som }}</b>
             </td>
             <td class="mayda och">{{ t.yaratgan.toliq_ism|default:"tizim" }}</td>
             <td class="ong">

@@ -6,6 +6,9 @@ from dashboard.widgets import PulInput, SanaInput
 
 from .models import Tranzaksiya, Usul
 
+# To'lov usuli ro'yxatidagi bo'sh variant
+BOSH_USUL = [("", "-- tanlang --")]
+
 # Qo'lda kiritish mumkin bo'lgan turlar (hisob avtomatik ochiladi)
 QOLDA_TURLAR = [
     (Tranzaksiya.Tur.TOLOV, "To'lov qabul qilish"),
@@ -34,6 +37,8 @@ class TolovForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields["sana"].initial = date.today()
         self.fields["usul"].required = False
+        # Bo'sh variant o'zbekcha bo'lsin (Django o'zi inglizcha yozadi)
+        self.fields["usul"].choices = BOSH_USUL + list(Usul.choices)
 
     def clean(self):
         tozalangan = super().clean()
