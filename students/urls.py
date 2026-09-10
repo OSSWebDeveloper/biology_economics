@@ -9,6 +9,7 @@ urlpatterns = [
     path("yangi/", views.oquvchi_saqlash, name="oquvchi_yangi"),
     path("guruhlar/", views.guruhlar, name="guruhlar"),
     path("guruhlar/yangi/", views.guruh_saqlash, name="guruh_yangi"),
+    path("guruhlar/<int:pk>/oyna/", views.guruh_oyna, name="guruh_oyna"),
     path("guruhlar/<int:pk>/", views.guruh_saqlash, name="guruh_tahrir"),
     path("guruhlar/<int:pk>/ochirish/", views.guruh_ochirish, name="guruh_ochirish"),
     path("<int:pk>/", views.oquvchi, name="oquvchi"),

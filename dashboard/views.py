@@ -74,7 +74,7 @@ def _oqituvchi_bosh(request):
         })
 
     qarzdorlar = (balans_bilan(
-        Oquvchi.objects.filter(faol=True, guruh__oqituvchi__foydalanuvchi=request.user)
+        Oquvchi.objects.filter(faol=True, guruh__oqituvchi=request.user)
         .select_related("guruh"))
         .filter(balans_summa__lt=0).order_by("balans_summa")[:10])
 

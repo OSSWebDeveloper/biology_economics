@@ -1,0 +1,65 @@
+{% load moliya %}
+<div class="oyna-sarlavha">
+  <div>
+    <h2 style="margin-bottom:2px">{{ guruh.nomi }}</h2>
+    <div class="bosq">
+      O'qituvchi: <b>{{ guruh.oqituvchi.toliq_ism|default:"biriktirilmagan" }}</b>
+      &middot; oylik {{ guruh.oylik_toluv|som }} so'm
+    </div>
+  </div>
+  <button type="button" class="yopish" data-yopish>&times;</button>
+</div>
+
+<div class="oyna-ich">
+  <div class="setka k3" style="margin-bottom:16px">
+    <div class="stat kok">
+      <div class="yorliq">O'quvchilar</div>
+      <div class="qiymat">{{ oquvchilar|length }}</div>
+    </div>
+    <div class="stat qizil">
+      <div class="yorliq">Qarzdor</div>
+      <div class="qiymat">{{ qarzdorlar }}</div>
+    </div>
+    <div class="stat">
+      <div class="yorliq">Jami qarz</div>
+      <div class="qiymat pul {% if qarz %}qarz{% endif %}">{{ qarz|som }}</div>
+    </div>
+  </div>
+
+  <div class="jadval-qobiq">
+    <table class="jadval">
+      <thead>
+        <tr>
+          <th>O'quvchi</th>
+          <th>Telefon</th>
+          <th class="ong">Balans</th>
+          <th>Holat</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for o in oquvchilar %}
+        <tr>
+          <td>
+            <span class="bosh-harf">{{ o.bosh_harflar }}</span>
+            <b>{{ o.toliq_ism }}</b>
+          </td>
+          <td class="mayda tel">{{ o.telefon|default:o.ota_telefon|default:"-" }}</td>
+          <td class="ong pul {{ o.balans_summa|balans_klass }}">
+            <b>{{ o.balans_summa|som }}</b>
+          </td>
+          <td><span class="nishon {{ o.holat_info.rang }}">{{ o.holat_info.nom }}</span></td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="4" class="hech-narsa">Bu guruhda hali o'quvchi yo'q.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="oyna-past">
+  <a href="{% url 'students:oquvchilar' %}?guruh={{ guruh.pk }}" class="tugma">
+    Ro'yxatda ochish
+  </a>
+  <button type="button" class="tugma" data-yopish>Yopish</button>
+</div>

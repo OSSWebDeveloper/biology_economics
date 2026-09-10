@@ -116,6 +116,12 @@
         oynaniYukla(tolovTugmasi.getAttribute("data-tolov"));
         return;
       }
+      var qator = h.target.closest("[data-oyna]");
+      if (qator && !h.target.closest("a, button, input, label, select")) {
+        h.preventDefault();
+        oynaniYukla(qator.getAttribute("data-oyna"));
+        return;
+      }
       var yopuvchi = h.target.closest("[data-yopish]");
       if (yopuvchi) { h.preventDefault(); yopish(); return; }
       if (h.target === qobiq()) yopish();

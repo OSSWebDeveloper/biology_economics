@@ -26,7 +26,7 @@ def _koradigan_oquvchilar(foydalanuvchi):
     """Admin hammasini, o'qituvchi esa faqat o'z guruhlaridagilarni ko'radi."""
     qs = Oquvchi.objects.select_related("guruh")
     if not foydalanuvchi.admin_mi:
-        qs = qs.filter(guruh__oqituvchi__foydalanuvchi=foydalanuvchi)
+        qs = qs.filter(guruh__oqituvchi=foydalanuvchi)
     return qs
 
 
@@ -196,12 +196,37 @@ def guruhlar(request):
     return render(request, "students/guruhlar.html", {"royxat": royxat})
 
 
+def guruh_oyna(request, pk):
+    """Guruh ustiga bosilganda ochiladigan oynacha: guruhdagi o'quvchilar."""
+    guruh = get_object_or_404(request.user.guruhlari.select_related("oqituvchi"), pk=pk)
+    oquvchilar = list(
+        balans_bilan(guruh.oquvchilar.filter(faol=True)).order_by("familiya", "ism")
+    )
+    for oquvchi in oquvchilar:
+        oquvchi.holat_info = balans_holati(oquvchi.balans_summa)
+
+    qarz = sum(-o.balans_summa for o in oquvchilar if o.balans_summa < 0)
+    keyingi = request.GET.get("keyingi") or ""
+    return render(request, "students/_guruh_oyna.html", {
+        "guruh": guruh,
+        "oquvchilar": oquvchilar,
+        "qarzdorlar": sum(1 for o in oquvchilar if o.balans_summa < 0),
+        "qarz": qarz,
+        "keyingi": keyingi if keyingi.startswith("/") else "",
+    })
+
+
 @admin_talab
 def guruh_saqlash(request, pk=None):
     obyekt = get_object_or_404(Guruh, pk=pk) if pk else None
-    form = GuruhForm(request.POST or None, instance=obyekt)
+    form = GuruhForm(request.POST or None, instance=obyekt,
+                     foydalanuvchi=request.user)
     if request.method == "POST" and form.is_valid():
-        form.save()
+        guruh = form.save(commit=False)
+        if guruh.oqituvchi is None:
+            # O'qituvchi tanlanmasa, guruhni yaratgan admin o'qituvchi bo'ladi
+            guruh.oqituvchi = request.user
+        guruh.save()
         messages.success(request, "Guruh saqlandi.")
         return redirect("students:guruhlar")
     return render(request, "students/guruh_form.html", {

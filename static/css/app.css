@@ -172,6 +172,7 @@ table.jadval th {
 }
 table.jadval td { padding: 11px 14px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
 table.jadval tbody tr:hover { background: #f8fafc; }
+table.jadval tr.bosiladigan { cursor: pointer; }
 table.jadval .ong { text-align: right; }
 table.jadval .markaz { text-align: center; }
 .bosh-harf {

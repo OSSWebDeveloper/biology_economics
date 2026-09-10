@@ -1,6 +1,7 @@
 from datetime import date
 from decimal import Decimal
 
+from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.urls import reverse
@@ -13,9 +14,9 @@ class Guruh(models.Model):
         validators=[MinValueValidator(0)],
     )
     oqituvchi = models.ForeignKey(
-        "staff.Xodim", verbose_name="O'qituvchi", on_delete=models.SET_NULL,
-        null=True, blank=True, related_name="guruhlar",
-        help_text="Guruhga biriktirilgan o'qituvchi shu guruh o'quvchilarini ko'radi.",
+        settings.AUTH_USER_MODEL, verbose_name="O'qituvchi",
+        on_delete=models.SET_NULL, null=True, blank=True, related_name="guruhlar",
+        help_text="Bo'sh qoldirilsa, guruhni yaratgan admin o'qituvchi sifatida qayd etiladi.",
     )
 
     faol = models.BooleanField("Faol", default=True)

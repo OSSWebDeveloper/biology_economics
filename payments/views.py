@@ -25,7 +25,7 @@ def tolovlar(request):
     filtr = TolovFiltrForm(request.GET or None)
     qs = Tranzaksiya.objects.select_related("oquvchi", "yaratgan")
     if not request.user.admin_mi:
-        qs = qs.filter(oquvchi__guruh__oqituvchi__foydalanuvchi=request.user)
+        qs = qs.filter(oquvchi__guruh__oqituvchi=request.user)
 
     if filtr.is_valid():
         m = filtr.cleaned_data

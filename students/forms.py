@@ -26,7 +26,7 @@ class OquvchiForm(forms.ModelForm):
         guruhlar = Guruh.objects.filter(faol=True)
         if foydalanuvchi is not None and not foydalanuvchi.admin_mi:
             # O'qituvchi faqat o'z guruhiga o'quvchi qo'sha oladi
-            guruhlar = guruhlar.filter(oqituvchi__foydalanuvchi=foydalanuvchi)
+            guruhlar = guruhlar.filter(oqituvchi=foydalanuvchi)
             self.fields["guruh"].required = True
             self.fields["guruh"].empty_label = None
         else:
@@ -55,15 +55,22 @@ class GuruhForm(forms.ModelForm):
         fields = ["nomi", "oqituvchi", "oylik_toluv", "faol"]
         widgets = {"oylik_toluv": PulInput()}
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, foydalanuvchi=None, **kwargs):
         super().__init__(*args, **kwargs)
-        from staff.models import Xodim
+        from accounts.models import Foydalanuvchi
 
-        self.fields["oqituvchi"].queryset = Xodim.objects.filter(faol=True)
-        self.fields["oqituvchi"].empty_label = "-- O'qituvchi biriktirilmagan --"
+        oqituvchilar = Foydalanuvchi.objects.filter(
+            saytga_kira_oladi=True, is_active=True, is_superuser=False,
+        )
+        if foydalanuvchi is not None and foydalanuvchi.pk:
+            # O'zini tanlash uchun bo'sh variant bor - ro'yxatda takrorlanmasin
+            oqituvchilar = oqituvchilar.exclude(pk=foydalanuvchi.pk)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        maydon = self.fields["oqituvchi"]
+        maydon.queryset = oqituvchilar.order_by("last_name", "first_name")
+        maydon.empty_label = "-- O'zim o'qituvchiman --"
+        maydon.required = False
+
         if self.instance.pk is None:
             # Yangi guruhda maydon "0" emas, bo'sh turadi
             self.initial["oylik_toluv"] = None

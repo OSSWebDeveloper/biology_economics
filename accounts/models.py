@@ -54,4 +54,4 @@ class Foydalanuvchi(AbstractUser):
 
         if self.admin_mi:
             return Guruh.objects.all()
-        return Guruh.objects.filter(oqituvchi__foydalanuvchi=self)
+        return Guruh.objects.filter(oqituvchi=self)

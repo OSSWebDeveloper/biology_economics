@@ -27,7 +27,7 @@
         </thead>
         <tbody>
         {% for g in royxat %}
-          <tr>
+          <tr class="bosiladigan" data-oyna="{% url 'students:guruh_oyna' g.pk %}">
             <td><b>{{ g.nomi }}</b></td>
             <td class="mayda">{{ g.oqituvchi.toliq_ism|default:"-" }}</td>
             <td class="markaz">{{ g.oquvchilar_soni }}</td>
@@ -56,5 +56,8 @@
       </table>
     </div>
   </div>
+</div>
+<div class="bosq" style="margin-top:10px">
+  Guruh ustiga bosilsa, undagi o'quvchilar ro'yxati ochiladi.
 </div>
 {% endblock %}
