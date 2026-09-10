@@ -30,8 +30,12 @@ class OquvchiForm(forms.ModelForm):
 
     def clean(self):
         tozalangan = super().clean()
-        if not tozalangan.get("oylik_toluv") and tozalangan.get("guruh"):
-            tozalangan["oylik_toluv"] = tozalangan["guruh"].oylik_toluv
+        # Narx bo'sh qoldirilsa guruhdan olinadi; guruh ham bo'lmasa - narx shart
+        if tozalangan.get("oylik_toluv") is None and not tozalangan.get("guruh"):
+            self.add_error(
+                "oylik_toluv",
+                "Guruh tanlanmagan bo'lsa, oylik kurs to'lovini yozing.",
+            )
         if not any([tozalangan.get("telefon"), tozalangan.get("ota_telefon"),
                     tozalangan.get("ona_telefon")]):
             self.add_error("telefon", "Kamida bitta telefon raqami kiritilsin.")

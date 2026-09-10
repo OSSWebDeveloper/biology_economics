@@ -40,8 +40,11 @@
   </div>
   <div class="stat">
     <div class="yorliq">Oylik kurs to'lovi</div>
-    <div class="qiymat pul">{{ oquvchi.oylik_toluv|som }}</div>
-    <div class="izoh">bir oy uchun</div>
+    <div class="qiymat pul">{{ oquvchi.amaldagi_oylik|som }}</div>
+    <div class="izoh">
+      {% if oquvchi.narxi_ozidan %}shu o'quvchi uchun alohida
+      {% else %}guruh narxi{% endif %}
+    </div>
   </div>
   <div class="stat">
     <div class="yorliq">O'quvchi telefoni</div>

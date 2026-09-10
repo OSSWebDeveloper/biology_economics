@@ -99,7 +99,7 @@
               {% empty %}<span class="och">-</span>{% endfor %}
             </td>
             <td>{{ o.guruh.nomi|default:"-" }}</td>
-            <td class="ong pul">{{ o.oylik_toluv|som }}</td>
+            <td class="ong pul">{{ o.amaldagi_oylik|som }}</td>
             <td class="ong pul {{ o.balans_summa|balans_klass }}"><b>{{ o.balans_summa|som }}</b></td>
             <td><span class="nishon {{ o.holat_info.rang }}">{{ o.holat_info.nom }}</span></td>
             <td class="ong">

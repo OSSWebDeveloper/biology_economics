@@ -92,7 +92,8 @@ class Command(BaseCommand):
                             f"+998 90 {tasodif.randint(100, 999)} "
                             f"{tasodif.randint(10, 99)} {tasodif.randint(10, 99)}",
                 guruh=guruh,
-                oylik_toluv=guruh.oylik_toluv,
+                # ko'pchilik guruh narxini meros oladi, ba'zisi alohida
+                oylik_toluv=None if i % 5 else guruh.oylik_toluv + Decimal(50000),
                 boshlangan_sana=boshlangan,
             )
             oquvchilar.append(oquvchi)

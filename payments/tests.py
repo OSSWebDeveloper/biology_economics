@@ -196,3 +196,62 @@ class PulMaydoniTest(TestCase):
         guruh = Guruh.objects.create(nomi="Test", oylik_toluv=Decimal(3000000))
         html = str(GuruhForm(instance=guruh)["oylik_toluv"])
         self.assertIn('value="3 000 000"', html)
+
+
+class NarxMerosTest(TestCase):
+    """Narx bo'sh qoldirilsa guruhdan olinadi, yozilsa o'sha narx ishlatiladi."""
+
+    def setUp(self):
+        self.guruh = Guruh.objects.create(nomi="11-sinf", oylik_toluv=Decimal(600000))
+
+    def _oquvchi(self, **qo):
+        return Oquvchi.objects.create(ism="Ali", familiya="Valiyev",
+                                      telefon="+998901234567",
+                                      boshlangan_sana=SENTABR, guruh=self.guruh, **qo)
+
+    def test_bosh_qoldirilsa_guruh_narxi_olinadi(self):
+        oquvchi = self._oquvchi(oylik_toluv=None)
+        self.assertEqual(oquvchi.amaldagi_oylik, Decimal(600000))
+        self.assertFalse(oquvchi.narxi_ozidan)
+        summa, _ = davr_summasi(oquvchi, SENTABR)
+        self.assertEqual(summa, Decimal(600000))
+
+    def test_narx_yozilsa_osha_narx_ishlatiladi(self):
+        oquvchi = self._oquvchi(oylik_toluv=Decimal(450000))
+        self.assertEqual(oquvchi.amaldagi_oylik, Decimal(450000))
+        self.assertTrue(oquvchi.narxi_ozidan)
+        summa, _ = davr_summasi(oquvchi, SENTABR)
+        self.assertEqual(summa, Decimal(450000))
+
+    def test_guruh_narxi_ozgarsa_meros_olganlar_ham_ozgaradi(self):
+        meros = self._oquvchi(oylik_toluv=None)
+        alohida = self._oquvchi(oylik_toluv=Decimal(450000))
+        self.guruh.oylik_toluv = Decimal(700000)
+        self.guruh.save()
+        meros.refresh_from_db(); alohida.refresh_from_db()
+        self.assertEqual(meros.amaldagi_oylik, Decimal(700000))
+        self.assertEqual(alohida.amaldagi_oylik, Decimal(450000))
+
+    def test_guruhsiz_va_narxsiz_oquvchi_qabul_qilinmaydi(self):
+        from students.forms import OquvchiForm
+
+        form = OquvchiForm(data={"ism": "Ali", "familiya": "Valiyev",
+                                 "telefon": "+998901234567", "ota_telefon": "",
+                                 "ona_telefon": "", "guruh": "",
+                                 "oylik_toluv": "", "boshlangan_sana": "2025-09-01",
+                                 "izoh": ""})
+        self.assertFalse(form.is_valid())
+        self.assertIn("oylik_toluv", form.errors)
+
+    def test_guruh_bilan_narxsiz_forma_qabul_qilinadi(self):
+        from students.forms import OquvchiForm
+
+        form = OquvchiForm(data={"ism": "Ali", "familiya": "Valiyev",
+                                 "telefon": "+998901234567", "ota_telefon": "",
+                                 "ona_telefon": "", "guruh": str(self.guruh.pk),
+                                 "oylik_toluv": "", "boshlangan_sana": "2025-09-01",
+                                 "izoh": ""})
+        self.assertTrue(form.is_valid(), form.errors)
+        oquvchi = form.save()
+        self.assertIsNone(oquvchi.oylik_toluv)
+        self.assertEqual(oquvchi.amaldagi_oylik, Decimal(600000))

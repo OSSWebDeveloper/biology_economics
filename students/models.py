@@ -1,4 +1,5 @@
 from datetime import date
+from decimal import Decimal
 
 from django.core.validators import MinValueValidator
 from django.db import models
@@ -49,9 +50,9 @@ class Oquvchi(models.Model):
                               null=True, blank=True, related_name="oquvchilar")
 
     oylik_toluv = models.DecimalField(
-        "Oylik kurs to'lovi (so'm)", max_digits=12, decimal_places=2, default=0,
-        validators=[MinValueValidator(0)],
-        help_text="Bir oylik to'liq narx. Kunlik narx = shu summa / oydagi kunlar soni.",
+        "Oylik kurs to'lovi (so'm)", max_digits=12, decimal_places=2,
+        null=True, blank=True, validators=[MinValueValidator(0)],
+        help_text="Bo'sh qoldirilsa, guruh narxi olinadi.",
     )
 
     boshlangan_sana = models.DateField(
@@ -95,6 +96,23 @@ class Oquvchi(models.Model):
     @property
     def bosh_harflar(self):
         return f"{self.familiya[:1]}{self.ism[:1]}".upper()
+
+    @property
+    def amaldagi_oylik(self):
+        """Shu o'quvchi uchun amalda ishlatiladigan oylik narx.
+
+        O'zining narxi yozilgan bo'lsa - o'sha, aks holda guruhning narxi.
+        """
+        if self.oylik_toluv is not None:
+            return self.oylik_toluv
+        if self.guruh_id and self.guruh:
+            return self.guruh.oylik_toluv
+        return Decimal("0")
+
+    @property
+    def narxi_ozidan(self):
+        """Narx shu o'quvchiga alohida qo'yilganmi (guruhdan meros emasmi)."""
+        return self.oylik_toluv is not None
 
     @property
     def telefonlar(self):

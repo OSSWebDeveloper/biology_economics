@@ -75,7 +75,7 @@ def davr_summasi(oquvchi, davr, tugash_sana=None):
 
     Qaytaradi: (summa, kunlar_soni)
     """
-    oylik = Decimal(oquvchi.oylik_toluv or 0)
+    oylik = Decimal(oquvchi.amaldagi_oylik or 0)
     if oylik <= 0:
         return NOL, 0
 
