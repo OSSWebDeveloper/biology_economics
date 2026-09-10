@@ -27,15 +27,6 @@
 
 <form method="get" class="filtr" data-avto-filtr>
   <div class="maydon">
-    <label>Amal turi</label>
-    <select name="tur">
-      <option value="">Barchasi</option>
-      {% for kod, nom in turlar %}
-      <option value="{{ kod }}" {% if filtr.tur == kod %}selected{% endif %}>{{ nom }}</option>
-      {% endfor %}
-    </select>
-  </div>
-  <div class="maydon">
     <label>To'lov usuli</label>
     <select name="usul">
       <option value="">Naqd va plastik</option>

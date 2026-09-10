@@ -226,15 +226,12 @@ def tolov_ochirish(request, pk):
 def oylik_tolovlari(request):
     """Xodimlarga berilgan pullar ro'yxati (naqd / plastik alohida)."""
     usul = request.GET.get("usul") or ""
-    tur = request.GET.get("tur") or ""
     sanadan = request.GET.get("sanadan") or ""
     sanagacha = request.GET.get("sanagacha") or ""
 
     qs = XodimTranzaksiya.objects.select_related("xodim", "yaratgan")
     if usul:
         qs = qs.filter(usul=usul)
-    if tur:
-        qs = qs.filter(tur=tur)
     if sanadan:
         qs = qs.filter(sana__gte=sanadan)
     if sanagacha:
@@ -252,9 +249,8 @@ def oylik_tolovlari(request):
     return render(request, "staff/tolovlar.html", {
         "sahifa": sahifalar.get_page(request.GET.get("sahifa")),
         "jamlar": jamlar,
-        "turlar": XodimTranzaksiya.Tur.choices,
         "usullar": Usul.choices,
-        "filtr": {"usul": usul, "tur": tur, "sanadan": sanadan, "sanagacha": sanagacha},
+        "filtr": {"usul": usul, "sanadan": sanadan, "sanagacha": sanagacha},
     })
 
 
