@@ -108,18 +108,12 @@
     tolovFormasi(document);
     pulMaydonlari(document);
 
-    /* Jadval qatoriga bosilsa oynacha ochiladi */
+    /* "To'lov" tugmasi oynachani ochadi */
     document.addEventListener("click", function (h) {
       var tolovTugmasi = h.target.closest("[data-tolov]");
       if (tolovTugmasi) {
         h.preventDefault();
         oynaniYukla(tolovTugmasi.getAttribute("data-tolov"));
-        return;
-      }
-      var qator = h.target.closest("[data-oyna]");
-      if (qator && !h.target.closest("a, button, input, label, select")) {
-        h.preventDefault();
-        oynaniYukla(qator.getAttribute("data-oyna"));
         return;
       }
       var yopuvchi = h.target.closest("[data-yopish]");

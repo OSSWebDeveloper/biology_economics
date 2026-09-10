@@ -62,7 +62,7 @@
         </thead>
         <tbody>
         {% for x in royxat %}
-          <tr class="bosiladigan" data-oyna="{% url 'staff:xodim_oyna' x.pk %}">
+          <tr>
             <td>
               <span class="bosh-harf">{{ x.bosh_harflar }}</span>
               <b>{{ x.toliq_ism }}</b>
@@ -96,5 +96,4 @@
   </div>
 </div>
 
-<div class="bosq">"To'lov" tugmasi avans/oylik berish oynachasini ochadi, qatorga bosilsa to'liq ma'lumot chiqadi.</div>
 {% endblock %}

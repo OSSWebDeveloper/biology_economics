@@ -78,7 +78,6 @@ class SahifalarTest(TestCase):
             reverse("students:oquvchilar"),
             reverse("students:oquvchilar") + "?holat=qarzdor&tartib=balans",
             reverse("students:oquvchi", args=[self.oquvchi.pk]),
-            reverse("students:oquvchi_oyna", args=[self.oquvchi.pk]),
             reverse("students:oquvchi_yangi"),
             reverse("students:oquvchi_tahrir", args=[self.oquvchi.pk]),
             reverse("students:guruhlar"),
@@ -87,7 +86,6 @@ class SahifalarTest(TestCase):
             reverse("payments:tolovlar") + "?usul=naqd",
             reverse("staff:xodimlar"),
             reverse("staff:xodim", args=[self.xodim.pk]),
-            reverse("staff:xodim_oyna", args=[self.xodim.pk]),
             reverse("staff:tolovlar"),
             reverse("accounts:shaxsiy"),
             reverse("payments:tez_tolov_oyna", args=[1]),
@@ -164,9 +162,8 @@ class SahifalarTest(TestCase):
 
     def test_xodimga_avans_beriladi(self):
         javob = self.client.post(
-            reverse("staff:tolov_qoshish", args=[self.xodim.pk]),
-            {"tur": "avans", "summa": "500000", "sana": "2025-09-15",
-             "usul": Usul.NAQD},
+            reverse("staff:tez_oylik", args=[self.xodim.pk]),
+            {"tur": "avans", "usul": Usul.NAQD, "summa": "500 000"},
         )
         self.assertEqual(javob.status_code, 302)
         self.assertEqual(self.xodim.tranzaksiyalar.filter(tur="avans").count(), 1)

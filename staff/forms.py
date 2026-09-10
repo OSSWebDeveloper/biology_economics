@@ -27,43 +27,6 @@ class XodimForm(forms.ModelForm):
         }
 
 
-class XodimTolovForm(forms.ModelForm):
-    """Xodimga avans / oylik berish formasi."""
-
-    tur = forms.ChoiceField(label="Amal turi", choices=QOLDA_TURLAR,
-                            initial=XodimTranzaksiya.Tur.AVANS)
-
-    class Meta:
-        model = XodimTranzaksiya
-        fields = ["tur", "summa", "sana", "usul", "izoh"]
-        widgets = {
-            "sana": SanaInput(),
-            "summa": PulInput(),
-            "izoh": forms.TextInput(attrs={"placeholder": "Ixtiyoriy izoh"}),
-        }
-
-    def __init__(self, *args, xodim=None, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["sana"].initial = date.today()
-        self.fields["usul"].required = False
-
-    def clean(self):
-        tozalangan = super().clean()
-        tur = tozalangan.get("tur")
-        usul = tozalangan.get("usul")
-        summa = tozalangan.get("summa")
-
-        if summa is not None and summa <= 0:
-            self.add_error("summa", "Summa noldan katta bo'lsin.")
-
-        pul_harakati = tur in (XodimTranzaksiya.Tur.AVANS, XodimTranzaksiya.Tur.OYLIK)
-        if pul_harakati and not usul:
-            self.add_error("usul", "To'lov usulini tanlang (naqd yoki plastik).")
-        if not pul_harakati:
-            tozalangan["usul"] = ""
-        return tozalangan
-
-
 class MaoshForm(forms.Form):
     """Oylik maoshni admin tayinlaydi."""
 

@@ -17,7 +17,6 @@ from .forms import (
     TezOylikForm,
     XodimForm,
     XodimHisobForm,
-    XodimTolovForm,
 )
 from .models import Xodim, XodimTranzaksiya
 from .services import (
@@ -71,7 +70,6 @@ def xodimlar(request):
         "jamlar": jamlar,
         "joriy_oy": oy_nomi(joriy_davr),
         "filtr": {"q": qidiruv, "royxat": royxat_turi},
-        "tolov_form": XodimTolovForm(),
     })
 
 
@@ -98,23 +96,7 @@ def xodim(request, pk):
         "holat": qoldiq_holati(yiguvchi),
         "oy_avansi": joriy_oy_avansi(obyekt, joriy_davr),
         "joriy_oy": oy_nomi(joriy_davr),
-        "tolov_form": XodimTolovForm(xodim=obyekt),
         "maosh_form": MaoshForm(initial={"oylik_maosh": obyekt.oylik_maosh}),
-    })
-
-
-def xodim_oyna(request, pk):
-    obyekt = get_object_or_404(Xodim, pk=pk)
-    qoldiq = obyekt.qoldiq
-    keyingi = request.GET.get("keyingi") or ""
-    return render(request, "staff/_oyna.html", {
-        "keyingi": keyingi if keyingi.startswith("/") else "",
-        "xodim": obyekt,
-        "qoldiq": qoldiq,
-        "holat": qoldiq_holati(qoldiq),
-        "oy_avansi": joriy_oy_avansi(obyekt),
-        "oxirgilar": obyekt.tranzaksiyalar.order_by("-sana", "-id")[:6],
-        "tolov_form": XodimTolovForm(xodim=obyekt),
     })
 
 
@@ -226,32 +208,6 @@ def xodim_ochirish(request, pk):
         messages.success(request, f"{ism} va uning to'lovlar tarixi o'chirildi.")
         return redirect("staff:xodimlar")
     return render(request, "staff/ochirish.html", {"xodim": obyekt})
-
-
-def tolov_qoshish(request, xodim_id):
-    obyekt = get_object_or_404(Xodim, pk=xodim_id)
-    qaytish = _qaytish_manzili(request, reverse("staff:xodim", args=[obyekt.pk]))
-    if request.method != "POST":
-        return redirect(qaytish)
-
-    form = XodimTolovForm(request.POST)
-    if form.is_valid():
-        tranzaksiya = form.save(commit=False)
-        tranzaksiya.xodim = obyekt
-        tranzaksiya.yaratgan = request.user
-        tranzaksiya.save()
-        messages.success(
-            request,
-            f"{obyekt.toliq_ism}: {tranzaksiya.get_tur_display().lower()} - "
-            f"{tranzaksiya.summa:,.0f} so'm.".replace(",", " "),
-        )
-    else:
-        xatolar = "; ".join(
-            f"{form.fields[m].label if m in form.fields else m}: {' '.join(x)}"
-            for m, x in form.errors.items()
-        )
-        messages.error(request, f"Saqlanmadi. {xatolar}")
-    return redirect(qaytish)
 
 
 @admin_talab

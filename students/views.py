@@ -105,23 +105,6 @@ def oquvchi(request, pk):
     })
 
 
-def oquvchi_oyna(request, pk):
-    """Ro'yxatdan bosilganda ochiladigan oynacha ichi (HTML bo'lagi)."""
-    obyekt = get_object_or_404(Oquvchi.objects.select_related("guruh"), pk=pk)
-    hisoblarni_yarat(obyekt)
-    balans = obyekt.balans
-    oxirgilar = obyekt.tranzaksiyalar.order_by("-sana", "-id")[:6]
-    keyingi = request.GET.get("keyingi") or ""
-    return render(request, "students/_oyna.html", {
-        "keyingi": keyingi if keyingi.startswith("/") else "",
-        "oquvchi": obyekt,
-        "balans": balans,
-        "holat": balans_holati(balans),
-        "oxirgilar": oxirgilar,
-        "tolov_form": TolovForm(),
-    })
-
-
 def oquvchi_saqlash(request, pk=None):
     obyekt = get_object_or_404(Oquvchi, pk=pk) if pk else None
     form = OquvchiForm(request.POST or None, instance=obyekt)
