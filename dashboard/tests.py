@@ -85,7 +85,7 @@ class SahifalarTest(TestCase):
             reverse("students:guruhlar"),
             reverse("students:guruh_yangi"),
             reverse("payments:tolovlar"),
-            reverse("payments:tolovlar") + "?usul=naqd&tur=tolov",
+            reverse("payments:tolovlar") + "?usul=naqd",
             reverse("payments:kartalar"),
             reverse("staff:xodimlar"),
             reverse("staff:xodim", args=[self.xodim.pk]),

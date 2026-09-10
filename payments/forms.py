@@ -76,12 +76,10 @@ class KartaForm(forms.ModelForm):
 class TolovFiltrForm(forms.Form):
     """To'lovlar ro'yxati uchun filtr."""
 
-    HOLAT_TANLOV = [("", "Barcha amallar")] + [(k, n) for k, n in Tranzaksiya.Tur.choices]
     USUL_TANLOV = [("", "Barcha usullar")] + list(Usul.choices)
 
     q = forms.CharField(label="Qidiruv", required=False,
                         widget=forms.TextInput(attrs={"placeholder": "Ism, familiya yoki telefon"}))
-    tur = forms.ChoiceField(label="Amal turi", choices=HOLAT_TANLOV, required=False)
     usul = forms.ChoiceField(label="To'lov usuli", choices=USUL_TANLOV, required=False)
     karta = forms.ModelChoiceField(label="Karta", queryset=Karta.objects.all(),
                                    required=False, empty_label="Barcha kartalar")

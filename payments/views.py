@@ -32,8 +32,6 @@ def tolovlar(request):
                 Q(oquvchi__ism__icontains=m["q"]) | Q(oquvchi__familiya__icontains=m["q"])
                 | Q(oquvchi__telefon__icontains=m["q"])
             )
-        if m.get("tur"):
-            qs = qs.filter(tur=m["tur"])
         if m.get("usul"):
             qs = qs.filter(usul=m["usul"])
         if m.get("karta"):
