@@ -63,10 +63,6 @@ class ChiqarishForm(forms.Form):
         widget=SanaInput(),
     )
     sabab = forms.CharField(label="Sababi", max_length=200, required=False)
-    qayta_hisobla = forms.BooleanField(
-        label="Oxirgi oyni kunlarga bo'lib qayta hisoblansin", required=False, initial=True,
-        help_text="Chiqarilgan sanagacha bo'lgan kunlar uchungina pul hisoblanadi.",
-    )
 
 
 class QaytarishForm(forms.Form):

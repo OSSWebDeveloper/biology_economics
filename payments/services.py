@@ -2,9 +2,13 @@
 
 Asosiy qoida (klient talabi):
   * Oylik kurs puli o'sha oydagi kunlar soniga bo'linadi -> kunlik narx.
-  * O'quvchi oyning o'rtasida kelsa, kelgan sanasidan keyingi oyning
-    1-sanasigacha bo'lgan kunlar uchun to'laydi.
-  * 1-sanadan boshlab yangi to'liq sikl (to'liq oylik summa) boshlanadi.
+  * Hisob OY TUGAGANDAN KEYIN yoziladi: o'quvchi qo'shilganda qarzi 0 bo'ladi,
+    keyingi oyning 1-sanasida o'tgan oyda qatnashgan kunlari hisoblanadi.
+  * O'quvchi oy o'rtasida kelsa, faqat kelgan kunidan oy oxirigacha bo'lgan
+    kunlar uchun pul yoziladi.
+  * Har oyning 1-sanasida sikl qaytadan boshlanadi.
+  * O'quvchi ro'yxatdan chiqarilsa, oxirgi (tugallanmagan) oy o'sha zahoti
+    qatnashgan kunlari bo'yicha hisoblanadi.
 """
 from calendar import monthrange
 from collections import defaultdict
@@ -96,14 +100,20 @@ def davr_summasi(oquvchi, davr, tugash_sana=None):
 
 
 def kerakli_davrlar(oquvchi, sanagacha=None):
-    """O'quvchi uchun hisob ochilishi kerak bo'lgan oylar ro'yxati."""
+    """Hisob ochilishi kerak bo'lgan oylar - faqat TUGAGAN oylar.
+
+    Joriy oy hali tugamagani uchun unga pul yozilmaydi: u keyingi oyning
+    1-sanasida hisoblanadi. Shu sababli yangi qo'shilgan o'quvchining qarzi 0.
+    """
     sanagacha = sanagacha or date.today()
     boshi = oy_boshi(oquvchi.boshlangan_sana)
 
-    chegara = sanagacha
-    if not oquvchi.faol:
-        chegara = min(chegara, oquvchi.chiqarilgan_sana or sanagacha)
-    oxirgi = oy_boshi(chegara)
+    # oxirgi to'liq tugagan oy
+    oxirgi = oldingi_oy_boshi(oy_boshi(sanagacha))
+
+    if not oquvchi.faol and oquvchi.chiqarilgan_sana:
+        # chiqarilgan o'quvchining chiqqan oyi ham hisoblanadi (chiqarishda yopiladi)
+        oxirgi = min(oxirgi, oy_boshi(oquvchi.chiqarilgan_sana))
 
     davrlar = []
     joriy = boshi
@@ -111,6 +121,11 @@ def kerakli_davrlar(oquvchi, sanagacha=None):
         davrlar.append(joriy)
         joriy = keyingi_oy_boshi(joriy)
     return davrlar
+
+
+def oyni_yopish(oquvchi, sana):
+    """O'quvchi chiqarilganda tugallanmagan oyni o'sha zahoti hisoblaydi."""
+    return oyni_qayta_hisobla(oquvchi, oy_boshi(sana), sana)
 
 
 def _hisob_yozuvi(oquvchi, davr):

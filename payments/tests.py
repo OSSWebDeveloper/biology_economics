@@ -52,7 +52,7 @@ class KunlikHisobTest(TestCase):
 
     def test_keyingi_oydan_yangi_toliq_sikl_boshlanadi(self):
         oquvchi = oquvchi_yarat(date(2025, 9, 15))
-        hisoblarni_yarat(oquvchi, sanagacha=date(2025, 10, 20))
+        hisoblarni_yarat(oquvchi, sanagacha=date(2025, 11, 1))
 
         hisoblar = list(
             Tranzaksiya.objects.filter(oquvchi=oquvchi, tur=Tranzaksiya.Tur.HISOB)
@@ -72,8 +72,8 @@ class KunlikHisobTest(TestCase):
         self.assertEqual(
             Tranzaksiya.objects.filter(tur=Tranzaksiya.Tur.HISOB).count(), birinchi
         )
-        self.assertEqual(birinchi, 3)   # sentabr, oktabr, noyabr
-        self.assertEqual(oquvchi.tranzaksiyalar.count(), 3)
+        self.assertEqual(birinchi, 2)   # sentabr va oktabr (noyabr hali tugamagan)
+        self.assertEqual(oquvchi.tranzaksiyalar.count(), 2)
 
     def test_oylik_toluv_nol_bolsa_hisob_ochilmaydi(self):
         oquvchi = oquvchi_yarat(SENTABR, oylik=0)
@@ -81,10 +81,47 @@ class KunlikHisobTest(TestCase):
         self.assertEqual(oquvchi.tranzaksiyalar.count(), 0)
 
 
+class KeyinHisoblashTest(TestCase):
+    """Hisob oy tugagandan keyin yoziladi - qo'shilganda qarz 0 bo'ladi."""
+
+    def test_yangi_oquvchining_qarzi_nol(self):
+        oquvchi = oquvchi_yarat(date(2025, 9, 10))
+        hisoblarni_yarat(oquvchi, sanagacha=date(2025, 9, 30))
+        self.assertEqual(oquvchi.tranzaksiyalar.count(), 0)
+        self.assertEqual(oquvchi_balansi(oquvchi), Decimal(0))
+
+    def test_oy_tugagach_qatnashgan_kunlar_hisoblanadi(self):
+        """10-sentabrda kelgan: 1-oktabrda 21 kunlik hisob chiqadi."""
+        oquvchi = oquvchi_yarat(date(2025, 9, 10), oylik=200000)
+        hisoblarni_yarat(oquvchi, sanagacha=OKTABR)
+        hisob = Tranzaksiya.objects.get(oquvchi=oquvchi, tur=Tranzaksiya.Tur.HISOB)
+        self.assertEqual(hisob.kunlar, 21)                    # 10-30 sentabr
+        self.assertEqual(hisob.summa, Decimal(140000))        # 200000/30*21
+        self.assertEqual(hisob.davr, SENTABR)
+
+    def test_har_oyning_birida_yangi_sikl(self):
+        oquvchi = oquvchi_yarat(date(2025, 9, 10), oylik=200000)
+        hisoblarni_yarat(oquvchi, sanagacha=date(2025, 11, 1))
+        hisoblar = list(
+            Tranzaksiya.objects.filter(oquvchi=oquvchi, tur=Tranzaksiya.Tur.HISOB)
+            .order_by("davr")
+        )
+        self.assertEqual(len(hisoblar), 2)
+        self.assertEqual(hisoblar[0].kunlar, 21)              # sentabr - qisman
+        self.assertEqual(hisoblar[1].kunlar, 31)              # oktabr - to'liq
+        self.assertEqual(hisoblar[1].summa, Decimal(200000))
+
+    def test_joriy_oyga_pul_yozilmaydi(self):
+        oquvchi = oquvchi_yarat(SENTABR)
+        hisoblarni_yarat(oquvchi, sanagacha=date(2025, 9, 28))
+        self.assertEqual(oquvchi.tranzaksiyalar.count(), 0)
+
+
 class BalansTest(TestCase):
     def setUp(self):
         self.oquvchi = oquvchi_yarat(SENTABR)
-        hisoblarni_yarat(self.oquvchi, sanagacha=date(2025, 9, 20))
+        # sentabr tugagach (1-oktabrda) hisoblanadi
+        hisoblarni_yarat(self.oquvchi, sanagacha=OKTABR)
 
     def test_tolovsiz_oquvchi_qarzdor(self):
         balans = oquvchi_balansi(self.oquvchi)
@@ -138,7 +175,7 @@ class BalansTest(TestCase):
 class ChiqarishTest(TestCase):
     def test_chiqarilgan_oy_kunlab_qayta_hisoblanadi(self):
         oquvchi = oquvchi_yarat(SENTABR)
-        hisoblarni_yarat(oquvchi, sanagacha=date(2025, 9, 25))
+        hisoblarni_yarat(oquvchi, sanagacha=OKTABR)
         self.assertEqual(oquvchi_balansi(oquvchi), Decimal(-600000))
 
         oquvchi.faol = False

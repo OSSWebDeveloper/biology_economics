@@ -164,17 +164,30 @@ Texnik Django superuser hisobi bu tizimga umuman aralashmaydi.
 
 ## 4. Kurs to'lovi qanday hisoblanadi
 
-Klient aytgan qoida to'liq shunday amalga oshirilgan:
+Klient qoidasi:
 
 1. **Kunlik narx = oylik kurs puli ÷ o'sha oydagi kunlar soni.**
    Sentabr 30 kun, oktabr 31 kun — kunlik narx har oyda boshqacha bo'ladi.
-2. **O'quvchi oy o'rtasida kelsa**, kelgan kunidan keyingi oyning 1-sanasigacha
-   bo'lgan kunlar uchun to'laydi.
-   *Misol:* oylik 600 000 so'm, sentabrda 30 kun → kunlik 20 000 so'm.
-   15-sentabrda kelgan o'quvchi 15–30 sentabr = **16 kun × 20 000 = 320 000 so'm**.
-3. **1-sanadan yangi sikl** boshlanadi — to'liq oylik summa yoziladi.
-4. Hisoblar avtomatik ochiladi: sahifa ochilganda tizim yetishmayotgan oylarni
-   o'zi hisoblab qo'yadi (takroriy yozuv chiqmaydi).
+2. **Hisob oy tugagandan keyin yoziladi.** Yangi o'quvchi qo'shilganda uning
+   qarzi **0** bo'ladi. Keyingi oyning **1-sanasida** o'tgan oyda qatnashgan
+   kunlari hisoblanadi.
+   *Misol:* oylik 200 000 so'm, o'quvchi 10-sentabrda keldi.
+   Sentabrda 30 kun, kunlik 6 667 so'm. 1-oktabrda **21 kun** uchun
+   **140 000 so'm** yoziladi.
+3. **Har oyning 1-sanasida sikl qaytadan boshlanadi.** To'liq oy ishlagan
+   o'quvchiga keyingi oyning 1-sanasida to'liq oylik summa yoziladi.
+4. O'quvchi ro'yxatdan chiqarilsa, tugallanmagan oy **o'sha zahoti**
+   qatnashgan kunlari bo'yicha hisoblanadi.
+5. Hisoblar avtomatik ochiladi: sahifa ochilganda tizim yetishmayotgan
+   oylarni o'zi hisoblab qo'yadi (takroriy yozuv chiqmaydi).
+
+### Narx qayerdan olinadi
+
+O'quvchi kartochkasidagi "Oylik kurs to'lovi" maydoni **ixtiyoriy**:
+
+* bo'sh qoldirilsa — o'quvchi **guruh narxini** oladi va guruh narxi
+  o'zgarsa avtomatik yangilanadi;
+* narx yozilsa — aynan shu o'quvchi uchun o'sha narx ishlatiladi.
 
 ### Balans
 

@@ -160,8 +160,8 @@ def oquvchi_chiqarish(request, pk):
         tur=Tranzaksiya.Tur.HISOB, davr__gt=oy_boshi(sana)
     ).delete()
 
-    if form.cleaned_data.get("qayta_hisobla"):
-        oyni_qayta_hisobla(obyekt, oy_boshi(sana), sana)
+    # Tugallanmagan oy o'sha zahoti hisoblanadi - qatnashgan kunlari uchun
+    oyni_qayta_hisobla(obyekt, oy_boshi(sana), sana)
 
     messages.success(request, f"{obyekt.toliq_ism} ro'yxatdan chiqarildi.")
     return redirect("students:oquvchi", pk=pk)

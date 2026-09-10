@@ -57,7 +57,7 @@ class Oquvchi(models.Model):
 
     boshlangan_sana = models.DateField(
         "Kursga kelgan sana", default=date.today,
-        help_text="Birinchi oy shu sanadan keyingi oyning 1-sanasigacha kunlab hisoblanadi.",
+        help_text="Shu oyda qatnashgan kunlari keyingi oyning 1-sanasida hisoblanadi.",
     )
 
     faol = models.BooleanField("Ro'yxatda (kursga keladi)", default=True)
