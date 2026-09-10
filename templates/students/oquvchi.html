@@ -100,7 +100,6 @@
               </td>
               <td class="mayda">
                 {% if t.usul %}{{ t.get_usul_display }}{% endif %}
-                {% if t.karta_korinishi %}<div class="bosq tel">{{ t.karta_korinishi }}</div>{% endif %}
               </td>
               <td class="ong pul {% if t.ishorali_summa < 0 %}qarz{% else %}oldindan{% endif %}">
                 {{ t.ishorali_summa|som }}

@@ -14,7 +14,7 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 
 from accounts.models import Foydalanuvchi
-from payments.models import Karta, Tranzaksiya, Usul
+from payments.models import Tranzaksiya, Usul
 from payments.services import barcha_hisoblarni_yangila, oquvchi_balansi, oy_boshi
 from staff.models import Xodim, XodimTranzaksiya
 from staff.services import maoshlarni_yangila
@@ -53,7 +53,6 @@ class Command(BaseCommand):
             Oquvchi.objects.all().delete()
             Xodim.objects.all().delete()
             Guruh.objects.all().delete()
-            Karta.objects.all().delete()
             ochirilgan = Foydalanuvchi.objects.filter(pk__in=hisob_idlar).delete()[0]
             self.stdout.write(self.style.WARNING(
                 f"Barcha ma'lumot o'chirildi. Xodim loginlari: {ochirilgan} ta."))
@@ -61,13 +60,6 @@ class Command(BaseCommand):
 
         tasodif = random.Random(2026)
         bugun = date.today()
-
-        kartalar = [
-            Karta.objects.create(nomi="Humo - asosiy", raqam="9860 1234 5678 1234",
-                                 egasi="Biologiya kursi"),
-            Karta.objects.create(nomi="Uzcard - zaxira", raqam="8600 8765 4321 8765",
-                                 egasi="Biologiya kursi"),
-        ]
 
         guruhlar = [
             Guruh.objects.create(nomi="9-sinf (DTM)", oylik_toluv=Decimal(500000)),
@@ -122,13 +114,10 @@ class Command(BaseCommand):
             else:
                 summa = qarz + Decimal(tasodif.choice([100000, 200000, 300000]))
 
-            usul = Usul.NAQD if tasodif.random() < 0.45 else Usul.PLASTIK
-            karta = tasodif.choice(kartalar) if usul == Usul.PLASTIK else None
             Tranzaksiya.objects.create(
                 oquvchi=oquvchi, tur=Tranzaksiya.Tur.TOLOV, summa=summa,
                 sana=bugun - timedelta(days=tasodif.randint(0, 20)),
-                usul=usul, karta=karta,
-                karta_raqami=karta.raqam if karta else "",
+                usul=Usul.NAQD if tasodif.random() < 0.45 else Usul.PLASTIK,
                 izoh="kurs to'lovi",
             )
 
@@ -141,18 +130,13 @@ class Command(BaseCommand):
             )
 
         xodimlar = [
-            Xodim.objects.create(ism="Nilufar", familiya="Ahmedova",
-                                 lavozim="administrator", telefon="+998 90 111 22 33",
-                                 karta_raqami="9860 0000 1111 2222",
+            Xodim.objects.create(ism="Nilufar", familiya="Ahmedova", telefon="+998 90 111 22 33",
                                  oylik_maosh=Decimal(4000000),
                                  ishga_kirgan_sana=bugun - timedelta(days=200)),
-            Xodim.objects.create(ism="Sanjar", familiya="Rustamov",
-                                 lavozim="yordamchi o'qituvchi", telefon="+998 91 222 33 44",
-                                 karta_raqami="8600 0000 3333 4444",
+            Xodim.objects.create(ism="Sanjar", familiya="Rustamov", telefon="+998 91 222 33 44",
                                  oylik_maosh=Decimal(3000000),
                                  ishga_kirgan_sana=bugun - timedelta(days=75)),
-            Xodim.objects.create(ism="Zuhra", familiya="Normatova",
-                                 lavozim="farrosh", telefon="+998 93 333 44 55",
+            Xodim.objects.create(ism="Zuhra", familiya="Normatova", telefon="+998 93 333 44 55",
                                  oylik_maosh=Decimal(1500000),
                                  ishga_kirgan_sana=bugun - timedelta(days=40)),
         ]
@@ -168,8 +152,7 @@ class Command(BaseCommand):
                     xodim=xodim, tur=XodimTranzaksiya.Tur.OYLIK,
                     summa=tranzaksiya.summa,
                     sana=tranzaksiya.davr + timedelta(days=32),
-                    usul=Usul.PLASTIK if xodim.karta_raqami else Usul.NAQD,
-                    karta_raqami=xodim.karta_raqami,
+                    usul=Usul.PLASTIK,
                     izoh="oylik to'liq berildi",
                 )
             avans = (xodim.oylik_maosh * Decimal("0.4")).quantize(Decimal("1"))

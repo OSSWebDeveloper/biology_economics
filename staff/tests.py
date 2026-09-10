@@ -22,7 +22,7 @@ SENTABR = date(2025, 9, 1)
 
 def xodim_yarat(ishga_kirgan=SENTABR, maosh=3000000, **qoshimcha):
     return Xodim.objects.create(
-        ism="Olim", familiya="Karimov", lavozim="o'qituvchi",
+        ism="Olim", familiya="Karimov",
         oylik_maosh=Decimal(maosh), ishga_kirgan_sana=ishga_kirgan, **qoshimcha,
     )
 
@@ -75,7 +75,6 @@ class AvansTest(TestCase):
         XodimTranzaksiya.objects.create(
             xodim=self.xodim, tur=XodimTranzaksiya.Tur.OYLIK,
             summa=Decimal(2000000), sana=date(2025, 10, 1), usul=Usul.PLASTIK,
-            karta_raqami="8600111122223333",
         )
         qoldiq = xodim_qoldigi(self.xodim)
         self.assertEqual(qoldiq, Decimal(0))
@@ -160,9 +159,9 @@ class XodimHisobiTest(TestCase):
         self.client.post(self._hisob_url(), {
             "login": "olim", "parol": "kurs2026", "rol": Foydalanuvchi.Rol.OPERATOR})
         self.client.post(reverse("staff:xodim_tahrir", args=[self.xodim.pk]), {
-            "ism": "Olimjon", "familiya": "Karimov", "lavozim": "o'qituvchi",
-            "telefon": "+998 90 000 00 00", "karta_raqami": "",
-            "oylik_maosh": "3000000", "ishga_kirgan_sana": "2025-09-01", "izoh": "",
+            "ism": "Olimjon", "familiya": "Karimov",
+            "telefon": "+998 90 000 00 00",
+            "oylik_maosh": "3000000", "izoh": "",
         })
         self.xodim.refresh_from_db()
         self.assertEqual(self.xodim.foydalanuvchi.toliq_ism, "Karimov Olimjon")
@@ -200,3 +199,50 @@ class XodimHisobiTest(TestCase):
             "login": "olim", "parol": "kurs2026", "rol": Foydalanuvchi.Rol.ADMIN})
         self.xodim.refresh_from_db()
         self.assertIsNone(self.xodim.foydalanuvchi)
+
+
+class TezOylikTest(TestCase):
+    """Xodimlar ro'yxatidagi "To'lov" tugmasi - sodda oynacha."""
+
+    def setUp(self):
+        self.admin = Foydalanuvchi.objects.create_user(
+            username="admin1", password="parol12345", rol=Foydalanuvchi.Rol.ADMIN)
+        self.xodim = xodim_yarat()
+        self.client.login(username="admin1", password="parol12345")
+
+    def test_oynada_faqat_uchta_narsa_boladi(self):
+        javob = self.client.get(reverse("staff:tez_oylik_oyna", args=[self.xodim.pk]))
+        self.assertEqual(javob.status_code, 200)
+        html = javob.content.decode()
+        self.assertIn("Amal turi", html)
+        self.assertIn("To'lov usuli", html)
+        self.assertIn('name="summa"', html)
+        for maydon in ('name="sana"', 'name="izoh"'):
+            self.assertNotIn(maydon, html)
+
+    def test_avans_saqlanadi(self):
+        javob = self.client.post(reverse("staff:tez_oylik", args=[self.xodim.pk]),
+                                 {"tur": "avans", "usul": Usul.NAQD, "summa": "1 200 000"})
+        self.assertEqual(javob.status_code, 302)
+        yozuv = XodimTranzaksiya.objects.get(xodim=self.xodim,
+                                             tur=XodimTranzaksiya.Tur.AVANS)
+        self.assertEqual(yozuv.summa, Decimal(1200000))
+        self.assertEqual(yozuv.usul, Usul.NAQD)
+
+    def test_oylik_saqlanadi(self):
+        self.client.post(reverse("staff:tez_oylik", args=[self.xodim.pk]),
+                         {"tur": "oylik", "usul": Usul.PLASTIK, "summa": "3 000 000"})
+        yozuv = XodimTranzaksiya.objects.get(xodim=self.xodim,
+                                             tur=XodimTranzaksiya.Tur.OYLIK)
+        self.assertEqual(yozuv.summa, Decimal(3000000))
+        self.assertEqual(yozuv.usul, Usul.PLASTIK)
+
+    def test_nol_summa_saqlanmaydi(self):
+        self.client.post(reverse("staff:tez_oylik", args=[self.xodim.pk]),
+                         {"tur": "avans", "usul": Usul.NAQD, "summa": "0"})
+        self.assertFalse(XodimTranzaksiya.objects.filter(
+            tur=XodimTranzaksiya.Tur.AVANS).exists())
+
+    def test_royxatda_tolov_tugmasi_bor(self):
+        html = self.client.get(reverse("staff:xodimlar")).content.decode()
+        self.assertIn("data-tolov=", html)

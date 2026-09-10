@@ -141,7 +141,6 @@ class BalansTest(TestCase):
         Tranzaksiya.objects.create(
             oquvchi=self.oquvchi, tur=Tranzaksiya.Tur.TOLOV,
             summa=Decimal(1000000), sana=date(2025, 9, 5), usul=Usul.PLASTIK,
-            karta_raqami="8600123412341234",
         )
         balans = oquvchi_balansi(self.oquvchi)
         self.assertEqual(balans, Decimal(400000))

@@ -14,6 +14,7 @@ from payments.services import oy_boshi, oy_nomi
 from .forms import (
     HisobBoglashForm,
     MaoshForm,
+    TezOylikForm,
     XodimForm,
     XodimHisobForm,
     XodimTolovForm,
@@ -49,7 +50,7 @@ def xodimlar(request):
     if qidiruv:
         qs = qs.filter(
             Q(ism__icontains=qidiruv) | Q(familiya__icontains=qidiruv)
-            | Q(lavozim__icontains=qidiruv) | Q(telefon__icontains=qidiruv)
+            | Q(telefon__icontains=qidiruv)
         )
 
     qs = qoldiq_bilan(qs)
@@ -115,6 +116,46 @@ def xodim_oyna(request, pk):
         "oxirgilar": obyekt.tranzaksiyalar.order_by("-sana", "-id")[:6],
         "tolov_form": XodimTolovForm(xodim=obyekt),
     })
+
+
+def tez_oylik_oyna(request, pk):
+    """Ro'yxatdagi "To'lov" tugmasi ochadigan sodda oynacha."""
+    obyekt = get_object_or_404(Xodim, pk=pk)
+    keyingi = request.GET.get("keyingi") or ""
+    return render(request, "staff/_tez_tolov.html", {
+        "xodim": obyekt,
+        "qoldiq": obyekt.qoldiq,
+        "form": TezOylikForm(),
+        "keyingi": keyingi if keyingi.startswith("/") else "",
+    })
+
+
+def tez_oylik(request, pk):
+    """Sodda oynachadan kelgan avans/oylikni saqlaydi."""
+    obyekt = get_object_or_404(Xodim, pk=pk)
+    qaytish = _qaytish_manzili(request, reverse("staff:xodimlar"))
+    if request.method != "POST":
+        return redirect(qaytish)
+
+    form = TezOylikForm(request.POST)
+    if form.is_valid():
+        yozuv = XodimTranzaksiya.objects.create(
+            xodim=obyekt,
+            tur=form.cleaned_data["tur"],
+            summa=form.cleaned_data["summa"],
+            sana=date.today(),
+            usul=form.cleaned_data["usul"],
+            yaratgan=request.user,
+        )
+        messages.success(
+            request,
+            f"{obyekt.toliq_ism}: {yozuv.get_tur_display().lower()} - "
+            f"{yozuv.summa:,.0f} so'm.".replace(",", " "),
+        )
+    else:
+        xatolar = "; ".join(" ".join(x) for x in form.errors.values())
+        messages.error(request, f"Saqlanmadi. {xatolar}")
+    return redirect(qaytish)
 
 
 @admin_talab

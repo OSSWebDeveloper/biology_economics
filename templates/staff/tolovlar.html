@@ -66,7 +66,6 @@
             <th>Xodim</th>
             <th>Amal</th>
             <th>Usul</th>
-            <th>Karta</th>
             <th class="ong">Summa</th>
             <th>Kiritdi</th>
           </tr>
@@ -81,12 +80,11 @@
               {% if t.izoh %}<div class="bosq">{{ t.izoh }}</div>{% endif %}
             </td>
             <td class="mayda">{{ t.get_usul_display|default:"-" }}</td>
-            <td class="mayda tel">{{ t.karta_raqami|default:"-" }}</td>
             <td class="ong pul {% if t.chiqim_mi %}qarz{% endif %}"><b>{{ t.summa|som }}</b></td>
             <td class="mayda och">{{ t.yaratgan.toliq_ism|default:"tizim" }}</td>
           </tr>
         {% empty %}
-          <tr><td colspan="7" class="hech-narsa">Yozuv topilmadi.</td></tr>
+          <tr><td colspan="6" class="hech-narsa">Yozuv topilmadi.</td></tr>
         {% endfor %}
         </tbody>
       </table>

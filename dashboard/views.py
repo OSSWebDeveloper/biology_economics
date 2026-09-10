@@ -8,7 +8,6 @@ from .services import (
     bugungi_holat,
     davr_chegarasi,
     guruhlar_kesimi,
-    kartalar_kesimi,
     moliya_hisoboti,
     oylik_dinamika,
     qarzdorlik_holati,
@@ -47,7 +46,6 @@ def moliya(request):
         "qarzdorlik": qarzdorlik_holati(),
         "dinamika": oylik_dinamika(),
         "guruhlar": guruhlar_kesimi(boshi, oxiri),
-        "kartalar": kartalar_kesimi(boshi, oxiri),
         "davr": {"kod": kod, "nom": davr_nomi,
                  "sanadan": boshi_matn or "", "sanagacha": oxiri_matn or ""},
     })

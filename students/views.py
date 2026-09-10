@@ -85,7 +85,7 @@ def oquvchi(request, pk):
     obyekt = get_object_or_404(Oquvchi.objects.select_related("guruh"), pk=pk)
     hisoblarni_yarat(obyekt)
 
-    tranzaksiyalar = list(obyekt.tranzaksiyalar.select_related("karta", "yaratgan")
+    tranzaksiyalar = list(obyekt.tranzaksiyalar.select_related("yaratgan")
                           .order_by("sana", "id"))
     yiguvchi = 0
     for tr in tranzaksiyalar:
@@ -110,8 +110,7 @@ def oquvchi_oyna(request, pk):
     obyekt = get_object_or_404(Oquvchi.objects.select_related("guruh"), pk=pk)
     hisoblarni_yarat(obyekt)
     balans = obyekt.balans
-    oxirgilar = (obyekt.tranzaksiyalar.select_related("karta")
-                 .order_by("-sana", "-id")[:6])
+    oxirgilar = obyekt.tranzaksiyalar.order_by("-sana", "-id")[:6]
     keyingi = request.GET.get("keyingi") or ""
     return render(request, "students/_oyna.html", {
         "keyingi": keyingi if keyingi.startswith("/") else "",

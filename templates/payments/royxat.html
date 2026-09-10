@@ -35,10 +35,6 @@
     {{ filtr.usul }}
   </div>
   <div class="maydon">
-    <label>Karta</label>
-    {{ filtr.karta }}
-  </div>
-  <div class="maydon">
     <label>Sanadan</label>
     {{ filtr.sanadan }}
   </div>
@@ -60,7 +56,6 @@
             <th>O'quvchi</th>
             <th>Amal</th>
             <th>Usul</th>
-            <th>Karta</th>
             <th class="ong">Summa</th>
             <th>Kiritdi</th>
             <th></th>
@@ -76,7 +71,6 @@
               {% if t.izoh %}<div class="bosq">{{ t.izoh }}</div>{% endif %}
             </td>
             <td class="mayda">{{ t.get_usul_display|default:"-" }}</td>
-            <td class="mayda tel">{{ t.karta_korinishi|default:"-" }}</td>
             <td class="ong pul {% if t.ishorali_summa < 0 %}qarz{% else %}oldindan{% endif %}">
               <b>{{ t.summa|som }}</b>
             </td>
@@ -93,7 +87,7 @@
             </td>
           </tr>
         {% empty %}
-          <tr><td colspan="8" class="hech-narsa">Yozuv topilmadi.</td></tr>
+          <tr><td colspan="7" class="hech-narsa">Yozuv topilmadi.</td></tr>
         {% endfor %}
         </tbody>
       </table>

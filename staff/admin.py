@@ -5,9 +5,9 @@ from .models import Xodim, XodimTranzaksiya
 
 @admin.register(Xodim)
 class XodimAdmin(admin.ModelAdmin):
-    list_display = ("familiya", "ism", "lavozim", "oylik_maosh", "telefon", "faol")
-    list_filter = ("faol", "lavozim")
-    search_fields = ("ism", "familiya", "telefon", "lavozim")
+    list_display = ("familiya", "ism", "oylik_maosh", "telefon", "faol")
+    list_filter = ("faol",)
+    search_fields = ("ism", "familiya", "telefon")
 
 
 @admin.register(XodimTranzaksiya)

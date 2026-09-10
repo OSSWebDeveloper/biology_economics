@@ -32,7 +32,7 @@
   <input type="hidden" name="royxat" value="{{ filtr.royxat }}">
   <div class="maydon keng">
     <label>Qidiruv</label>
-    <input type="text" name="q" value="{{ filtr.q }}" placeholder="Ism, lavozim yoki telefon">
+    <input type="text" name="q" value="{{ filtr.q }}" placeholder="Ism, familiya yoki telefon">
   </div>
   <button type="submit" class="tugma">Qidirish</button>
   {% if user.admin_mi %}
@@ -51,7 +51,6 @@
         <thead>
           <tr>
             <th>Xodim</th>
-            <th>Lavozim</th>
             <th>Telefon</th>
             <th>Login</th>
             <th class="ong">Oylik maosh</th>
@@ -69,7 +68,6 @@
               <b>{{ x.toliq_ism }}</b>
               {% if not x.faol %}<span class="nishon kulrang" style="margin-left:6px">ketgan</span>{% endif %}
             </td>
-            <td class="mayda">{{ x.lavozim|default:"-" }}</td>
             <td class="mayda tel">{{ x.telefon|default:"-" }}</td>
             <td class="mayda">
               {% if x.saytga_kiradi %}<span class="nishon yashil">{{ x.foydalanuvchi.username }}</span>
@@ -81,10 +79,16 @@
               <b>{{ x.qoldiq_summa|som }}</b>
             </td>
             <td><span class="nishon {{ x.holat_info.rang }}">{{ x.holat_info.nom }}</span></td>
-            <td class="ong"><a href="{% url 'staff:xodim' x.pk %}" class="tugma kichik">Ochish</a></td>
+            <td class="ong">
+              <div class="tugmalar" style="justify-content:flex-end">
+                <button type="button" class="tugma kichik asosiy"
+                        data-tolov="{% url 'staff:tez_oylik_oyna' x.pk %}">To'lov</button>
+                <a href="{% url 'staff:xodim' x.pk %}" class="tugma kichik">Ochish</a>
+              </div>
+            </td>
           </tr>
         {% empty %}
-          <tr><td colspan="9" class="hech-narsa">Xodim qo'shilmagan.</td></tr>
+          <tr><td colspan="8" class="hech-narsa">Xodim qo'shilmagan.</td></tr>
         {% endfor %}
         </tbody>
       </table>
@@ -92,5 +96,5 @@
   </div>
 </div>
 
-<div class="bosq">Qatorga bosilsa avans/oylik berish oynachasi ochiladi.</div>
+<div class="bosq">"To'lov" tugmasi avans/oylik berish oynachasini ochadi, qatorga bosilsa to'liq ma'lumot chiqadi.</div>
 {% endblock %}

@@ -195,16 +195,6 @@ def guruhlar_kesimi(boshi, oxiri):
     return sorted(natija, key=lambda q: q["tolangan"], reverse=True)
 
 
-def kartalar_kesimi(boshi, oxiri):
-    qs = _davr_ichida(
-        Tranzaksiya.objects.filter(tur=Tranzaksiya.Tur.TOLOV, usul=Usul.PLASTIK),
-        boshi, oxiri,
-    )
-    return (qs.values("karta__nomi", "karta__raqam", "karta_raqami")
-              .annotate(summa=Sum("summa"), soni=Count("id"))
-              .order_by("-summa"))
-
-
 def top_qarzdorlar(soni=8):
     qs = balans_bilan(Oquvchi.objects.filter(faol=True)).filter(balans_summa__lt=0)
     return qs.order_by("balans_summa")[:soni]

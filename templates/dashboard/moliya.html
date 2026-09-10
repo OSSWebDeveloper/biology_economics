@@ -162,31 +162,5 @@
     </div>
   </div>
 
-  <div class="panel">
-    <div class="panel-sarlavha">Plastik to'lovlar - kartalar kesimi</div>
-    <div class="panel-ich zich">
-      <div class="jadval-qobiq">
-        <table class="jadval">
-          <thead>
-            <tr><th>Karta</th><th class="markaz">To'lovlar</th><th class="ong">Summa</th></tr>
-          </thead>
-          <tbody>
-          {% for k in kartalar %}
-            <tr>
-              <td>
-                {{ k.karta__nomi|default:"Nomsiz" }}
-                <div class="bosq tel">{{ k.karta__raqam|default:k.karta_raqami|default:"-" }}</div>
-              </td>
-              <td class="markaz">{{ k.soni }}</td>
-              <td class="ong pul"><b>{{ k.summa|som }}</b></td>
-            </tr>
-          {% empty %}
-            <tr><td colspan="3" class="hech-narsa">Plastik to'lov bo'lmagan.</td></tr>
-          {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
 </div>
 {% endblock %}

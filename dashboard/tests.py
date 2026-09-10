@@ -6,7 +6,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from accounts.models import Foydalanuvchi
-from payments.models import Karta, Tranzaksiya, Usul
+from payments.models import Tranzaksiya, Usul
 from staff.models import Xodim
 from students.models import Guruh, Oquvchi
 
@@ -58,7 +58,6 @@ class SahifalarTest(TestCase):
             rol=Foydalanuvchi.Rol.OPERATOR,
         )
         cls.guruh = Guruh.objects.create(nomi="11-sinf", oylik_toluv=Decimal(600000))
-        cls.karta = Karta.objects.create(nomi="Humo", raqam="8600123412341234")
         cls.oquvchi = Oquvchi.objects.create(
             ism="Ali", familiya="Valiyev", telefon="+998901112233",
             ota_telefon="+998901112234", guruh=cls.guruh,
@@ -86,7 +85,6 @@ class SahifalarTest(TestCase):
             reverse("students:guruh_yangi"),
             reverse("payments:tolovlar"),
             reverse("payments:tolovlar") + "?usul=naqd",
-            reverse("payments:kartalar"),
             reverse("staff:xodimlar"),
             reverse("staff:xodim", args=[self.xodim.pk]),
             reverse("staff:xodim_oyna", args=[self.xodim.pk]),
@@ -100,7 +98,7 @@ class SahifalarTest(TestCase):
 
     def test_operator_admin_bolimlariga_kira_olmaydi(self):
         self.client.login(username="operator1", password="parol12345")
-        for manzil in (reverse("payments:kartalar"), reverse("students:guruh_yangi")):
+        for manzil in (reverse("students:guruh_yangi"), reverse("students:oquvchi_ochirish", args=[self.oquvchi.pk])):
             with self.subTest(manzil=manzil):
                 self.assertEqual(self.client.get(manzil).status_code, 302)
 
@@ -108,13 +106,12 @@ class SahifalarTest(TestCase):
         javob = self.client.post(
             reverse("payments:tolov_qoshish", args=[self.oquvchi.pk]),
             {"tur": "tolov", "summa": "320000", "sana": "2025-09-15",
-             "usul": Usul.PLASTIK, "karta": self.karta.pk, "karta_raqami": "",
-             "izoh": "sentabr uchun"},
+             "usul": Usul.PLASTIK, "izoh": "sentabr uchun"},
         )
         self.assertEqual(javob.status_code, 302)
         tolov = Tranzaksiya.objects.get(oquvchi=self.oquvchi, tur=Tranzaksiya.Tur.TOLOV)
         self.assertEqual(tolov.summa, Decimal(320000))
-        self.assertEqual(tolov.karta_raqami, self.karta.raqam)
+        self.assertEqual(tolov.usul, Usul.PLASTIK)
 
     def test_tez_tolov_oynasida_faqat_usul_va_summa_boladi(self):
         javob = self.client.get(
@@ -124,8 +121,7 @@ class SahifalarTest(TestCase):
         self.assertIn("To'lov usuli", html)
         self.assertIn('name="summa"', html)
         # ortiqcha maydonlar bo'lmasligi kerak
-        for maydon in ('name="tur"', 'name="sana"', 'name="izoh"',
-                       'name="karta"', 'name="karta_raqami"'):
+        for maydon in ('name="tur"', 'name="sana"', 'name="izoh"'):
             self.assertNotIn(maydon, html)
 
     def test_tez_tolov_saqlanadi(self):
@@ -149,16 +145,6 @@ class SahifalarTest(TestCase):
         html = self.client.get(reverse("students:oquvchilar")).content.decode()
         self.assertIn("data-tolov=", html)
         self.assertIn(">To'lov</button>", html)
-
-    def test_plastik_tolov_kartasiz_saqlanmaydi(self):
-        self.client.post(
-            reverse("payments:tolov_qoshish", args=[self.oquvchi.pk]),
-            {"tur": "tolov", "summa": "100000", "sana": "2025-09-15",
-             "usul": Usul.PLASTIK},
-        )
-        self.assertFalse(
-            Tranzaksiya.objects.filter(tur=Tranzaksiya.Tur.TOLOV).exists()
-        )
 
     def test_oquvchini_royxatdan_chiqarish(self):
         javob = self.client.post(

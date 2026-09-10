@@ -4,7 +4,7 @@ from django import forms
 
 from dashboard.widgets import PulInput, SanaInput
 
-from .models import Karta, Tranzaksiya, Usul
+from .models import Tranzaksiya, Usul
 
 # Qo'lda kiritish mumkin bo'lgan turlar (hisob avtomatik ochiladi)
 QOLDA_TURLAR = [
@@ -23,11 +23,10 @@ class TolovForm(forms.ModelForm):
 
     class Meta:
         model = Tranzaksiya
-        fields = ["tur", "summa", "sana", "usul", "karta", "karta_raqami", "izoh"]
+        fields = ["tur", "summa", "sana", "usul", "izoh"]
         widgets = {
             "sana": SanaInput(),
             "summa": PulInput(attrs={"placeholder": "0"}),
-            "karta_raqami": forms.TextInput(attrs={"placeholder": "8600 **** **** 1234"}),
             "izoh": forms.TextInput(attrs={"placeholder": "Ixtiyoriy izoh"}),
         }
 
@@ -35,9 +34,6 @@ class TolovForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields["sana"].initial = date.today()
         self.fields["usul"].required = False
-        self.fields["karta"].queryset = Karta.objects.filter(faol=True)
-        self.fields["karta"].empty_label = "-- Karta tanlanmagan --"
-        self.fields["karta"].required = False
 
     def clean(self):
         tozalangan = super().clean()
@@ -53,24 +49,7 @@ class TolovForm(forms.ModelForm):
             self.add_error("usul", "To'lov usulini tanlang (naqd yoki plastik).")
         if not pul_harakati:
             tozalangan["usul"] = ""
-            tozalangan["karta"] = None
-            tozalangan["karta_raqami"] = ""
-
-        if usul == Usul.PLASTIK and pul_harakati:
-            karta = tozalangan.get("karta")
-            raqam = (tozalangan.get("karta_raqami") or "").strip()
-            if not karta and not raqam:
-                self.add_error("karta_raqami",
-                               "Plastik to'lov uchun karta tanlang yoki raqamini yozing.")
-            if karta and not raqam:
-                tozalangan["karta_raqami"] = karta.raqam
         return tozalangan
-
-
-class KartaForm(forms.ModelForm):
-    class Meta:
-        model = Karta
-        fields = ["nomi", "raqam", "egasi", "faol"]
 
 
 class TolovFiltrForm(forms.Form):
@@ -81,8 +60,6 @@ class TolovFiltrForm(forms.Form):
     q = forms.CharField(label="Qidiruv", required=False,
                         widget=forms.TextInput(attrs={"placeholder": "Ism, familiya yoki telefon"}))
     usul = forms.ChoiceField(label="To'lov usuli", choices=USUL_TANLOV, required=False)
-    karta = forms.ModelChoiceField(label="Karta", queryset=Karta.objects.all(),
-                                   required=False, empty_label="Barcha kartalar")
     sanadan = forms.DateField(label="Sanadan", required=False,
                               widget=SanaInput())
     sanagacha = forms.DateField(label="Sanagacha", required=False,

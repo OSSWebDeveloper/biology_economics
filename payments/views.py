@@ -9,8 +9,8 @@ from django.urls import reverse
 from accounts.permissions import admin_talab
 from students.models import Oquvchi
 
-from .forms import KartaForm, TezTolovForm, TolovFiltrForm, TolovForm
-from .models import Karta, Tranzaksiya, Usul
+from .forms import TezTolovForm, TolovFiltrForm, TolovForm
+from .models import Tranzaksiya, Usul
 
 
 def _qaytish_manzili(request, standart):
@@ -23,7 +23,7 @@ def _qaytish_manzili(request, standart):
 def tolovlar(request):
     """Barcha moliyaviy amallar ro'yxati + filtr."""
     filtr = TolovFiltrForm(request.GET or None)
-    qs = Tranzaksiya.objects.select_related("oquvchi", "karta", "yaratgan")
+    qs = Tranzaksiya.objects.select_related("oquvchi", "yaratgan")
 
     if filtr.is_valid():
         m = filtr.cleaned_data
@@ -34,8 +34,6 @@ def tolovlar(request):
             )
         if m.get("usul"):
             qs = qs.filter(usul=m["usul"])
-        if m.get("karta"):
-            qs = qs.filter(karta=m["karta"])
         if m.get("sanadan"):
             qs = qs.filter(sana__gte=m["sanadan"])
         if m.get("sanagacha"):
@@ -138,34 +136,3 @@ def tolov_ochirish(request, pk):
             tranzaksiya.delete()
             messages.success(request, "Yozuv o'chirildi.")
     return redirect(qaytish)
-
-
-# ------------------------------------------------------------------ kartalar
-
-@admin_talab
-def kartalar(request):
-    return render(request, "payments/kartalar.html", {"royxat": Karta.objects.all()})
-
-
-@admin_talab
-def karta_saqlash(request, pk=None):
-    obyekt = get_object_or_404(Karta, pk=pk) if pk else None
-    form = KartaForm(request.POST or None, instance=obyekt)
-    if request.method == "POST" and form.is_valid():
-        form.save()
-        messages.success(request, "Karta saqlandi.")
-        return redirect("payments:kartalar")
-    return render(request, "payments/karta_form.html", {
-        "form": form,
-        "sarlavha": "Kartani tahrirlash" if obyekt else "Yangi karta",
-    })
-
-
-@admin_talab
-def karta_ochirish(request, pk):
-    obyekt = get_object_or_404(Karta, pk=pk)
-    if request.method == "POST":
-        obyekt.faol = False
-        obyekt.save(update_fields=["faol"])
-        messages.success(request, "Karta arxivlandi.")
-    return redirect("payments:kartalar")

@@ -1,0 +1,44 @@
+{% load moliya %}
+<div class="oyna-sarlavha">
+  <div>
+    <h2 style="margin-bottom:2px">{{ xodim.toliq_ism }}</h2>
+    <div class="bosq">
+      {% if qoldiq > 0 %}To'lanishi kerak: <b class="pul qarz">{{ qoldiq|som }} so'm</b>
+      {% elif qoldiq < 0 %}Ortiqcha avans: <b class="pul">{{ qoldiq|musbat|som }} so'm</b>
+      {% else %}Hisob-kitob qilingan{% endif %}
+    </div>
+  </div>
+  <button type="button" class="yopish" data-yopish>&times;</button>
+</div>
+
+<form method="post" action="{% url 'staff:tez_oylik' xodim.pk %}" novalidate>
+  {% csrf_token %}
+  <input type="hidden" name="keyingi" value="{{ keyingi|default:request.get_full_path }}">
+
+  <div class="oyna-ich">
+    <div class="maydon">
+      <label>Amal turi</label>
+      <div class="usul-tanlov">
+        {% for tanlov in form.tur %}
+          <label class="usul">{{ tanlov.tag }} <span>{{ tanlov.choice_label }}</span></label>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="maydon">
+      <label>To'lov usuli</label>
+      <div class="usul-tanlov">
+        {% for tanlov in form.usul %}
+          <label class="usul">{{ tanlov.tag }} <span>{{ tanlov.choice_label }}</span></label>
+        {% endfor %}
+      </div>
+    </div>
+
+    {% include "_maydon.html" with maydon=form.summa %}
+  </div>
+
+  <div class="oyna-past">
+    <button type="button" class="tugma" data-yopish>Bekor qilish</button>
+    <button type="submit" class="tugma asosiy">Saqlash</button>
+  </div>
+</form>

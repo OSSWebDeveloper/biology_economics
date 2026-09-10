@@ -13,11 +13,7 @@ class Xodim(models.Model):
 
     ism = models.CharField("Ism", max_length=60)
     familiya = models.CharField("Familiya", max_length=60)
-    lavozim = models.CharField("Lavozim", max_length=80, blank=True,
-                               help_text="Masalan: o'qituvchi, administrator, farrosh")
     telefon = models.CharField("Telefon", max_length=30, blank=True)
-    karta_raqami = models.CharField("Plastik karta raqami", max_length=30, blank=True,
-                                    help_text="Oylik plastikka o'tkazilganda ishlatiladi.")
 
     oylik_maosh = models.DecimalField(
         "Oylik maosh (so'm)", max_digits=12, decimal_places=2, default=0,
@@ -107,7 +103,6 @@ class XodimTranzaksiya(models.Model):
     sana = models.DateField("Sana", default=date.today)
 
     usul = models.CharField("To'lov usuli", max_length=10, choices=Usul.choices, blank=True)
-    karta_raqami = models.CharField("Karta raqami", max_length=30, blank=True)
 
     davr = models.DateField("Hisob davri (oy boshi)", null=True, blank=True)
     kunlar = models.PositiveSmallIntegerField("Hisoblangan kunlar", null=True, blank=True)

@@ -124,7 +124,7 @@ python manage.py createsuperuser
 ### Rollar
 
 * **Sayt admini** — hamma narsa: xodim oyligini tayinlash, yozuvni o'chirish,
-  guruh va karta boshqarish, foydalanuvchilarni boshqarish.
+  guruh boshqarish, xodimlarga login berish.
 * **Operator** — o'quvchi qo'shish/tahrirlash, to'lov qabul qilish, ro'yxatdan
   chiqarish, hisobotlarni ko'rish. Oylik tayinlash va o'chirish huquqi yo'q.
 
@@ -197,9 +197,12 @@ O'quvchi kartochkasidagi "Oylik kurs to'lovi" maydoni **ixtiyoriy**:
 | musbat | **oldindan to'langan** | yashil |
 | nol | qarzi yo'q | kulrang |
 
-Kiritish mumkin bo'lgan amallar (o'quvchi oynachasida):
+O'quvchilar ro'yxatidagi **"To'lov"** tugmasi eng sodda oynachani ochadi:
+naqd yoki plastik, va summa — boshqa hech narsa so'ralmaydi.
 
-* **To'lov qabul qilish** — naqd yoki plastik (karta raqami bilan);
+O'quvchi kartochkasidagi to'liq formada esa quyidagilar bor:
+
+* **To'lov qabul qilish** — naqd yoki plastik;
 * **Chegirma berish** — qarzni kamaytiradi;
 * **O'qituvchi qarzi** — dars o'tkazilmasa yoki o'qituvchi o'quvchidan qarz
   bo'lib qolsa, summa **oldindan to'langan pul hisobiga** o'tadi (klient talabi);
@@ -247,8 +250,7 @@ Butunlay o'chirish (tarixi bilan) faqat adminda va alohida tasdiqlash bilan.
 | **Kurs to'lovlari** | barcha to'lovlar; amal turi, naqd/plastik, karta va sana bo'yicha filtr |
 | **Xodimlar** | oylik maosh, shu oy avansi, qoldiq, saytga kirish logini |
 | **Oylik va avans** | xodimlarga berilgan pullar; naqd/plastik alohida |
-| **Moliya (statistika)** | kirim/chiqim, sof foyda, yig'ilish foizi, 12 oylik grafik, guruh va karta kesimi |
-| **Kartalar** | to'lov qabul qilinadigan plastik kartalar ro'yxati |
+| **Moliya (statistika)** | kirim/chiqim, sof foyda, yig'ilish foizi, 12 oylik grafik, guruhlar kesimi |
 | **Shaxsiy sahifam** | o'z familiyasi, ismi, logini va parolini o'zgartirish |
 
 ---
@@ -327,8 +329,6 @@ Quyidagilar mantiqiy standart bilan qilingan, klient boshqacha desa oson o'zgara
    sifatida hisoblanadi (masalan 10-sanada chiqsa, 1–10 = 10 kun).
 2. **Guruhlar** klient aytmagan, lekin qo'shildi — filtr va hisobot uchun qulay.
    Kerak bo'lmasa, o'quvchini guruhsiz qoldirsa bo'ladi.
-3. **Karta raqami** — to'lov *qabul qilingan* karta (o'qituvchining kartasi)
-   sifatida tushunildi; kartalar ro'yxatdan tanlanadi.
 4. **Dars qoldirish (davomat)** hisoblanmaydi — to'lov kalendar kunlari bo'yicha,
    klient aytganidek.
 

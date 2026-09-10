@@ -12,23 +12,6 @@ class Usul(models.TextChoices):
     PLASTIK = "plastik", "Plastik karta"
 
 
-class Karta(models.Model):
-    """To'lov qabul qilinadigan plastik kartalar (o'qituvchi/markaz kartalari)."""
-
-    nomi = models.CharField("Karta nomi", max_length=80, help_text="Masalan: Humo - asosiy")
-    raqam = models.CharField("Karta raqami", max_length=30)
-    egasi = models.CharField("Karta egasi", max_length=80, blank=True)
-    faol = models.BooleanField("Faol", default=True)
-
-    class Meta:
-        verbose_name = "Karta"
-        verbose_name_plural = "Kartalar"
-        ordering = ["-faol", "nomi"]
-
-    def __str__(self):
-        return f"{self.nomi} ({self.raqam})"
-
-
 class TranzaksiyaQuerySet(models.QuerySet):
     def tolovlar(self):
         return self.filter(tur=Tranzaksiya.Tur.TOLOV)
@@ -74,9 +57,6 @@ class Tranzaksiya(models.Model):
     sana = models.DateField("Sana", default=date.today)
 
     usul = models.CharField("To'lov usuli", max_length=10, choices=Usul.choices, blank=True)
-    karta = models.ForeignKey(Karta, verbose_name="Karta", on_delete=models.SET_NULL,
-                              null=True, blank=True, related_name="tranzaksiyalar")
-    karta_raqami = models.CharField("Karta raqami", max_length=30, blank=True)
 
     davr = models.DateField("Hisob davri (oy boshi)", null=True, blank=True,
                             help_text="Faqat hisoblangan kurs to'lovlari uchun.")
@@ -116,7 +96,3 @@ class Tranzaksiya(models.Model):
     def kirim_mi(self):
         """Kassaga haqiqiy pul tushganmi (statistikada kirim sifatida hisoblanadi)."""
         return self.tur == self.Tur.TOLOV
-
-    @property
-    def karta_korinishi(self):
-        return self.karta_raqami or (self.karta.raqam if self.karta else "")

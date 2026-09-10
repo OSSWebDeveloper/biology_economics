@@ -27,7 +27,7 @@
       <a href="{% url 'students:guruhlar' %}" class="{% if ns == 'students' and 'guruh' in un %}faol{% endif %}">
         <span class="belgi">&#128101;</span> Guruhlar
       </a>
-      <a href="{% url 'payments:tolovlar' %}" class="{% if ns == 'payments' and 'karta' not in un %}faol{% endif %}">
+      <a href="{% url 'payments:tolovlar' %}" class="{% if ns == 'payments' %}faol{% endif %}">
         <span class="belgi">&#128179;</span> Kurs to'lovlari
       </a>
 
@@ -48,11 +48,6 @@
       <a href="{% url 'accounts:shaxsiy' %}" class="{% if ns == 'accounts' %}faol{% endif %}">
         <span class="belgi">&#128273;</span> Shaxsiy sahifam
       </a>
-      {% if user.admin_mi %}
-      <a href="{% url 'payments:kartalar' %}" class="{% if ns == 'payments' and 'karta' in un %}faol{% endif %}">
-        <span class="belgi">&#128181;</span> Kartalar
-      </a>
-      {% endif %}
     </nav>
 
     <div class="yon-past">

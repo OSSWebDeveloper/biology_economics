@@ -91,14 +91,11 @@
       var tur = forma.querySelector("[name='tur']");
       var usul = forma.querySelector("[name='usul']");
       var usulQuti = forma.querySelector("[data-usul-quti]");
-      var kartaQuti = forma.querySelector("[data-karta-quti]");
 
       function yangila() {
         var pulHarakati = tur && (tur.value === "tolov" || tur.value === "qaytarish"
           || tur.value === "avans" || tur.value === "oylik");
         if (usulQuti) usulQuti.style.display = pulHarakati ? "" : "none";
-        var plastik = pulHarakati && usul && usul.value === "plastik";
-        if (kartaQuti) kartaQuti.style.display = plastik ? "" : "none";
       }
 
       if (tur) tur.addEventListener("change", yangila);

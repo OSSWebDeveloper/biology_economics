@@ -12,7 +12,6 @@
       {% if not xodim.faol %}<span class="nishon kulrang">ishdan ketgan</span>{% endif %}
     </h1>
     <div class="bosq">
-      {{ xodim.lavozim|default:"lavozim ko'rsatilmagan" }} &middot;
       {{ xodim.ishga_kirgan_sana|date:"d.m.Y" }} dan
       {% if xodim.ishdan_ketgan_sana %} &middot; ketgan {{ xodim.ishdan_ketgan_sana|date:"d.m.Y" }}{% endif %}
     </div>
@@ -51,7 +50,7 @@
   <div class="stat">
     <div class="yorliq">Aloqa</div>
     <div class="qiymat tel" style="font-size:1.05rem">{{ xodim.telefon|default:"-" }}</div>
-    <div class="izoh tel">{{ xodim.karta_raqami|default:"karta kiritilmagan" }}</div>
+    <div class="izoh">telefon raqami</div>
   </div>
 </div>
 
@@ -136,7 +135,6 @@
               </td>
               <td class="mayda">
                 {% if t.usul %}{{ t.get_usul_display }}{% endif %}
-                {% if t.karta_raqami %}<div class="bosq tel">{{ t.karta_raqami }}</div>{% endif %}
               </td>
               <td class="ong pul {% if t.ishorali_summa > 0 %}qarz{% else %}oldindan{% endif %}">
                 {{ t.summa|som }}
