@@ -20,27 +20,46 @@ class SanaInput(forms.DateInput):
         super().__init__(attrs=birlashgan, format=format or "%Y-%m-%d")
 
 
-class PulInput(forms.NumberInput):
-    """So'm summasi uchun maydon.
+class PulInput(forms.TextInput):
+    """So'm summasi uchun maydon: 3000000 emas, 3 000 000 ko'rinishida.
 
-    So'mda tiyin ishlatilmaydi, shuning uchun 700000.00 emas, 700000 ko'rinishida
-    chiqadi - aks holda brauzer uni "700000,00" qilib ko'rsatadi.
+    Raqamlar yozilayotganda uchtalab ajratiladi (app.js), yuborilganda esa
+    bo'shliqlar shu yerda olib tashlanadi - shuning uchun JavaScript ishlamasa
+    ham forma to'g'ri saqlanadi.
     """
 
     def __init__(self, attrs=None):
-        birlashgan = {"step": "1000", "min": "0", "inputmode": "numeric"}
+        birlashgan = {"inputmode": "numeric", "autocomplete": "off", "data-pul": "1"}
         if attrs:
             birlashgan.update(attrs)
         super().__init__(attrs=birlashgan)
+
+    @staticmethod
+    def _ajrat(matn):
+        """1234567 -> '1 234 567'."""
+        manfiy = matn.startswith("-")
+        raqamlar = matn.lstrip("-")
+        bolaklar = []
+        while len(raqamlar) > 3:
+            bolaklar.insert(0, raqamlar[-3:])
+            raqamlar = raqamlar[:-3]
+        bolaklar.insert(0, raqamlar)
+        return ("-" if manfiy else "") + " ".join(bolaklar)
 
     def format_value(self, value):
         matn = super().format_value(value)
         if matn in (None, ""):
             return matn
         try:
-            son = Decimal(str(matn).replace(",", "."))
+            son = Decimal(str(matn).replace(" ", "").replace(",", "."))
         except (InvalidOperation, ValueError):
             return matn
-        if son == son.to_integral_value():
-            return str(son.quantize(Decimal("1")))
-        return matn
+        if son != son.to_integral_value():
+            return matn
+        return self._ajrat(str(son.quantize(Decimal("1"))))
+
+    def value_from_datadict(self, data, files, name):
+        qiymat = data.get(name)
+        if isinstance(qiymat, str):
+            return qiymat.replace(" ", "").replace(" ", "")
+        return qiymat

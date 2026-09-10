@@ -37,6 +37,7 @@
       .then(function (html) {
         ich.innerHTML = html;
         tolovFormasi(ich);
+        pulMaydonlari(ich);
         var birinchi = ich.querySelector("input[name='summa']");
         if (birinchi) birinchi.focus();
       })
@@ -45,6 +46,40 @@
       });
   }
   window.oynaniYukla = oynaniYukla;
+
+
+  /* Pul maydonlari: yozilayotganda raqamlarni uchtalab ajratadi (3 000 000) */
+  function pulMaydonlari(ildiz) {
+    var soha = ildiz || document;
+    Array.prototype.forEach.call(soha.querySelectorAll("input[data-pul]"), function (maydon) {
+      if (maydon.getAttribute("data-pul-tayyor")) return;
+      maydon.setAttribute("data-pul-tayyor", "1");
+
+      function ajrat(matn) {
+        var raqamlar = String(matn).replace(/[^0-9]/g, "");
+        if (!raqamlar) return "";
+        return raqamlar.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+      }
+
+      function yangila() {
+        var eski = maydon.value;
+        var kursor = maydon.selectionStart;
+        var chapdagiRaqamlar = eski.slice(0, kursor).replace(/[^0-9]/g, "").length;
+        var yangi = ajrat(eski);
+        if (yangi === eski) return;
+        maydon.value = yangi;
+        var joy = 0, sanoq = 0;
+        while (joy < yangi.length && sanoq < chapdagiRaqamlar) {
+          if (yangi.charCodeAt(joy) >= 48 && yangi.charCodeAt(joy) <= 57) sanoq++;
+          joy++;
+        }
+        try { maydon.setSelectionRange(joy, joy); } catch (e) { /* e'tiborsiz */ }
+      }
+
+      maydon.addEventListener("input", yangila);
+      yangila();
+    });
+  }
 
   /* To'lov formasi: amal turiga qarab keraksiz maydonlarni yashiradi */
   function tolovFormasi(ildiz) {
@@ -72,6 +107,7 @@
 
   document.addEventListener("DOMContentLoaded", function () {
     tolovFormasi(document);
+    pulMaydonlari(document);
 
     /* Jadval qatoriga bosilsa oynacha ochiladi */
     document.addEventListener("click", function (h) {

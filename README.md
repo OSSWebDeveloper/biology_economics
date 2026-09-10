@@ -157,8 +157,8 @@ saytga kirish logini uning **xodim kartochkasidan** beriladi:
 Xodimlar ro'yxatida "Login" ustuni kimda kirish borligini ko'rsatib turadi.
 Har bir xodimga login shart emas — oylik va to'lovlar loginsiz ham yuritiladi.
 
-Birinchi o'rnatishda kursxona boshlig'i uchun **`admin` hisobi ham, xodim
-kartochkasi ham** birga ochiladi (u ham boshliq, ham o'qituvchi).
+Kursxona boshlig'i xodimlar ro'yxatiga kiritilmaydi — u faqat `admin`
+hisobiga ega bo'ladi. Xodimlar bo'limida faqat boshqa xodimlar ko'rinadi.
 
 Texnik Django superuser hisobi bu tizimga umuman aralashmaydi.
 

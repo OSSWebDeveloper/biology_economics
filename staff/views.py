@@ -89,7 +89,8 @@ def xodim(request, pk):
     joriy_davr = oy_boshi(date.today())
     return render(request, "staff/xodim.html", {
         "hisob_form": XodimHisobForm(hisob=obyekt.foydalanuvchi),
-        "boglash_form": HisobBoglashForm() if obyekt.foydalanuvchi is None else None,
+        "boglash_form": (HisobBoglashForm(joriy_foydalanuvchi=request.user)
+                         if obyekt.foydalanuvchi is None else None),
         "xodim": obyekt,
         "tranzaksiyalar": tranzaksiyalar,
         "qoldiq": yiguvchi,

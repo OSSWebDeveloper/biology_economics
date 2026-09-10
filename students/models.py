@@ -10,7 +10,6 @@ class Guruh(models.Model):
     oylik_toluv = models.DecimalField(
         "Oylik kurs to'lovi (so'm)", max_digits=12, decimal_places=2, default=0,
         validators=[MinValueValidator(0)],
-        help_text="Yangi o'quvchi qo'shilganda shu summa avtomatik qo'yiladi.",
     )
     faol = models.BooleanField("Faol", default=True)
     yaratilgan = models.DateTimeField(auto_now_add=True)

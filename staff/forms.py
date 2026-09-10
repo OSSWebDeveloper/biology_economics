@@ -137,9 +137,10 @@ class HisobBoglashForm(forms.Form):
         empty_label="-- hisobni tanlang --",
     )
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, joriy_foydalanuvchi=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["hisob"].queryset = (
-            Foydalanuvchi.objects.filter(is_superuser=False, xodim__isnull=True)
-            .order_by("username")
-        )
+        qs = Foydalanuvchi.objects.filter(is_superuser=False, xodim__isnull=True)
+        if joriy_foydalanuvchi is not None:
+            # O'zini xodim qilib qo'ya olmaydi
+            qs = qs.exclude(pk=joriy_foydalanuvchi.pk)
+        self.fields["hisob"].queryset = qs.order_by("username")

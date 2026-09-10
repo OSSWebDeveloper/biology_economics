@@ -6,6 +6,7 @@ from django.test import TestCase
 
 from students.models import Guruh, Oquvchi
 
+from .forms import TolovForm
 from .models import Tranzaksiya, Usul
 from .services import (
     balans_holati,
@@ -168,3 +169,30 @@ class GuruhTest(TestCase):
         oquvchi_yarat(SENTABR, guruh=guruh, faol=False,
                       chiqarilgan_sana=date(2025, 9, 15))
         self.assertEqual(guruh.faol_oquvchilar_soni, 1)
+
+
+class PulMaydoniTest(TestCase):
+    """Pul maydonlari 3 000 000 ko'rinishida ham qabul qilinishi kerak."""
+
+    def test_bosliqli_summa_qabul_qilinadi(self):
+        from students.forms import GuruhForm
+
+        form = GuruhForm(data={"nomi": "11-sinf", "oylik_toluv": "3 000 000",
+                               "faol": "on"})
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertEqual(form.cleaned_data["oylik_toluv"], Decimal(3000000))
+
+    def test_tolov_summasi_bosliq_bilan(self):
+        oquvchi = oquvchi_yarat(SENTABR)
+        form = TolovForm(data={"tur": "tolov", "summa": "1 250 000",
+                               "sana": "2025-09-05", "usul": "naqd"})
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertEqual(form.cleaned_data["summa"], Decimal(1250000))
+
+    def test_korinishida_ajratib_chiqadi(self):
+        from students.forms import GuruhForm
+        from students.models import Guruh
+
+        guruh = Guruh.objects.create(nomi="Test", oylik_toluv=Decimal(3000000))
+        html = str(GuruhForm(instance=guruh)["oylik_toluv"])
+        self.assertIn('value="3 000 000"', html)
