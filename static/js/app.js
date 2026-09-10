@@ -36,6 +36,8 @@
       })
       .then(function (html) {
         ich.innerHTML = html;
+        // Kengroq jadval bo'lsa, oyna ham kengayadi (data-keng)
+        ich.classList.toggle("keng", !!ich.querySelector("[data-keng]"));
         tolovFormasi(ich);
         pulMaydonlari(ich);
         var birinchi = ich.querySelector("input[name='summa']");

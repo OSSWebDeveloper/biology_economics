@@ -2,13 +2,23 @@
 '  Biologiya kursi - serverni to'xtatish
 '  Ish stolidagi "Serverni to'xtatish" yorlig'i shu faylni chaqiradi.
 '  Jimgina ishlaydi: hech qanday tasdiq oynasi chiqmaydi.
-'  Faqat to'xtatib bo'lmagan holatdagina ogohlantiradi.
+'
+'  Agar server administrator huquqi bilan ishga tushgan bo'lsa
+'  (masalan ORNATISH.bat oxirida), oddiy foydalanuvchi uni to'xtata
+'  olmaydi. Shunday holatda skript o'zini administrator huquqi bilan
+'  qayta chaqiradi - Windows bir marta ruxsat so'raydi.
 ' ============================================================
 Option Explicit
 
-Dim shell, fso, joy, port, url, pidlar, i
+Dim shell, fso, joy, port, url, adminMi, i
+
 Set shell = CreateObject("WScript.Shell")
 Set fso = CreateObject("Scripting.FileSystemObject")
+
+adminMi = False
+If WScript.Arguments.Count > 0 Then
+    If LCase(Trim(WScript.Arguments(0))) = "/admin" Then adminMi = True
+End If
 
 joy = fso.GetParentFolderName(WScript.ScriptFullName)
 port = PortniOqi(joy)
@@ -18,26 +28,49 @@ If Not ServerIshlayapti(url) Then
     WScript.Quit 0          ' allaqachon to'xtagan - jimgina chiqamiz
 End If
 
-pidlar = TinglayotganPidlar(port)
-For i = 0 To UBound(pidlar)
-    If pidlar(i) <> "" Then
-        shell.Run "taskkill /PID " & pidlar(i) & " /F", 0, True
-    End If
+' Uch marta urinamiz: ba'zan jarayon darrov yopilmaydi
+For i = 1 To 3
+    JarayonlarniYop port
+    WScript.Sleep 600
+    If Not ServerIshlayapti(url) Then WScript.Quit 0
 Next
 
-WScript.Sleep 700
-
-If ServerIshlayapti(url) Then
-    MsgBox "Serverni to'xtatib bo'lmadi." & vbCrLf & vbCrLf & _
-           "Vazifalar dispetcherini ochib, python.exe jarayonini yoping.", _
-           vbCritical, "Biologiya kursi"
-    WScript.Quit 1
+' Bu yergacha kelgan bo'lsa - huquq yetmadi
+If Not adminMi Then
+    If AdminBilanQaytaChaqir() Then WScript.Quit 0
 End If
 
-WScript.Quit 0
+MsgBox "Serverni to'xtatib bo'lmadi." & vbCrLf & vbCrLf & _
+       "Vazifalar dispetcherini ochib, python.exe jarayonini yoping.", _
+       vbCritical, "Biologiya kursi"
+WScript.Quit 1
 
 
 ' ------------------------------------------------------------ yordamchilar
+
+Sub JarayonlarniYop(p)
+    Dim pidlar, j
+    pidlar = TinglayotganPidlar(p)
+    For j = 0 To UBound(pidlar)
+        If pidlar(j) <> "" Then
+            shell.Run "taskkill /PID " & pidlar(j) & " /T /F", 0, True
+        End If
+    Next
+End Sub
+
+Function AdminBilanQaytaChaqir()
+    ' O'zini administrator huquqi bilan qayta ishga tushiradi.
+    ' Foydalanuvchi ruxsat bermasa - False qaytadi.
+    Dim app
+    AdminBilanQaytaChaqir = False
+    On Error Resume Next
+    Set app = CreateObject("Shell.Application")
+    If Err.Number <> 0 Then Exit Function
+    app.ShellExecute "wscript.exe", _
+                     """" & WScript.ScriptFullName & """ /admin", joy, "runas", 0
+    If Err.Number = 0 Then AdminBilanQaytaChaqir = True
+    On Error GoTo 0
+End Function
 
 Function PortniOqi(papka)
     Dim f

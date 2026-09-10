@@ -156,7 +156,7 @@ h3 { font-size: .98rem; }
 .stat.kok { border-left: 3px solid var(--kok); }
 .stat.sariq { border-left: 3px solid var(--sariq); }
 
-.pul { font-variant-numeric: tabular-nums; }
+.pul { font-variant-numeric: tabular-nums; white-space: nowrap; }
 .pul.qarz { color: var(--qizil); }
 .pul.oldindan { color: var(--yashil); }
 .pul.toza { color: var(--matn-och); }
@@ -175,6 +175,7 @@ table.jadval tbody tr:hover { background: #f8fafc; }
 table.jadval tr.bosiladigan { cursor: pointer; }
 table.jadval .ong { text-align: right; }
 table.jadval .markaz { text-align: center; }
+table.jadval .bir-qator { white-space: nowrap; }
 .bosh-harf {
   width: 30px; height: 30px; border-radius: 50%; background: var(--asosiy-juda-och);
   color: var(--asosiy); display: inline-grid; place-items: center;
@@ -294,6 +295,7 @@ label.belgilash input { width: auto; }
   width: 100%; max-width: 560px; animation: kotarilish .16s ease-out;
 }
 .oyna.keng { max-width: 720px; }
+.oyna .jadval td, .oyna .jadval th { white-space: nowrap; }
 @keyframes kotarilish { from { opacity: 0; transform: translateY(-12px); } }
 .oyna-sarlavha {
   padding: 16px 20px; border-bottom: 1px solid var(--chegara);

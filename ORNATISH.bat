@@ -222,7 +222,11 @@ echo.
 
 choice /c YN /n /m "   Hozir ishga tushirilsinmi?   [Y = ha, N = yo'q] "
 if errorlevel 2 goto :tamom
-start "" "%JOY%\Ishga_tushirish.vbs"
+rem Explorer orqali ochamiz. Sabab: ORNATISH.bat administrator huquqi bilan
+rem ishlaydi, "start" esa shu huquqni dasturga ham beradi - keyin oddiy
+rem "Serverni to'xtatish" yorlig'i uni to'xtata olmaydi. Explorer dasturni
+rem foydalanuvchining odatdagi huquqi bilan ochadi.
+explorer.exe "%JOY%\Ishga_tushirish.vbs"
 goto :tamom
 
 

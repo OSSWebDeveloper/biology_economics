@@ -1,5 +1,5 @@
 {% load moliya %}
-<div class="oyna-sarlavha">
+<div class="oyna-sarlavha" data-keng>
   <div>
     <h2 style="margin-bottom:2px">{{ guruh.nomi }}</h2>
     <div class="bosq">
@@ -39,7 +39,7 @@
       <tbody>
       {% for o in oquvchilar %}
         <tr>
-          <td>
+          <td class="bir-qator">
             <span class="bosh-harf">{{ o.bosh_harflar }}</span>
             <b>{{ o.toliq_ism }}</b>
           </td>
