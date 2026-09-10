@@ -231,8 +231,9 @@ Butunlay o'chirish (tarixi bilan) faqat adminda va alohida tasdiqlash bilan.
 ## 6. Xodimlar oyligi va avans
 
 * Oylik maoshni **faqat admin tayinlaydi** (xodim kartochkasi → "Oylik tayinlash").
-* Har oyning 1-sanasida maosh avtomatik hisoblanadi; xodim oy o'rtasida ishga
-  kirsa — o'quvchilardagi kabi kunlab bo'linadi.
+* Har oyning 1-sanasida maosh avtomatik hisoblanadi. **Oylik kunlarga
+  bo'linmaydi** — xodim ishga kirgan oyidan boshlab har oyga to'liq maosh
+  yoziladi (o'quvchilardan farqli).
 * **Avans** va **oylik** alohida yoziladi, ikkalasi ham naqd yoki plastik bo'lishi
   mumkin. "Oylik va avans" bo'limida naqd/plastik bo'yicha filtr bor.
 * **Qoldiq**: musbat — xodimga to'lanishi kerak; manfiy — ortiqcha avans berilgan.

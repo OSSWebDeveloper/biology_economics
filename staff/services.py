@@ -1,4 +1,8 @@
-"""Xodimlar oyligini hisoblash (o'quvchilar bilan bir xil kunlab bo'lish qoidasi)."""
+"""Xodimlar oyligini hisoblash.
+
+O'quvchilardan farqli: xodim oyligi kunlarga bo'linmaydi. Ishga kirgan
+oyidan boshlab har oyga to'liq maosh yoziladi.
+"""
 from collections import defaultdict
 from datetime import date
 from decimal import Decimal
@@ -21,7 +25,11 @@ from .models import Xodim, XodimTranzaksiya
 
 
 def maosh_summasi(xodim, davr, tugash_sana=None):
-    """`davr` oyi uchun hisoblanadigan maosh: (summa, kunlar)."""
+    """`davr` oyi uchun hisoblanadigan maosh: (summa, kunlar).
+
+    Xodimning oyligi kunlarga BO'LINMAYDI: u ishga kirgan oyidan boshlab
+    har oyga to'liq maosh yoziladi.
+    """
     oylik = Decimal(xodim.oylik_maosh or 0)
     if oylik <= 0:
         return NOL, 0
@@ -29,17 +37,14 @@ def maosh_summasi(xodim, davr, tugash_sana=None):
     kunlar_oyda = oydagi_kunlar(davr)
     oyning_oxiri = oy_oxiri(davr)
 
+    # Shu oyda umuman ishlaganmi?
     boshlanish = max(xodim.ishga_kirgan_sana, davr)
     tugash = tugash_sana or xodim.ishdan_ketgan_sana or oyning_oxiri
     tugash = min(tugash, oyning_oxiri)
-
     if tugash < boshlanish:
         return NOL, 0
 
-    kunlar = (tugash - boshlanish).days + 1
-    if kunlar >= kunlar_oyda:
-        return pulga_yaxlitla(oylik), kunlar_oyda
-    return pulga_yaxlitla(oylik / Decimal(kunlar_oyda) * kunlar), kunlar
+    return pulga_yaxlitla(oylik), kunlar_oyda
 
 
 def kerakli_davrlar(xodim, sanagacha=None):
@@ -61,8 +66,7 @@ def _hisob_yozuvi(xodim, davr):
     summa, kunlar = maosh_summasi(xodim, davr)
     if summa <= 0:
         return None
-    toliq = kunlar >= oydagi_kunlar(davr)
-    izoh = oy_nomi(davr) + (" oyligi" if toliq else f" - {kunlar} kun")
+    izoh = oy_nomi(davr) + " oyligi"
     return XodimTranzaksiya(
         xodim=xodim,
         tur=XodimTranzaksiya.Tur.HISOB,

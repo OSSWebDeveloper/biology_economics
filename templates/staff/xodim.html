@@ -181,8 +181,8 @@
       {% csrf_token %}
       <div class="oyna-ich">
         <p class="och mayda">
-          Yangi maosh keyingi oylardan boshlab to'liq qo'llanadi.
-          Xodim oy o'rtasida ishga kirgan bo'lsa, birinchi oy kunlarga bo'lib hisoblanadi.
+          Oylik kunlarga bo'linmaydi: xodim ishga kirgan oyidan boshlab har oyga
+          to'liq maosh yoziladi.
         </p>
         {% include "_maydon.html" with maydon=maosh_form.oylik_maosh %}
         {% include "_maydon.html" with maydon=maosh_form.qayta_hisobla %}

@@ -34,11 +34,17 @@ class MaoshHisobiTest(TestCase):
         self.assertEqual(summa, Decimal(3000000))
         self.assertEqual(kunlar, 30)
 
-    def test_oy_ortasida_ishga_kirgan_kunlab_oladi(self):
+    def test_oy_ortasida_ishga_kirgan_ham_toliq_oladi(self):
+        """Xodim oyligi kunlarga bo'linmaydi - kirgan oyi uchun to'liq maosh."""
         xodim = xodim_yarat(ishga_kirgan=date(2025, 9, 21))
         summa, kunlar = maosh_summasi(xodim, SENTABR)
-        self.assertEqual(kunlar, 10)
-        self.assertEqual(summa, Decimal(1000000))   # 100 000 * 10
+        self.assertEqual(summa, Decimal(3000000))
+        self.assertEqual(kunlar, 30)
+
+    def test_ishga_kirmagan_oyga_maosh_yozilmaydi(self):
+        xodim = xodim_yarat(ishga_kirgan=date(2025, 10, 5))
+        summa, _ = maosh_summasi(xodim, SENTABR)
+        self.assertEqual(summa, Decimal(0))
 
     def test_maosh_takrorlanmaydi(self):
         xodim_yarat()
