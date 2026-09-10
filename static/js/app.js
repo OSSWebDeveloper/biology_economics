@@ -57,6 +57,8 @@
 
       function ajrat(matn) {
         var raqamlar = String(matn).replace(/[^0-9]/g, "");
+        // boshidagi keraksiz nollar olib tashlanadi: 04510852 -> 4510852
+        raqamlar = raqamlar.replace(/^0+(?=[0-9])/, "");
         if (!raqamlar) return "";
         return raqamlar.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
       }
