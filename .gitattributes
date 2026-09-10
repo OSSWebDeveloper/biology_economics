@@ -6,3 +6,4 @@
 *.ico binary
 *.png binary
 *.lnk binary
+*.ps1 -text

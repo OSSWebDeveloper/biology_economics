@@ -191,11 +191,17 @@ popd
 rem ============================================================
 call :sarlavha "7/7   Ish stoliga yorliqlar qo'yilmoqda"
 rem ============================================================
-rem PowerShell uchun nomlardagi apostrof ikkilantiriladi
-set "YORLIQ_PS=%YORLIQ:'=''%"
-set "YORLIQ2_PS=%YORLIQ2:'=''%"
-powershell -NoProfile -Command "$ws = New-Object -ComObject WScript.Shell; $d = [Environment]::GetFolderPath('CommonDesktopDirectory'); if (-not $d -or -not (Test-Path $d)) { $d = [Environment]::GetFolderPath('Desktop') }; foreach ($eski in @('Biologiya kursi.lnk','Dasturni yopish.lnk')) { $y = Join-Path $d $eski; if (Test-Path $y) { Remove-Item -LiteralPath $y -Force; Write-Host ('    Eski yorliq olib tashlandi: ' + $eski) } }; $royxat = @( @('%YORLIQ_PS%','Ishga_tushirish.vbs','bio.ico','Biologiya kursi - dasturni ochish'), @('%YORLIQ2_PS%','Toxtatish.vbs','bio_stop.ico','Biologiya kursi - serverni toxtatish') ); foreach ($r in $royxat) { $dest = Join-Path $d ($r[0] + '.lnk'); $src = Join-Path '%JOY%' ($r[0] + '.lnk'); if (Test-Path $src) { Copy-Item -LiteralPath $src -Destination $dest -Force }; $l = $ws.CreateShortcut($dest); $l.TargetPath = Join-Path '%JOY%' $r[1]; $l.WorkingDirectory = '%JOY%'; $l.IconLocation = Join-Path '%JOY%' $r[2]; $l.Description = $r[3]; $l.Save(); Write-Host ('    ' + $dest) }"
-if errorlevel 1 echo    Ogohlantirish: yorliqlar yaratilmadi, %JOY% papkasidagi .lnk fayllarini o'zingiz ish stoliga ko'chiring.
+rem Nomlar muhit o'zgaruvchisi orqali uzatiladi - buyruq satridagi
+rem apostrof turli kompyuterlarda turlicha o'qilib ketmasligi uchun
+set "BIO_JOY=%JOY%"
+set "BIO_YORLIQ1=%YORLIQ%"
+set "BIO_YORLIQ2=%YORLIQ2%"
+powershell -NoProfile -ExecutionPolicy Bypass -File "%JOY%\yorliqlar.ps1"
+if errorlevel 1 (
+    echo    Ogohlantirish: yorliqlarni yaratib bo'lmadi.
+    echo    "%JOY%" papkasidagi .lnk fayllarini o'zingiz ish stoliga ko'chiring
+    echo    yoki "%JOY%\Yorliqlarni_tiklash.bat" faylini ishga tushiring.
+)
 
 if exist "%ZIP%" del /q "%ZIP%" >nul 2>&1
 if exist "%VAQT%" rd /s /q "%VAQT%" >nul 2>&1
