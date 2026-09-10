@@ -110,6 +110,21 @@ class ChiqishTest(TestCase):
         self.assertEqual(keyingi.status_code, 302)   # endi kirish sahifasiga yuboradi
 
 
+class KeshTest(TestCase):
+    """CSS/JS manzilida versiya bo'lsin - yangilangandan keyin brauzer eskisini olmasin."""
+
+    def setUp(self):
+        self.admin = foydalanuvchi("admin1", Foydalanuvchi.Rol.ADMIN)
+        self.client.login(username="admin1", password="parol12345")
+
+    def test_statik_fayllarda_versiya_bor(self):
+        from django.conf import settings
+
+        html = self.client.get(reverse("dashboard:bosh")).content.decode()
+        self.assertIn(f"app.css?v={settings.SAYT_VERSIYA}", html)
+        self.assertIn(f"app.js?v={settings.SAYT_VERSIYA}", html)
+
+
 class BoshlangichTest(TestCase):
     def test_boshlangich_admin_hisobini_ochadi(self):
         from io import StringIO

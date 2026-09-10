@@ -48,6 +48,12 @@ class GuruhForm(forms.ModelForm):
         fields = ["nomi", "oylik_toluv", "faol"]
         widgets = {"oylik_toluv": PulInput()}
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance.pk is None:
+            # Yangi guruhda maydon "0" emas, bo'sh turadi
+            self.initial["oylik_toluv"] = None
+
 
 class ChiqarishForm(forms.Form):
     """O'quvchini kursga keladiganlar ro'yxatidan chiqarish."""
