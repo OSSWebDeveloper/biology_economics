@@ -59,28 +59,43 @@ h3 { font-size: .98rem; }
 }
 
 .yon-logo {
-  padding: 18px 18px 14px;
+  padding: 14px 18px 12px;
   border-bottom: 1px solid rgba(255, 255, 255, .08);
+  flex-shrink: 0;
 }
 .yon-logo b { color: #fff; font-size: 1rem; display: block; letter-spacing: .2px; }
 .yon-logo span { font-size: .74rem; color: #7dd3c0; }
 
-.yon-menyu { padding: 10px 8px; overflow-y: auto; flex: 1; }
+.yon-menyu {
+  padding: 8px; flex: 1; min-height: 0;
+  overflow-y: auto; overscroll-behavior: contain;
+  scrollbar-width: thin;                       /* Firefox */
+  scrollbar-color: rgba(255, 255, 255, .18) transparent;
+}
+/* Ingichka, fonga singib ketadigan scroll (Chrome/Edge) */
+.yon-menyu::-webkit-scrollbar { width: 6px; }
+.yon-menyu::-webkit-scrollbar-track { background: transparent; }
+.yon-menyu::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, .14); border-radius: 3px;
+}
+.yon-menyu::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, .28); }
+
 .yon-menyu .bolim {
-  font-size: .68rem; text-transform: uppercase; letter-spacing: .08em;
-  color: #5e8b86; padding: 14px 12px 6px;
+  font-size: .66rem; text-transform: uppercase; letter-spacing: .08em;
+  color: #5e8b86; padding: 10px 12px 4px;
 }
 .yon-menyu a {
   display: flex; align-items: center; gap: 10px;
-  padding: 9px 12px; border-radius: 8px; color: #cbd5e1;
-  font-size: .875rem; text-decoration: none; margin-bottom: 2px;
+  padding: 8px 12px; border-radius: 8px; color: #cbd5e1;
+  font-size: .86rem; text-decoration: none; margin-bottom: 1px;
 }
 .yon-menyu a:hover { background: rgba(255, 255, 255, .07); color: #fff; }
 .yon-menyu a.faol { background: var(--asosiy); color: #fff; font-weight: 600; }
 .yon-menyu .belgi { width: 18px; text-align: center; opacity: .9; }
 
 .yon-past {
-  padding: 12px; border-top: 1px solid rgba(255, 255, 255, .08); font-size: .78rem;
+  padding: 10px 12px; border-top: 1px solid rgba(255, 255, 255, .08);
+  font-size: .78rem; flex-shrink: 0;
 }
 .yon-past a { color: #7dd3c0; }
 .chiqish-forma { display: inline; }
