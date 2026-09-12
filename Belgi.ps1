@@ -84,9 +84,7 @@ if (Test-Path -LiteralPath $belgiFayli) {
 } else {
     $belgi.Icon = [System.Drawing.SystemIcons]::Application
 }
-# Belgi faqat server ishlayotganda turadi - shuning uchun izohda
-# chap tugma nima qilishini yozamiz
-$belgi.Text = "Biologiya kursi - ochish uchun bosing"
+$belgi.Text = "Biologiya kursi"
 $belgi.Visible = $false
 
 $menyu = New-Object System.Windows.Forms.ContextMenuStrip

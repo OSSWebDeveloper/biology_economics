@@ -52,6 +52,8 @@ turgan bo'lsa — server ishlayapti, yo'q bo'lsa — ishlamayapti.**
 | **chap tugma** | saytni Chrome'da ochadi |
 | **o'ng tugma** | "Dasturni yangilash" (ORNATISH.bat) va "Serverni to'xtatish" |
 
+Belgi ustiga sichqoncha olib borilsa **"Biologiya kursi"** yozuvi chiqadi.
+
 Belgi `Belgi.ps1` skripti — tashqi kutubxona kerak emas, Windows'ning o'z
 .NET shakllari ishlatiladi. `Ishga_tushirish.vbs` uni ko'rinmas rejimda
 chaqiradi; ikkinchi nusxa ochilmaydi (mutex). Har 3 sekundda port
