@@ -2,22 +2,25 @@
    Tashqi kutubxonalarsiz, internetsiz ham to'liq ishlaydi. */
 
 :root {
-  --asosiy: #0f766e;
-  --asosiy-och: #14b8a6;
-  --asosiy-juda-och: #ecfdf5;
-  --fon: #f4f6f8;
+  /* my.gov.uz logotipi palitrasi: to'q ko'k, och ko'k va yashil */
+  --asosiy: #0079c1;
+  --asosiy-och: #4ab3e6;
+  --asosiy-juda-och: #eaf6fd;
+  --asosiy-toq: #00679f;
+  --fon: #f3f7fa;
   --panel: #ffffff;
   --matn: #1a2027;
   --matn-och: #64748b;
   --chegara: #e2e8f0;
   --qizil: #dc2626;
   --qizil-fon: #fef2f2;
-  --yashil: #059669;
-  --yashil-fon: #ecfdf5;
+  --yashil: #3f8f3b;
+  --yashil-och: #63ac5e;
+  --yashil-fon: #eef7ed;
   --sariq: #d97706;
   --sariq-fon: #fffbeb;
-  --kok: #2563eb;
-  --kok-fon: #eff6ff;
+  --kok: #0079c1;
+  --kok-fon: #eaf6fd;
   --radius: 10px;
   --soya: 0 1px 3px rgba(15, 23, 42, .08), 0 1px 2px rgba(15, 23, 42, .04);
   --soya-katta: 0 10px 30px rgba(15, 23, 42, .18);
@@ -49,7 +52,7 @@ h3 { font-size: .98rem; }
 .yon {
   width: var(--yon-eni);
   flex: 0 0 var(--yon-eni);
-  background: #0b3b38;
+  background: #0a3a5c;
   color: #cbd5e1;
   display: flex;
   flex-direction: column;
@@ -64,7 +67,7 @@ h3 { font-size: .98rem; }
   flex-shrink: 0;
 }
 .yon-logo b { color: #fff; font-size: 1rem; display: block; letter-spacing: .2px; }
-.yon-logo span { font-size: .74rem; color: #7dd3c0; }
+.yon-logo span { font-size: .74rem; color: #8ecdf0; }
 
 .yon-menyu {
   padding: 8px; flex: 1; min-height: 0;
@@ -82,7 +85,7 @@ h3 { font-size: .98rem; }
 
 .yon-menyu .bolim {
   font-size: .66rem; text-transform: uppercase; letter-spacing: .08em;
-  color: #5e8b86; padding: 10px 12px 4px;
+  color: #6f93b3; padding: 10px 12px 4px;
 }
 .yon-menyu a {
   display: flex; align-items: center; gap: 10px;
@@ -97,11 +100,11 @@ h3 { font-size: .98rem; }
   padding: 10px 12px; border-top: 1px solid rgba(255, 255, 255, .08);
   font-size: .78rem; flex-shrink: 0;
 }
-.yon-past a { color: #7dd3c0; }
+.yon-past a { color: #8ecdf0; }
 .chiqish-forma { display: inline; }
 .chiqish-forma button {
   background: none; border: none; padding: 0; margin: 0; cursor: pointer;
-  color: #7dd3c0; font: inherit; text-decoration: none;
+  color: #8ecdf0; font: inherit; text-decoration: none;
 }
 .chiqish-forma button:hover { text-decoration: underline; }
 
@@ -207,7 +210,7 @@ table.jadval .bir-qator { white-space: nowrap; }
 }
 .tugma:hover { background: #f8fafc; text-decoration: none; }
 .tugma.asosiy { background: var(--asosiy); border-color: var(--asosiy); color: #fff; }
-.tugma.asosiy:hover { background: #0d635c; }
+.tugma.asosiy:hover { background: var(--asosiy-toq); }
 .tugma.xavf { background: var(--qizil); border-color: var(--qizil); color: #fff; }
 .tugma.xavf:hover { background: #b91c1c; }
 .tugma.kichik { padding: 5px 10px; font-size: .78rem; }
@@ -283,10 +286,10 @@ label.belgilash input { width: auto; }
   padding: 11px 14px; border-radius: 8px; font-size: .87rem;
   border: 1px solid transparent; display: flex; gap: 10px; align-items: flex-start;
 }
-.xabar.success { background: var(--yashil-fon); border-color: #a7f3d0; color: #065f46; }
+.xabar.success { background: var(--yashil-fon); border-color: #c2e2bf; color: #2d6b2a; }
 .xabar.error { background: var(--qizil-fon); border-color: #fecaca; color: #991b1b; }
 .xabar.warning { background: var(--sariq-fon); border-color: #fde68a; color: #92400e; }
-.xabar.info { background: var(--kok-fon); border-color: #bfdbfe; color: #1e40af; }
+.xabar.info { background: var(--kok-fon); border-color: #b6ddf3; color: #075e95; }
 
 /* ------------------------------------------------------------------ oynacha */
 
@@ -342,7 +345,7 @@ label.belgilash input { width: auto; }
 
 .kirish-sahifa {
   min-height: 100vh; display: grid; place-items: center; padding: 20px;
-  background: linear-gradient(140deg, #0b3b38, #0f766e 60%, #14b8a6);
+  background: linear-gradient(140deg, #0a3a5c, #0079c1 55%, #4ab3e6);
 }
 .kirish-quti {
   background: #fff; border-radius: 16px; box-shadow: var(--soya-katta);

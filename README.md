@@ -350,6 +350,8 @@ bio_moliya/
 ├─ dashboard/       bosh sahifa va moliya statistikasi
 ├─ templates/       sahifalar
 ├─ static/          css va js (tashqi kutubxonasiz)
+│                  ranglar `app.css` ichidagi `:root` da - my.gov.uz
+│                  palitrasi: ko'k #0079c1, och ko'k #4ab3e6, yashil #63ac5e
 ├─ versiya.txt      dastur versiyasi - yangilash shunga qarab ishlaydi
 └─ ORNATISH.bat     mijoz kompyuteriga o'rnatuvchi
 ```
