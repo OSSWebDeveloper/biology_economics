@@ -77,6 +77,8 @@ class SahifalarTest(TestCase):
             reverse("dashboard:moliya"),
             reverse("students:oquvchilar"),
             reverse("students:oquvchilar") + "?holat=qarzdor&tartib=balans",
+            reverse("students:oquvchilar") + "?royxat=qarzdor",
+            reverse("students:oquvchilar") + "?royxat=qarzdor&qamrov=hammasi&tartib=tolov",
             reverse("students:oquvchi", args=[self.oquvchi.pk]),
             reverse("students:oquvchi_yangi"),
             reverse("students:oquvchi_tahrir", args=[self.oquvchi.pk]),

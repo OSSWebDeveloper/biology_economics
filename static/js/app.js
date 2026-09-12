@@ -39,6 +39,7 @@
         // Kengroq jadval bo'lsa, oyna ham kengayadi (data-keng)
         ich.classList.toggle("keng", !!ich.querySelector("[data-keng]"));
         tolovFormasi(ich);
+        arxivFormasi(ich);
         pulMaydonlari(ich);
         var birinchi = ich.querySelector("input[name='summa']");
         if (birinchi) birinchi.focus();
@@ -106,16 +107,49 @@
     });
   }
 
+  /* Arxivlash formasi: tanlangan sababga qarab maydonlar ko'rinadi */
+  function arxivFormasi(ildiz) {
+    var soha = ildiz || document;
+    Array.prototype.forEach.call(soha.querySelectorAll("[data-arxiv-forma]"), function (forma) {
+      var tanlovlar = forma.querySelectorAll("[name='sabab']");
+      var qutilar = forma.querySelectorAll("[data-sabab]");
+
+      function yangila() {
+        var tanlangan = "";
+        Array.prototype.forEach.call(tanlovlar, function (t) {
+          if (t.checked) tanlangan = t.value;
+        });
+        Array.prototype.forEach.call(qutilar, function (quti) {
+          var uniki = quti.getAttribute("data-sabab") === tanlangan;
+          quti.style.display = uniki ? "" : "none";
+          // Ko'rinmayotgan maydonlar brauzer tekshiruvidan chetda qolsin
+          Array.prototype.forEach.call(quti.querySelectorAll("input"), function (maydon) {
+            maydon.disabled = !uniki;
+          });
+        });
+        var birinchi = forma.querySelector("[data-sabab] input:not([disabled])");
+        if (birinchi && document.activeElement !== birinchi) birinchi.focus();
+      }
+
+      Array.prototype.forEach.call(tanlovlar, function (t) {
+        t.addEventListener("change", yangila);
+      });
+      yangila();
+    });
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
     tolovFormasi(document);
+    arxivFormasi(document);
     pulMaydonlari(document);
 
     /* "To'lov" tugmasi oynachani ochadi */
     document.addEventListener("click", function (h) {
-      var tolovTugmasi = h.target.closest("[data-tolov]");
-      if (tolovTugmasi) {
+      var oynaTugmasi = h.target.closest("[data-tolov], [data-oynacha]");
+      if (oynaTugmasi) {
         h.preventDefault();
-        oynaniYukla(tolovTugmasi.getAttribute("data-tolov"));
+        oynaniYukla(oynaTugmasi.getAttribute("data-tolov")
+          || oynaTugmasi.getAttribute("data-oynacha"));
         return;
       }
       var qator = h.target.closest("[data-oyna]");

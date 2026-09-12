@@ -10,7 +10,7 @@
   <div class="panel-ich">
     <div class="tugmalar">
       <a href="{% url 'students:oquvchi_yangi' %}" class="tugma asosiy">+ Yangi o'quvchi</a>
-      <a href="{% url 'students:oquvchilar' %}?holat=qarzdor" class="tugma">Qarzdorlar ro'yxati</a>
+      <a href="{% url 'students:oquvchilar' %}?royxat=qarzdor" class="tugma">Qarzdorlar ro'yxati</a>
       <a href="{% url 'payments:tolovlar' %}" class="tugma">Kurs to'lovlari</a>
       <a href="{% url 'staff:xodimlar' %}" class="tugma">Xodimlar oyligi</a>
       <a href="{% url 'dashboard:moliya' %}" class="tugma">Moliya hisoboti</a>
@@ -50,7 +50,7 @@
   <div class="panel">
     <div class="panel-sarlavha">
       Eng katta qarzdorlar
-      <a href="{% url 'students:oquvchilar' %}?holat=qarzdor&tartib=balans" class="bosq">Hammasi &rarr;</a>
+      <a href="{% url 'students:oquvchilar' %}?royxat=qarzdor" class="bosq">Hammasi &rarr;</a>
     </div>
     <div class="panel-ich zich">
       <div class="jadval-qobiq">

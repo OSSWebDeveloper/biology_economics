@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% load moliya %}
+
+{% block sarlavha %}Arxiv - {{ SAYT_NOMI }}{% endblock %}
+{% block bolim_nomi %}Arxiv{% endblock %}
+
+{% block ichki %}
+<div class="qator orasi" style="margin-bottom:16px">
+  <div class="setka k3" style="flex:1">
+    <div class="stat kok">
+      <div class="yorliq">Arxivda</div>
+      <div class="qiymat">{{ jami }}</div>
+      <div class="izoh">kursni tugatgan o'quvchilar</div>
+    </div>
+    <div class="stat yashil">
+      <div class="yorliq">O'qishga kirganlar</div>
+      <div class="qiymat">{{ sanoq.oqish|default:"0" }}</div>
+      <div class="izoh">ballari saqlangan</div>
+    </div>
+    <div class="stat sariq">
+      <div class="yorliq">Sertifikat olganlar</div>
+      <div class="qiymat">{{ sanoq.sertifikat|default:"0" }}</div>
+      <div class="izoh">kursni tugatib ketgan</div>
+    </div>
+  </div>
+</div>
+
+<div class="tab-menyu">
+  {% for kod, nomi in yorliqlar %}
+  <a href="?bolim={{ kod }}" class="{% if bolim == kod %}faol{% endif %}">{{ nomi }}</a>
+  {% endfor %}
+</div>
+
+<form method="get" class="filtr">
+  <input type="hidden" name="bolim" value="{{ bolim }}">
+  <div class="maydon keng">
+    <label>Qidiruv</label>
+    <input type="text" name="q" value="{{ qidiruv }}" placeholder="Ism, familiya yoki guruh nomi">
+  </div>
+  <button type="submit" class="tugma">Qidirish</button>
+  <a href="{% url 'students:arxiv' %}?bolim={{ bolim }}" class="tugma">Tozalash</a>
+</form>
+
+<div class="panel">
+  <div class="panel-ich zich">
+    <div class="jadval-qobiq">
+      <table class="jadval">
+        <thead>
+          <tr>
+            <th>O'quvchi</th>
+            <th>Guruhi</th>
+            <th>Sababi</th>
+            <th>Natija</th>
+            <th class="ong">Balans</th>
+            <th>Arxivlangan</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for a in sahifa %}
+          <tr>
+            <td class="ism">
+              <span class="bosh-harf">{{ a.oquvchi.bosh_harflar }}</span>
+              <b>{{ a.oquvchi.toliq_ism }}</b>
+              <div class="bosq" style="margin-left:38px">
+                {{ a.oquvchi.boshlangan_sana|date:"d.m.Y" }} dan
+                {% if a.oquvchi.chiqarilgan_sana %}
+                  &ndash; {{ a.oquvchi.chiqarilgan_sana|date:"d.m.Y" }}
+                {% endif %}
+              </div>
+            </td>
+            <td>{{ a.guruh_nomi|default:"-" }}</td>
+            <td>
+              <span class="nishon {% if a.sabab == 'oqish' %}yashil{% elif a.sabab == 'sertifikat' %}kok{% else %}kulrang{% endif %}">
+                {{ a.get_sabab_display }}
+              </span>
+            </td>
+            <td class="mayda">
+              {% if a.sabab == 'oqish' %}
+                Biologiya: <b>{{ a.biologiya_bali }}</b> &middot; Jami: <b>{{ a.jami_ball }}</b>
+              {% elif a.sabab == 'sertifikat' %}
+                {{ a.sertifikat }}
+              {% else %}<span class="och">-</span>{% endif %}
+            </td>
+            <td class="ong pul {{ a.balans_summa|balans_klass }}">{{ a.balans_summa|som }}</td>
+            <td class="mayda">{{ a.sana|date:"d.m.Y" }}</td>
+            <td class="ong">
+              <div class="tugmalar" style="justify-content:flex-end">
+                <a href="{% url 'students:oquvchi' a.oquvchi.pk %}" class="tugma kichik">Ochish</a>
+                <form method="post" action="{% url 'students:arxivdan_chiqarish' a.pk %}"
+                      onsubmit="return confirm('{{ a.oquvchi.toliq_ism }} arxivdan chiqarilsinmi?')">
+                  {% csrf_token %}
+                  <input type="hidden" name="keyingi" value="{{ request.get_full_path }}">
+                  <button type="submit" class="tugma kichik">Arxivdan chiqarish</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="7" class="hech-narsa">Bu bo'limda hali hech kim yo'q.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if sahifa.paginator.num_pages > 1 %}
+    <div class="sahifalar">
+      {% if sahifa.has_previous %}
+        <a href="?{% sorov_bilan sahifa=sahifa.previous_page_number %}">&larr;</a>
+      {% endif %}
+      <span class="joriy">{{ sahifa.number }} / {{ sahifa.paginator.num_pages }}</span>
+      {% if sahifa.has_next %}
+        <a href="?{% sorov_bilan sahifa=sahifa.next_page_number %}">&rarr;</a>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

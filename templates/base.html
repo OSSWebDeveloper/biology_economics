@@ -21,11 +21,14 @@
       </a>
 
       <div class="bolim">O'quvchilar</div>
-      <a href="{% url 'students:oquvchilar' %}" class="{% if ns == 'students' and 'guruh' not in un %}faol{% endif %}">
+      <a href="{% url 'students:oquvchilar' %}" class="{% if ns == 'students' and 'guruh' not in un and 'arxiv' not in un %}faol{% endif %}">
         <span class="belgi">&#128100;</span> {% if user.admin_mi %}Ro'yxat{% else %}Mening o'quvchilarim{% endif %}
       </a>
       <a href="{% url 'students:guruhlar' %}" class="{% if ns == 'students' and 'guruh' in un %}faol{% endif %}">
         <span class="belgi">&#128101;</span> {% if user.admin_mi %}Guruhlar{% else %}Guruhlarim{% endif %}
+      </a>
+      <a href="{% url 'students:arxiv' %}" class="{% if ns == 'students' and 'arxiv' in un %}faol{% endif %}">
+        <span class="belgi">&#128230;</span> Arxiv
       </a>
       <a href="{% url 'payments:tolovlar' %}" class="{% if ns == 'payments' %}faol{% endif %}">
         <span class="belgi">&#128179;</span> Kurs to'lovlari

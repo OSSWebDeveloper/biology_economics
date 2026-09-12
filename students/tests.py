@@ -10,7 +10,7 @@ from accounts.models import Foydalanuvchi
 from payments.models import Tranzaksiya, Usul
 from staff.models import Xodim
 
-from .models import Guruh, Oquvchi
+from .models import Arxiv, Guruh, Oquvchi
 
 
 def oquvchi_yarat(guruh, ism="Ali", familiya="Valiyev"):
@@ -274,3 +274,163 @@ class GuruhniOchirishTest(TestCase):
         self.client.login(username="olim", password="parol12345")
         self.client.post(reverse("students:guruh_ochirish", args=[self.guruh.pk]))
         self.assertTrue(Guruh.objects.filter(pk=self.guruh.pk).exists())
+
+
+class QarzdorlarBolimiTest(TestCase):
+    """Ro'yxatdagi "Qarzdorlar" bo'limi."""
+
+    def setUp(self):
+        Foydalanuvchi.objects.create_user(
+            username="admin1", password="parol12345", rol=Foydalanuvchi.Rol.ADMIN)
+        self.guruh = Guruh.objects.create(nomi="11-sinf", oylik_toluv=Decimal(600000))
+        self.qarzdor = oquvchi_yarat(self.guruh, "Jasur", "Rahmonov")
+        self.tolagan = oquvchi_yarat(self.guruh, "Zilola", "Valiyeva")
+        Tranzaksiya.objects.create(
+            oquvchi=self.qarzdor, tur=Tranzaksiya.Tur.HISOB, summa=Decimal(600000),
+            sana=date(2026, 9, 1), davr=date(2026, 9, 1))
+        Tranzaksiya.objects.create(
+            oquvchi=self.tolagan, tur=Tranzaksiya.Tur.TOLOV, summa=Decimal(600000),
+            sana=date(2026, 9, 5), usul=Usul.NAQD)
+        self.client.login(username="admin1", password="parol12345")
+
+    def manzil(self, **parametrlar):
+        qoshimcha = "".join(f"&{k}={v}" for k, v in parametrlar.items())
+        return reverse("students:oquvchilar") + "?royxat=qarzdor" + qoshimcha
+
+    def test_faqat_qarzdorlar_korinadi(self):
+        javob = self.client.get(self.manzil())
+        self.assertEqual(javob.status_code, 200)
+        self.assertContains(javob, "Rahmonov Jasur")
+        self.assertNotContains(javob, "Valiyeva Zilola")
+
+    def test_jami_qarz_hisoblanadi(self):
+        javob = self.client.get(self.manzil())
+        self.assertContains(javob, "Jami qarz")
+        self.assertEqual(javob.context["jamlar"]["qarz_summa"], Decimal(600000))
+        self.assertEqual(javob.context["jamlar"]["qarzdor"], 1)
+
+    def test_oddiy_royxatda_bolim_yorligi_bor(self):
+        html = self.client.get(reverse("students:oquvchilar")).content.decode()
+        self.assertIn("?royxat=qarzdor", html)
+
+    def test_chiqarilgan_qarzdor_faqat_qamrov_bilan_korinadi(self):
+        self.qarzdor.faol = False
+        self.qarzdor.chiqarilgan_sana = date(2026, 9, 10)
+        self.qarzdor.save()
+        self.assertNotContains(self.client.get(self.manzil()), "Rahmonov Jasur")
+        self.assertContains(
+            self.client.get(self.manzil(qamrov="hammasi")), "Rahmonov Jasur")
+
+    def test_hali_tolamaganlar_belgilanadi(self):
+        self.assertContains(self.client.get(self.manzil()), "hali to'lamagan")
+
+
+class ArxivlashTest(TestCase):
+    """Arxivlash oynachasi va "Arxiv" bo'limi."""
+
+    def setUp(self):
+        Foydalanuvchi.objects.create_user(
+            username="admin1", password="parol12345", rol=Foydalanuvchi.Rol.ADMIN)
+        self.guruh = Guruh.objects.create(nomi="11-sinf", oylik_toluv=Decimal(600000))
+        self.oquvchi = oquvchi_yarat(self.guruh, "Jasur", "Rahmonov")
+        self.client.login(username="admin1", password="parol12345")
+
+    def arxivla(self, **maydonlar):
+        return self.client.post(
+            reverse("students:oquvchi_arxivlash", args=[self.oquvchi.pk]), maydonlar)
+
+    def test_oynacha_ochiladi(self):
+        javob = self.client.get(
+            reverse("students:oquvchi_arxiv_oyna", args=[self.oquvchi.pk]))
+        self.assertEqual(javob.status_code, 200)
+        for nomi in ("qishga kirdi", "Sertifikat oldi", "Guruhdan haydaldi"):
+            self.assertContains(javob, nomi)
+
+    def test_oqishga_kirdi_ballari_saqlanadi(self):
+        self.arxivla(sabab="oqish", biologiya_bali="78.5", jami_ball="164.3")
+        yozuv = Arxiv.objects.get(oquvchi=self.oquvchi)
+        self.assertEqual(yozuv.sabab, Arxiv.Sabab.OQISHGA_KIRDI)
+        self.assertEqual(yozuv.biologiya_bali, Decimal("78.5"))
+        self.assertEqual(yozuv.jami_ball, Decimal("164.3"))
+        self.assertEqual(yozuv.guruh_nomi, "11-sinf")
+        self.assertEqual(yozuv.guruh, self.guruh)
+
+    def test_arxivlangan_guruhdan_chiqariladi(self):
+        self.arxivla(sabab="haydaldi")
+        self.oquvchi.refresh_from_db()
+        self.assertIsNone(self.oquvchi.guruh)
+        self.assertFalse(self.oquvchi.faol)
+        # Guruh olib tashlansa ham oylik narx yo'qolmaydi
+        self.assertEqual(self.oquvchi.oylik_toluv, Decimal(600000))
+        self.assertEqual(self.guruh.faol_oquvchilar_soni, 0)
+
+    def test_sertifikatsiz_saqlanmaydi(self):
+        self.arxivla(sabab="sertifikat", sertifikat="")
+        self.assertFalse(Arxiv.objects.exists())
+
+    def test_sertifikat_saqlanadi(self):
+        self.arxivla(sabab="sertifikat", sertifikat="A-2026/114")
+        yozuv = Arxiv.objects.get(oquvchi=self.oquvchi)
+        self.assertEqual(yozuv.sertifikat, "A-2026/114")
+        self.assertIsNone(yozuv.biologiya_bali)
+
+    def test_haydalganda_qoshimcha_maydonlar_tozalanadi(self):
+        self.arxivla(sabab="haydaldi", biologiya_bali="90", sertifikat="bor edi")
+        yozuv = Arxiv.objects.get(oquvchi=self.oquvchi)
+        self.assertEqual(yozuv.sertifikat, "")
+        self.assertIsNone(yozuv.biologiya_bali)
+        self.assertIsNone(yozuv.jami_ball)
+
+    def test_ballsiz_oqishga_kirdi_saqlanmaydi(self):
+        self.arxivla(sabab="oqish", biologiya_bali="", jami_ball="")
+        self.assertFalse(Arxiv.objects.exists())
+
+    def test_arxivlangan_royxatda_korinmaydi(self):
+        self.arxivla(sabab="haydaldi")
+        self.client.get(reverse("students:oquvchilar"))  # xabarni iste'mol qiladi
+        for manzil in ("", "?royxat=chiqarilgan", "?royxat=hammasi",
+                       "?royxat=qarzdor&qamrov=hammasi"):
+            with self.subTest(manzil=manzil):
+                javob = self.client.get(reverse("students:oquvchilar") + manzil)
+                self.assertNotContains(javob, "Rahmonov Jasur")
+                self.assertNotIn(self.oquvchi, list(javob.context["sahifa"]))
+
+    def test_arxiv_bolimida_korinadi(self):
+        self.arxivla(sabab="oqish", biologiya_bali="78.5", jami_ball="164.3")
+        javob = self.client.get(reverse("students:arxiv"))
+        self.assertContains(javob, "Rahmonov Jasur")
+        self.assertContains(javob, "11-sinf")
+
+    def test_yorliqlar_ajratadi(self):
+        self.arxivla(sabab="haydaldi")
+        manzil = reverse("students:arxiv")
+        self.assertContains(self.client.get(manzil + "?bolim=haydaldi"), "Rahmonov Jasur")
+        self.assertNotContains(self.client.get(manzil + "?bolim=oqish"), "Rahmonov Jasur")
+
+    def test_ikki_marta_arxivlanmaydi(self):
+        self.arxivla(sabab="haydaldi")
+        self.arxivla(sabab="oqish", biologiya_bali="80", jami_ball="170")
+        self.assertEqual(Arxiv.objects.count(), 1)
+        self.assertEqual(Arxiv.objects.get().sabab, Arxiv.Sabab.HAYDALDI)
+
+    def test_oqituvchi_oz_arxivini_koradi(self):
+        oqituvchi = Foydalanuvchi.objects.create_user(
+            username="olim", password="parol12345", rol=Foydalanuvchi.Rol.OQITUVCHI)
+        self.guruh.oqituvchi = oqituvchi
+        self.guruh.save()
+        self.arxivla(sabab="haydaldi")
+
+        self.client.login(username="olim", password="parol12345")
+        self.assertContains(self.client.get(reverse("students:arxiv")), "Rahmonov Jasur")
+        # Guruhi bo'shatilgan bo'lsa ham kartochkasi ochiladi
+        javob = self.client.get(reverse("students:oquvchi", args=[self.oquvchi.pk]))
+        self.assertEqual(javob.status_code, 200)
+
+    def test_arxivdan_chiqariladi(self):
+        self.arxivla(sabab="haydaldi")
+        yozuv = Arxiv.objects.get()
+        self.client.get(reverse("students:oquvchilar"))  # xabarni iste'mol qiladi
+        self.client.post(reverse("students:arxivdan_chiqarish", args=[yozuv.pk]))
+        self.assertFalse(Arxiv.objects.exists())
+        javob = self.client.get(reverse("students:oquvchilar") + "?royxat=chiqarilgan")
+        self.assertContains(javob, "Rahmonov Jasur")

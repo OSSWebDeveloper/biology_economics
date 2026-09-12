@@ -1,12 +1,29 @@
 {% extends "base.html" %}
 {% load moliya %}
 
-{% block sarlavha %}O'quvchilar - {{ SAYT_NOMI }}{% endblock %}
-{% block bolim_nomi %}O'quvchilar ro'yxati{% endblock %}
+{% block sarlavha %}{% if qarz_royxati %}Qarzdorlar{% else %}O'quvchilar{% endif %} - {{ SAYT_NOMI }}{% endblock %}
+{% block bolim_nomi %}{% if qarz_royxati %}Qarzdorlar ro'yxati{% else %}O'quvchilar ro'yxati{% endif %}{% endblock %}
 
 {% block ichki %}
 <div class="qator orasi" style="margin-bottom:16px">
   <div class="setka k3" style="flex:1">
+    {% if qarz_royxati %}
+    <div class="stat qizil">
+      <div class="yorliq">Qarzdorlar</div>
+      <div class="qiymat">{{ jamlar.qarzdor }}</div>
+      <div class="izoh">filtrga mos o'quvchilar</div>
+    </div>
+    <div class="stat qizil">
+      <div class="yorliq">Jami qarz</div>
+      <div class="qiymat pul qarz">{{ jamlar.qarz_summa|som }}</div>
+      <div class="izoh">yig'ilishi kerak bo'lgan summa</div>
+    </div>
+    <div class="stat sariq">
+      <div class="yorliq">Eng katta qarz</div>
+      <div class="qiymat pul qarz">{{ jamlar.eng_katta|som }}</div>
+      <div class="izoh">bitta o'quvchida</div>
+    </div>
+    {% else %}
     <div class="stat kok">
       <div class="yorliq">Ro'yxatda</div>
       <div class="qiymat">{{ jamlar.jami }}</div>
@@ -22,11 +39,14 @@
       <div class="qiymat">{{ jamlar.oldindan }}</div>
       <div class="izoh">hisobida puli bor</div>
     </div>
+    {% endif %}
   </div>
 </div>
 
 <div class="tab-menyu">
   <a href="?royxat=faol" class="{% if filtr.royxat == 'faol' %}faol{% endif %}">Kursga keladiganlar</a>
+  <a href="?royxat=qarzdor" class="{% if qarz_royxati %}faol{% endif %}">Qarzdorlar{% if qarzdorlar_soni %}
+    <span class="nishon qizil" style="margin-left:4px">{{ qarzdorlar_soni }}</span>{% endif %}</a>
   <a href="?royxat=chiqarilgan" class="{% if filtr.royxat == 'chiqarilgan' %}faol{% endif %}">Chiqarilganlar</a>
   <a href="?royxat=hammasi" class="{% if filtr.royxat == 'hammasi' %}faol{% endif %}">Hammasi</a>
 </div>
@@ -46,6 +66,25 @@
       {% endfor %}
     </select>
   </div>
+  {% if qarz_royxati %}
+  <div class="maydon">
+    <label>Kimlar</label>
+    <select name="qamrov">
+      <option value="faol" {% if filtr.qamrov == 'faol' %}selected{% endif %}>Kursga keladiganlar</option>
+      <option value="chiqarilgan" {% if filtr.qamrov == 'chiqarilgan' %}selected{% endif %}>Chiqarilganlar</option>
+      <option value="hammasi" {% if filtr.qamrov == 'hammasi' %}selected{% endif %}>Hammasi</option>
+    </select>
+  </div>
+  <div class="maydon">
+    <label>Tartib</label>
+    <select name="tartib">
+      <option value="balans" {% if filtr.tartib == 'balans' %}selected{% endif %}>Eng ko'p qarzdor</option>
+      <option value="tolov" {% if filtr.tartib == 'tolov' %}selected{% endif %}>Eng uzoq to'lamaganlar</option>
+      <option value="ism" {% if filtr.tartib == 'ism' %}selected{% endif %}>Familiya bo'yicha</option>
+      <option value="yangi" {% if filtr.tartib == 'yangi' %}selected{% endif %}>Yangi kelganlar</option>
+    </select>
+  </div>
+  {% else %}
   <div class="maydon">
     <label>To'lov holati</label>
     <select name="holat">
@@ -64,9 +103,12 @@
       <option value="yangi" {% if filtr.tartib == 'yangi' %}selected{% endif %}>Yangi kelganlar</option>
     </select>
   </div>
+  {% endif %}
   <button type="submit" class="tugma">Filtrlash</button>
-  <a href="{% url 'students:oquvchilar' %}" class="tugma">Tozalash</a>
+  <a href="{% url 'students:oquvchilar' %}?royxat={{ filtr.royxat }}" class="tugma">Tozalash</a>
+  {% if not qarz_royxati %}
   <a href="{% url 'students:oquvchi_yangi' %}" class="tugma asosiy">+ Yangi o'quvchi</a>
+  {% endif %}
 </form>
 
 <div class="panel">
@@ -79,15 +121,15 @@
             <th>Telefonlar</th>
             <th>Guruh</th>
             <th class="ong">Oylik</th>
-            <th class="ong">Balans</th>
-            <th>Holat</th>
+            <th class="ong">{% if qarz_royxati %}Qarz{% else %}Balans{% endif %}</th>
+            <th>{% if qarz_royxati %}Oxirgi to'lov{% else %}Holat{% endif %}</th>
             <th></th>
           </tr>
         </thead>
         <tbody>
         {% for o in sahifa %}
           <tr>
-            <td>
+            <td class="ism">
               <span class="bosh-harf">{{ o.bosh_harflar }}</span>
               <b>{{ o.toliq_ism }}</b>
               {% if not o.faol %}<span class="nishon kulrang" style="margin-left:6px">chiqarilgan</span>{% endif %}
@@ -100,18 +142,31 @@
             </td>
             <td>{{ o.guruh.nomi|default:"-" }}</td>
             <td class="ong pul">{{ o.amaldagi_oylik|som }}</td>
+            {% if qarz_royxati %}
+            <td class="ong pul qarz"><b>{{ o.balans_summa|musbat|som }}</b></td>
+            <td class="mayda">
+              {% if o.oxirgi_tolov %}{{ o.oxirgi_tolov|date:"d.m.Y" }}
+              {% else %}<span class="nishon qizil">hali to'lamagan</span>{% endif %}
+            </td>
+            {% else %}
             <td class="ong pul {{ o.balans_summa|balans_klass }}"><b>{{ o.balans_summa|som }}</b></td>
             <td><span class="nishon {{ o.holat_info.rang }}">{{ o.holat_info.nom }}</span></td>
+            {% endif %}
             <td class="ong">
               <div class="tugmalar" style="justify-content:flex-end">
                 <button type="button" class="tugma kichik asosiy"
                         data-tolov="{% url 'payments:tez_tolov_oyna' o.pk %}">To'lov</button>
                 <a href="{% url 'students:oquvchi' o.pk %}" class="tugma kichik">Ochish</a>
+                <button type="button" class="tugma kichik"
+                        data-oynacha="{% url 'students:oquvchi_arxiv_oyna' o.pk %}">Arxiv</button>
               </div>
             </td>
           </tr>
         {% empty %}
-          <tr><td colspan="7" class="hech-narsa">Bu shartlarga mos o'quvchi topilmadi.</td></tr>
+          <tr><td colspan="7" class="hech-narsa">
+            {% if qarz_royxati %}Qarzdor o'quvchi yo'q - hammasi to'lagan.
+            {% else %}Bu shartlarga mos o'quvchi topilmadi.{% endif %}
+          </td></tr>
         {% endfor %}
         </tbody>
       </table>

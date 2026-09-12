@@ -2,8 +2,9 @@ from datetime import date
 
 from django.contrib import messages
 from django.core.paginator import Paginator
-from django.db.models import Count, Q
+from django.db.models import Count, Max, Q
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 
 from accounts.permissions import admin_talab
 from payments.forms import TolovForm
@@ -11,6 +12,7 @@ from payments.models import Tranzaksiya
 from payments.services import (
     balans_bilan,
     balans_holati,
+    balans_ifodasi,
     barcha_hisoblarni_yangila,
     hisoblarni_yarat,
     holat_filtri,
@@ -18,30 +20,53 @@ from payments.services import (
     oyni_qayta_hisobla,
 )
 
-from .forms import ChiqarishForm, GuruhForm, OquvchiForm, QaytarishForm
-from .models import Guruh, Oquvchi
+from .forms import ArxivForm, ChiqarishForm, GuruhForm, OquvchiForm, QaytarishForm
+from .models import Arxiv, Guruh, Oquvchi
 
 
 def _koradigan_oquvchilar(foydalanuvchi):
-    """Admin hammasini, o'qituvchi esa faqat o'z guruhlaridagilarni ko'radi."""
+    """Admin hammasini, o'qituvchi esa faqat o'z guruhlaridagilarni ko'radi.
+
+    Arxivlangan o'quvchining guruhi bo'shatiladi, shuning uchun o'qituvchi uni
+    arxivdagi guruh yozuvi orqali ko'rishda davom etadi.
+    """
     qs = Oquvchi.objects.select_related("guruh")
     if not foydalanuvchi.admin_mi:
-        qs = qs.filter(guruh__oqituvchi=foydalanuvchi)
+        qs = qs.filter(
+            Q(guruh__oqituvchi=foydalanuvchi) | Q(arxiv__guruh__oqituvchi=foydalanuvchi)
+        )
     return qs
 
 
+QARZ_ROYXATI = "qarzdor"
+
+
+def _qamrov_filtri(qs, qamrov):
+    """Qarzdorlar bo'limi kimlarni qamrab olishi: faol / chiqarilgan / hammasi."""
+    if qamrov == "chiqarilgan":
+        return qs.filter(faol=False)
+    if qamrov == "hammasi":
+        return qs
+    return qs.filter(faol=True)
+
+
 def oquvchilar(request):
-    """Kursga keladiganlar ro'yxati + to'lov holati bo'yicha filtr."""
+    """O'quvchilar ro'yxati: kursga keladiganlar, chiqarilganlar va qarzdorlar."""
     barcha_hisoblarni_yangila()
 
     royxat_turi = request.GET.get("royxat", "faol")
+    qarz_royxati = royxat_turi == QARZ_ROYXATI
     qidiruv = (request.GET.get("q") or "").strip()
     guruh_id = request.GET.get("guruh") or ""
     holat = request.GET.get("holat") or ""
-    tartib = request.GET.get("tartib") or "ism"
+    qamrov = request.GET.get("qamrov") or "faol"
+    tartib = request.GET.get("tartib") or ("balans" if qarz_royxati else "ism")
 
-    qs = _koradigan_oquvchilar(request.user)
-    if royxat_turi == "chiqarilgan":
+    # Arxivlanganlar ro'yxatda ko'rinmaydi - ular "Arxiv" bo'limida
+    qs = _koradigan_oquvchilar(request.user).filter(arxiv__isnull=True)
+    if qarz_royxati:
+        qs = _qamrov_filtri(qs, qamrov)
+    elif royxat_turi == "chiqarilgan":
         qs = qs.filter(faol=False)
     elif royxat_turi != "hammasi":
         qs = qs.filter(faol=True)
@@ -55,7 +80,17 @@ def oquvchilar(request):
     if guruh_id.isdigit():
         qs = qs.filter(guruh_id=int(guruh_id))
 
-    qs = holat_filtri(balans_bilan(qs), holat)
+    qs = balans_bilan(qs)
+    if qarz_royxati:
+        # Faqat manfiy balansli o'quvchilar + oxirgi to'lov qachon bo'lgani
+        qs = qs.filter(balans_summa__lt=0).annotate(
+            oxirgi_tolov=Max(
+                "tranzaksiyalar__sana",
+                filter=Q(tranzaksiyalar__tur=Tranzaksiya.Tur.TOLOV),
+            )
+        )
+    else:
+        qs = holat_filtri(qs, holat)
 
     tartiblar = {
         "ism": ["familiya", "ism"],
@@ -63,6 +98,9 @@ def oquvchilar(request):
         "balans_teskari": ["-balans_summa"],
         "yangi": ["-boshlangan_sana"],
     }
+    if qarz_royxati:
+        # Eng uzoq to'lamaganlar tepada (umuman to'lamaganlar eng boshida)
+        tartiblar["tolov"] = ["oxirgi_tolov", "familiya"]
     qs = qs.order_by(*tartiblar.get(tartib, tartiblar["ism"]))
 
     sahifalar = Paginator(qs, 50)
@@ -72,18 +110,28 @@ def oquvchilar(request):
         oquvchi.holat_info = balans_holati(oquvchi.balans_summa)
 
     balanslar = list(qs.values_list("balans_summa", flat=True))
+    qarzlar = [-b for b in balanslar if b < 0]
     jamlar = {
         "jami": len(balanslar),
-        "qarzdor": sum(1 for b in balanslar if b < 0),
+        "qarzdor": len(qarzlar),
         "oldindan": sum(1 for b in balanslar if b > 0),
+        "qarz_summa": sum(qarzlar) if qarzlar else 0,
+        "eng_katta": max(qarzlar) if qarzlar else 0,
     }
+
+    # Yorliqdagi raqam: kursga keladigan qarzdorlar soni (bo'lim filtriga bog'liq emas)
+    qarzdorlar_soni = balans_bilan(
+        _koradigan_oquvchilar(request.user).filter(faol=True, arxiv__isnull=True)
+    ).filter(balans_summa__lt=0).count()
 
     return render(request, "students/royxat.html", {
         "sahifa": sahifa,
         "guruhlar": request.user.guruhlari.filter(faol=True),
         "jamlar": jamlar,
+        "qarz_royxati": qarz_royxati,
+        "qarzdorlar_soni": qarzdorlar_soni,
         "filtr": {"q": qidiruv, "guruh": guruh_id, "holat": holat,
-                  "royxat": royxat_turi, "tartib": tartib},
+                  "royxat": royxat_turi, "tartib": tartib, "qamrov": qamrov},
         "tolov_form": TolovForm(),
     })
 
@@ -185,6 +233,135 @@ def oquvchi_ochirish(request, pk):
         messages.success(request, f"{ism} va uning butun tarixi o'chirildi.")
         return redirect("students:oquvchilar")
     return render(request, "students/ochirish.html", {"oquvchi": obyekt})
+
+
+# ------------------------------------------------------------------ arxiv
+
+
+def _qaytish_manzili(request, standart):
+    keyingi = request.POST.get("keyingi") or request.GET.get("keyingi")
+    if keyingi and keyingi.startswith("/"):
+        return keyingi
+    return standart
+
+
+def oquvchi_arxiv_oyna(request, pk):
+    """"Arxivlash" tugmasi ochadigan oynacha."""
+    obyekt = get_object_or_404(_koradigan_oquvchilar(request.user), pk=pk)
+    keyingi = request.GET.get("keyingi") or ""
+    return render(request, "students/_arxiv_oyna.html", {
+        "oquvchi": obyekt,
+        "form": ArxivForm(),
+        "keyingi": keyingi if keyingi.startswith("/") else "",
+    })
+
+
+def oquvchi_arxivlash(request, pk):
+    """O'quvchini guruhdan chiqarib arxivga o'tkazadi."""
+    obyekt = get_object_or_404(_koradigan_oquvchilar(request.user), pk=pk)
+    qaytish = _qaytish_manzili(request, reverse("students:oquvchi", args=[pk]))
+    if request.method != "POST":
+        return redirect(qaytish)
+
+    if hasattr(obyekt, "arxiv"):
+        messages.error(request, f"{obyekt.toliq_ism} allaqachon arxivda.")
+        return redirect(qaytish)
+
+    form = ArxivForm(request.POST)
+    if not form.is_valid():
+        xatolar = "; ".join(" ".join(x) for x in form.errors.values())
+        messages.error(request, f"Arxivlanmadi. {xatolar}")
+        return redirect(qaytish)
+
+    sana = date.today()
+    yozuv = form.save(commit=False)
+    yozuv.oquvchi = obyekt
+    yozuv.guruh = obyekt.guruh
+    yozuv.guruh_nomi = obyekt.guruh.nomi if obyekt.guruh else ""
+    yozuv.sana = sana
+    yozuv.yaratgan = request.user
+
+    hali_faol = obyekt.faol
+    # Guruh olib tashlanadi - shuning uchun narx o'quvchining o'ziga ko'chiriladi,
+    # aks holda oxirgi oy hisobi noto'g'ri chiqadi.
+    if obyekt.oylik_toluv is None:
+        obyekt.oylik_toluv = obyekt.amaldagi_oylik
+    obyekt.guruh = None
+    obyekt.faol = False
+    if hali_faol:
+        obyekt.chiqarilgan_sana = sana
+    obyekt.chiqarish_sababi = f"Arxiv: {yozuv.get_sabab_display()}"
+    obyekt.save()
+
+    if hali_faol:
+        # Chiqarilgandagi kabi: keyingi oylar hisobi olib tashlanadi,
+        # tugallanmagan oy esa qatnashgan kunlari bo'yicha yopiladi.
+        obyekt.tranzaksiyalar.filter(
+            tur=Tranzaksiya.Tur.HISOB, davr__gt=oy_boshi(sana)
+        ).delete()
+        oyni_qayta_hisobla(obyekt, oy_boshi(sana), sana)
+
+    yozuv.save()
+    messages.success(
+        request,
+        f"{obyekt.toliq_ism} arxivga o'tkazildi ({yozuv.get_sabab_display().lower()}).",
+    )
+    return redirect(qaytish)
+
+
+def arxiv(request):
+    """Arxiv bo'limi: sabab bo'yicha yorliqlarga ajratilgan ro'yxat."""
+    asos = Arxiv.objects.all()
+    if not request.user.admin_mi:
+        asos = asos.filter(guruh__oqituvchi=request.user)
+
+    sanoq = dict(asos.values_list("sabab").annotate(soni=Count("id")))
+    bolim = request.GET.get("bolim") or "hammasi"
+    qidiruv = (request.GET.get("q") or "").strip()
+
+    qs = asos.select_related("oquvchi", "guruh").annotate(
+        balans_summa=balans_ifodasi("oquvchi__tranzaksiyalar")
+    ).order_by("-sana", "-id")
+    if bolim in Arxiv.Sabab.values:
+        qs = qs.filter(sabab=bolim)
+    if qidiruv:
+        qs = qs.filter(
+            Q(oquvchi__ism__icontains=qidiruv) | Q(oquvchi__familiya__icontains=qidiruv)
+            | Q(guruh_nomi__icontains=qidiruv)
+        )
+
+    sahifalar = Paginator(qs, 50)
+    sahifa = sahifalar.get_page(request.GET.get("sahifa"))
+    for yozuv in sahifa:
+        yozuv.holat_info = balans_holati(yozuv.balans_summa)
+
+    return render(request, "students/arxiv.html", {
+        "sahifa": sahifa,
+        "bolim": bolim,
+        "qidiruv": qidiruv,
+        "sanoq": sanoq,
+        "jami": sum(sanoq.values()),
+        "yorliqlar": [("hammasi", "Hammasi")] + list(Arxiv.Sabab.choices),
+    })
+
+
+def arxivdan_chiqarish(request, pk):
+    """Xato arxivlangan o'quvchini arxivdan qaytaradi (ro'yxatga emas)."""
+    yozuv = get_object_or_404(Arxiv.objects.select_related("oquvchi", "guruh"), pk=pk)
+    if not request.user.admin_mi and (
+        yozuv.guruh is None or yozuv.guruh.oqituvchi_id != request.user.pk
+    ):
+        messages.error(request, "Bu yozuvni faqat admin qaytara oladi.")
+        return redirect("students:arxiv")
+    if request.method == "POST":
+        ism = yozuv.oquvchi.toliq_ism
+        yozuv.delete()
+        messages.success(
+            request,
+            f"{ism} arxivdan chiqarildi. U endi \"Chiqarilganlar\" ro'yxatida - "
+            f"guruhini tayinlash uchun kartochkasidan ro'yxatga qaytaring.",
+        )
+    return redirect(_qaytish_manzili(request, reverse("students:arxiv")))
 
 
 # ---------------------------------------------------------------- guruhlar

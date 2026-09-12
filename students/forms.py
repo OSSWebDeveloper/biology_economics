@@ -4,7 +4,7 @@ from django import forms
 
 from dashboard.widgets import PulInput, SanaInput
 
-from .models import Guruh, Oquvchi
+from .models import Arxiv, Guruh, Oquvchi
 
 
 class OquvchiForm(forms.ModelForm):
@@ -94,3 +94,44 @@ class QaytarishForm(forms.Form):
         widget=SanaInput(),
         help_text="Shu sanadan yangi hisob boshlanadi.",
     )
+
+
+class ArxivForm(forms.ModelForm):
+    """Arxivlash oynachasi: sabab va unga bog'liq maydonlar."""
+
+    class Meta:
+        model = Arxiv
+        fields = ["sabab", "biologiya_bali", "jami_ball", "sertifikat"]
+        widgets = {
+            "sabab": forms.RadioSelect(),
+            "biologiya_bali": forms.NumberInput(attrs={"step": "0.1", "min": "0"}),
+            "jami_ball": forms.NumberInput(attrs={"step": "0.1", "min": "0"}),
+            "sertifikat": forms.TextInput(
+                attrs={"placeholder": "Sertifikat raqami yoki darajasi"}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # RadioSelect da bo'sh ("---------") variant kerak emas
+        self.fields["sabab"].choices = Arxiv.Sabab.choices
+
+    def clean(self):
+        """Tanlangan sababga tegishli bo'lmagan maydonlar tozalanadi."""
+        tozalangan = super().clean()
+        sabab = tozalangan.get("sabab")
+
+        if sabab == Arxiv.Sabab.OQISHGA_KIRDI:
+            for nom in ("biologiya_bali", "jami_ball"):
+                if tozalangan.get(nom) is None and nom not in self.errors:
+                    self.add_error(nom, "Ball kiritilsin.")
+            tozalangan["sertifikat"] = ""
+        elif sabab == Arxiv.Sabab.SERTIFIKAT:
+            if not tozalangan.get("sertifikat"):
+                self.add_error("sertifikat", "Sertifikat yozilsin.")
+            tozalangan["biologiya_bali"] = None
+            tozalangan["jami_ball"] = None
+        else:
+            tozalangan["sertifikat"] = ""
+            tozalangan["biologiya_bali"] = None
+            tozalangan["jami_ball"] = None
+        return tozalangan

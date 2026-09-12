@@ -7,6 +7,8 @@ app_name = "students"
 urlpatterns = [
     path("", views.oquvchilar, name="oquvchilar"),
     path("yangi/", views.oquvchi_saqlash, name="oquvchi_yangi"),
+    path("arxiv/", views.arxiv, name="arxiv"),
+    path("arxiv/<int:pk>/chiqarish/", views.arxivdan_chiqarish, name="arxivdan_chiqarish"),
     path("guruhlar/", views.guruhlar, name="guruhlar"),
     path("guruhlar/yangi/", views.guruh_saqlash, name="guruh_yangi"),
     path("guruhlar/<int:pk>/oyna/", views.guruh_oyna, name="guruh_oyna"),
@@ -15,6 +17,8 @@ urlpatterns = [
     path("<int:pk>/", views.oquvchi, name="oquvchi"),
     path("<int:pk>/tahrirlash/", views.oquvchi_saqlash, name="oquvchi_tahrir"),
     path("<int:pk>/chiqarish/", views.oquvchi_chiqarish, name="oquvchi_chiqarish"),
+    path("<int:pk>/arxiv-oyna/", views.oquvchi_arxiv_oyna, name="oquvchi_arxiv_oyna"),
+    path("<int:pk>/arxivlash/", views.oquvchi_arxivlash, name="oquvchi_arxivlash"),
     path("<int:pk>/qaytarish/", views.oquvchi_qaytarish, name="oquvchi_qaytarish"),
     path("<int:pk>/ochirish/", views.oquvchi_ochirish, name="oquvchi_ochirish"),
 ]

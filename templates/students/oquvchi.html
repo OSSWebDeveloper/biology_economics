@@ -9,7 +9,8 @@
   <div>
     <h1 style="margin-bottom:4px">
       {{ oquvchi.toliq_ism }}
-      {% if not oquvchi.faol %}<span class="nishon kulrang">ro'yxatdan chiqarilgan</span>{% endif %}
+      {% if oquvchi.arxiv %}<span class="nishon kok">arxivda &middot; {{ oquvchi.arxiv.get_sabab_display }}</span>
+      {% elif not oquvchi.faol %}<span class="nishon kulrang">ro'yxatdan chiqarilgan</span>{% endif %}
     </h1>
     <div class="bosq">
       {{ oquvchi.guruh.nomi|default:"Guruhsiz" }} &middot;
@@ -21,10 +22,21 @@
   </div>
   <div class="tugmalar">
     <a href="{% url 'students:oquvchi_tahrir' oquvchi.pk %}" class="tugma">Tahrirlash</a>
-    {% if oquvchi.faol %}
-      <button type="button" class="tugma" data-ochish="#chiqarish-oynasi">Ro'yxatdan chiqarish</button>
+    {% if oquvchi.arxiv %}
+      <form method="post" action="{% url 'students:arxivdan_chiqarish' oquvchi.arxiv.pk %}"
+            onsubmit="return confirm('Arxivdan chiqarilsinmi?')">
+        {% csrf_token %}
+        <input type="hidden" name="keyingi" value="{{ request.get_full_path }}">
+        <button type="submit" class="tugma">Arxivdan chiqarish</button>
+      </form>
     {% else %}
-      <button type="button" class="tugma asosiy" data-ochish="#qaytarish-oynasi">Ro'yxatga qaytarish</button>
+      {% if oquvchi.faol %}
+        <button type="button" class="tugma" data-ochish="#chiqarish-oynasi">Ro'yxatdan chiqarish</button>
+      {% else %}
+        <button type="button" class="tugma asosiy" data-ochish="#qaytarish-oynasi">Ro'yxatga qaytarish</button>
+      {% endif %}
+      <button type="button" class="tugma"
+              data-oynacha="{% url 'students:oquvchi_arxiv_oyna' oquvchi.pk %}">Arxivlash</button>
     {% endif %}
     {% if user.admin_mi %}
       <a href="{% url 'students:oquvchi_ochirish' oquvchi.pk %}" class="tugma xavf">O'chirish</a>
@@ -125,6 +137,32 @@
     </div>
   </div>
 </div>
+
+{% if oquvchi.arxiv %}
+<div class="panel">
+  <div class="panel-sarlavha">Arxiv ma'lumoti</div>
+  <div class="panel-ich">
+    <div class="setka k4">
+      <div>
+        <div class="bosq">Sababi</div>
+        <b>{{ oquvchi.arxiv.get_sabab_display }}</b>
+      </div>
+      <div>
+        <div class="bosq">Arxivlashdagi guruhi</div>
+        <b>{{ oquvchi.arxiv.guruh_nomi|default:"-" }}</b>
+      </div>
+      <div>
+        <div class="bosq">Natija</div>
+        <b>{{ oquvchi.arxiv.natija|default:"-" }}</b>
+      </div>
+      <div>
+        <div class="bosq">Arxivlangan sana</div>
+        <b>{{ oquvchi.arxiv.sana|date:"d.m.Y" }}</b>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
 
 {% if oquvchi.izoh %}
 <div class="panel">

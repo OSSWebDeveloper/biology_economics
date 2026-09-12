@@ -142,3 +142,69 @@ class Oquvchi(models.Model):
     def holat(self):
         from payments.services import balans_holati
         return balans_holati(self.balans)
+
+
+class Arxiv(models.Model):
+    """Kursni tugatgan o'quvchi: guruhdan chiqariladi, ma'lumoti saqlanib qoladi.
+
+    Arxivlangan o'quvchi hech qaysi guruhga tegishli bo'lmaydi va o'quvchilar
+    ro'yxatida ko'rinmaydi - faqat "Arxiv" bo'limida turadi.
+    """
+
+    class Sabab(models.TextChoices):
+        OQISHGA_KIRDI = "oqish", "O'qishga kirdi"
+        SERTIFIKAT = "sertifikat", "Sertifikat oldi"
+        HAYDALDI = "haydaldi", "Guruhdan haydaldi"
+
+    oquvchi = models.OneToOneField(
+        Oquvchi, verbose_name="O'quvchi", on_delete=models.CASCADE,
+        related_name="arxiv",
+    )
+    sabab = models.CharField("Sababi", max_length=20, choices=Sabab.choices)
+
+    guruh = models.ForeignKey(
+        Guruh, verbose_name="Arxivlashdagi guruhi", on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="arxivlanganlar",
+    )
+    guruh_nomi = models.CharField(
+        "Guruh nomi", max_length=100, blank=True,
+        help_text="Guruh keyin o'chirilsa ham nomi shu yerda saqlanib qoladi.",
+    )
+
+    # Faqat "O'qishga kirdi" uchun
+    biologiya_bali = models.DecimalField(
+        "Biologiya bali", max_digits=5, decimal_places=1, null=True, blank=True,
+        validators=[MinValueValidator(0)],
+    )
+    jami_ball = models.DecimalField(
+        "Jami ball", max_digits=5, decimal_places=1, null=True, blank=True,
+        validators=[MinValueValidator(0)],
+    )
+
+    # Faqat "Sertifikat oldi" uchun
+    sertifikat = models.CharField("Sertifikat", max_length=200, blank=True)
+
+    sana = models.DateField("Arxivlangan sana", default=date.today)
+    yaratgan = models.ForeignKey(
+        settings.AUTH_USER_MODEL, verbose_name="Kiritdi", on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="arxivlagani",
+    )
+    yaratilgan = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Arxiv yozuvi"
+        verbose_name_plural = "Arxiv"
+        ordering = ["-sana", "-id"]
+        indexes = [models.Index(fields=["sabab"])]
+
+    def __str__(self):
+        return f"{self.oquvchi} - {self.get_sabab_display()}"
+
+    @property
+    def natija(self):
+        """Jadvalda ko'rsatiladigan qisqa natija matni."""
+        if self.sabab == self.Sabab.OQISHGA_KIRDI:
+            return f"Biologiya: {self.biologiya_bali} / Jami: {self.jami_ball}"
+        if self.sabab == self.Sabab.SERTIFIKAT:
+            return self.sertifikat
+        return ""

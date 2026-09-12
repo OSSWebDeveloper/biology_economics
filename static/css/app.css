@@ -215,6 +215,12 @@ table.jadval .bir-qator { white-space: nowrap; }
 .tugma:disabled { opacity: .5; cursor: not-allowed; }
 
 .tugmalar { display: flex; gap: 8px; flex-wrap: wrap; }
+/* Jadval qatoridagi amal tugmalari bir qatorda tursin (kerak bo'lsa jadval suriladi) */
+table.jadval td .tugmalar { flex-wrap: nowrap; gap: 5px; }
+table.jadval td .tugmalar .tugma { white-space: nowrap; }
+table.jadval td .tugmalar .tugma.kichik { padding: 5px 8px; }
+/* Ism-familiya ustuni ikki qatorga bo'linib ketmasin */
+table.jadval td.ism { white-space: nowrap; }
 
 /* ------------------------------------------------------------------ formalar */
 

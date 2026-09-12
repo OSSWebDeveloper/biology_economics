@@ -243,6 +243,28 @@ O'quvchi kartochkasida **"Ro'yxatdan chiqarish"** tugmasi:
 
 Butunlay o'chirish (tarixi bilan) faqat adminda va alohida tasdiqlash bilan.
 
+### Arxivlash
+
+O'quvchi kursni butunlay tugatganda **"Arxiv"** tugmasi bosiladi (ro'yxat
+qatorida ham, kartochkada ham bor). Oynachada sabab tanlanadi:
+
+| Sabab | Qo'shimcha maydon |
+|---|---|
+| **O'qishga kirdi** | biologiya bali va jami ball |
+| **Sertifikat oldi** | sertifikat raqami/darajasi |
+| **Guruhdan haydaldi** | yo'q |
+
+Saqlangach o'quvchi **guruhdan chiqariladi** (guruh ro'yxatlariga va
+hisobotlariga aralashmaydi), ro'yxatdan olinadi va **Arxiv** bo'limiga o'tadi.
+Moliyaviy tarixi to'liq saqlanadi; guruh olib tashlanishi bilan oylik narx
+yo'qolmasligi uchun narx o'quvchining o'ziga ko'chiriladi va oxirgi
+tugallanmagan oy qatnashgan kunlari bo'yicha yopiladi.
+
+Arxiv bo'limi yorliqlarga bo'lingan: **Hammasi / O'qishga kirdi / Sertifikat
+oldi / Guruhdan haydaldi**. Xato arxivlangan bo'lsa — **"Arxivdan chiqarish"**;
+o'quvchi "Chiqarilganlar" ro'yxatiga qaytadi, so'ng kartochkasidan ro'yxatga
+qaytarilib guruh tayinlanadi.
+
 ---
 
 ## 6. Xodimlar oyligi va avans
@@ -264,7 +286,9 @@ Butunlay o'chirish (tarixi bilan) faqat adminda va alohida tasdiqlash bilan.
 |---|---|
 | **Bosh sahifa** | tezkor amallar, bugungi va oylik tushum, qarzdorlar, oxirgi to'lovlar |
 | **O'quvchilar → Ro'yxat** | qidiruv, guruh/to'lov holati bo'yicha filtr; qatorga bosilsa to'lov oynachasi ochiladi |
+| **Ro'yxat → Qarzdorlar** | faqat qarzi bor o'quvchilar: jami qarz, eng katta qarz, oxirgi to'lov sanasi; chiqarilganlarni ham qo'shib ko'rsatish mumkin |
 | **Guruhlar** | guruh nomi, dars jadvali, guruhning standart oylik to'lovi |
+| **Arxiv** | kursni tugatganlar: o'qishga kirdi / sertifikat oldi / haydaldi yorliqlari, ballari va oxirgi balansi |
 | **Kurs to'lovlari** | barcha to'lovlar; amal turi, naqd/plastik, karta va sana bo'yicha filtr |
 | **Xodimlar** | oylik maosh, shu oy avansi, qoldiq, saytga kirish logini |
 | **Oylik va avans** | xodimlarga berilgan pullar; naqd/plastik alohida |

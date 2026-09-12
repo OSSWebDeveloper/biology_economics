@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Guruh, Oquvchi
+from .models import Arxiv, Guruh, Oquvchi
 
 
 @admin.register(Guruh)
@@ -18,3 +18,12 @@ class OquvchiAdmin(admin.ModelAdmin):
     search_fields = ("ism", "familiya", "telefon", "ota_telefon", "ona_telefon")
     date_hierarchy = "boshlangan_sana"
     autocomplete_fields = ("guruh",)
+
+
+@admin.register(Arxiv)
+class ArxivAdmin(admin.ModelAdmin):
+    list_display = ("oquvchi", "sabab", "guruh_nomi", "biologiya_bali", "jami_ball",
+                    "sertifikat", "sana")
+    list_filter = ("sabab", "sana")
+    search_fields = ("oquvchi__ism", "oquvchi__familiya", "guruh_nomi", "sertifikat")
+    date_hierarchy = "sana"

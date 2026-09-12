@@ -1,0 +1,46 @@
+<div class="oyna-sarlavha">
+  <div>
+    <h2 style="margin-bottom:2px">Arxivlash</h2>
+    <div class="bosq">
+      {{ oquvchi.toliq_ism }} &middot; {{ oquvchi.guruh.nomi|default:"Guruhsiz" }}
+    </div>
+  </div>
+  <button type="button" class="yopish" data-yopish>&times;</button>
+</div>
+
+<form method="post" action="{% url 'students:oquvchi_arxivlash' oquvchi.pk %}"
+      novalidate data-arxiv-forma>
+  {% csrf_token %}
+  <input type="hidden" name="keyingi" value="{{ keyingi|default:request.get_full_path }}">
+
+  <div class="oyna-ich">
+    <p class="och mayda" style="margin-bottom:14px">
+      O'quvchi guruhdan chiqariladi va arxivga o'tadi. Moliyaviy tarixi
+      saqlanib qoladi, shu oyda qatnashgan kunlari uchun pul hisoblanadi.
+    </p>
+
+    <div class="maydon">
+      <label>Sababi</label>
+      <div class="usul-tanlov">
+        {% for tanlov in form.sabab %}
+          <label class="usul">{{ tanlov.tag }} <span>{{ tanlov.choice_label }}</span></label>
+        {% endfor %}
+      </div>
+      {% for xato in form.sabab.errors %}<div class="xato">{{ xato }}</div>{% endfor %}
+    </div>
+
+    <div class="setka k2" data-sabab="oqish" style="display:none">
+      {% include "_maydon.html" with maydon=form.biologiya_bali %}
+      {% include "_maydon.html" with maydon=form.jami_ball %}
+    </div>
+
+    <div data-sabab="sertifikat" style="display:none">
+      {% include "_maydon.html" with maydon=form.sertifikat %}
+    </div>
+  </div>
+
+  <div class="oyna-past">
+    <button type="button" class="tugma" data-yopish>Bekor qilish</button>
+    <button type="submit" class="tugma asosiy">Saqlash</button>
+  </div>
+</form>
