@@ -92,6 +92,12 @@ Versiya raqami repozitoriyning ildizidagi `versiya.txt` faylida turadi.
 > paytida o'qiladi — demak eski raqam turgan bo'lsa, server qayta ishga
 > tushmagan bo'ladi.
 
+> **3.4.1 dan oldingi o'rnatuvchi** serverni to'xtatmasdi. Agar mijozda hali
+> o'sha turgan bo'lsa (yoki biror sabab bilan server to'xtamasa), tartib
+> shunday: ish stolidagi **"Serverni to'xtatish"** → keyin **ORNATISH.bat** →
+> so'ng **"Dasturga kirish"**. Bir marta shunday yangilangandan keyin
+> o'rnatuvchi buni o'zi bajaradigan bo'ladi.
+
 **Ma'lumotlar bazasi hech qachon almashtirilmaydi.** Yangilashda `db.sqlite3`,
 `maxfiy_kalit.txt` va `port.txt` fayllariga tegilmaydi — o'quvchilar, to'lovlar,
 xodimlar va parollar joyida qoladi.
