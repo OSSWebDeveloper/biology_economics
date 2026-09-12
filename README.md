@@ -28,7 +28,12 @@ U ketma-ket quyidagilarni bajaradi:
 | 4/7 | Fayllarni `C:\bio_moliya` ga ko'chiradi, **bazaga tegmaydi** |
 | 5/7 | Virtual muhit ochib, Django va boshqa kutubxonalarni o'rnatadi |
 | 6/7 | Bazani tayyorlaydi (`migrate`), birinchi marta bo'lsa admin hisobini ochadi |
-| 7/7 | Ish stoliga **ikkita yorliq** qo'yadi |
+| 7/7 | Ish stoliga **ikkita yorliq** qo'yadi va dasturni ishga tushiradi |
+
+> Oxirida savol berilmaydi. Avval "Ishga tushirilsinmi? [Y/N]" so'ralardi,
+> lekin `choice` buyrug'i bosilgan tugmani emas, chiqqan **harfni** tekshiradi:
+> klaviatura rus yoki o'zbek kirillchasida tursa `Y` tugmasi `Н` harfini beradi,
+> buyruq uni rad etib faqat ovoz chiqaradi va oyna qotib qolgandek ko'rinadi.
 
 Ish stolidagi ikkita yorliq:
 
@@ -36,6 +41,17 @@ Ish stolidagi ikkita yorliq:
 |---|---|
 | **Dasturga kirish** | server fon rejimida (oynasiz) ishga tushadi va sayt **Chrome**'da ochiladi. Server allaqachon ishlayotgan bo'lsa — faqat Chrome ochiladi |
 | **Serverni to'xtatish** | ishlab turgan serverni to'xtatadi va tasdiq oynasini ko'rsatadi |
+
+> Yorliqlar **foydalanuvchining o'z ish stoliga** qo'yiladi. Manzil UAC
+> oynasidan OLDIN aniqlanadi: agar administrator huquqi boshqa hisob bilan
+> berilsa, "ish stoli" o'sha hisobniki bo'lib qolar va yorliq ko'rinmay
+> qolardi. OneDrive ish stolini o'ziga ko'chirgan kompyuterlarda ham shu
+> manzil to'g'ri chiqadi.
+>
+> Ko'rinmasa: ish stolida bir marta **F5** bosing, bo'lmasa
+> `C:io_moliya\Yorliqlarni_tiklash.bat` ni ishga tushiring — u qayerga
+> qo'yayotganini ekranda ko'rsatadi. Windows Script Host o'chirilgan
+> kompyuterda tayyor `.lnk` fayllari ko'chiriladi.
 
 ### Sozlash
 

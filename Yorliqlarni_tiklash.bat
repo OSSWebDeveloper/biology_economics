@@ -7,16 +7,24 @@ rem   shu faylni ishga tushiring. Dastur qayta o'rnatilmaydi,
 rem   ma'lumotlar bazasiga ham tegilmaydi - faqat yorliqlar
 rem   qaytadan yaratiladi.
 rem ============================================================
-setlocal EnableExtensions
+setlocal EnableExtensions EnableDelayedExpansion
 title Biologiya kursi - yorliqlarni tiklash
 
 rem --- Administrator huquqi: umumiy ish stoliga yozish uchun kerak ---
+rem Ish stoli manzili ko'tarilishdan oldin olinadi - UAC boshqa hisob
+rem bilan ko'tarilsa, yorliq o'sha hisobning ish stoliga tushib qolmasin.
 net session >nul 2>&1
 if errorlevel 1 (
     echo.
     echo   Administrator huquqi so'raladi...
-    powershell -NoProfile -Command "Start-Process -FilePath '%~f0' -Verb RunAs" >nul 2>&1
+    for /f "usebackq delims=" %%D in (`powershell -NoProfile -Command "[Environment]::GetFolderPath('Desktop')"`) do set "BIO_ISHSTOLI=%%D"
+    powershell -NoProfile -Command "Start-Process -FilePath '%~f0' -ArgumentList '\"!BIO_ISHSTOLI!\"' -Verb RunAs" >nul 2>&1
     exit /b
+)
+
+set "BIO_ISHSTOLI=%~1"
+if not defined BIO_ISHSTOLI (
+    for /f "usebackq delims=" %%D in (`powershell -NoProfile -Command "[Environment]::GetFolderPath('Desktop')"`) do set "BIO_ISHSTOLI=%%D"
 )
 
 set "JOY=%~dp0"
@@ -28,7 +36,8 @@ set "BIO_YORLIQ2=Serverni to'xtatish"
 
 echo.
 echo   Yorliqlar tiklanmoqda...
-echo   Dastur papkasi: %BIO_JOY%
+echo   Dastur papkasi : !BIO_JOY!
+echo   Ish stoli      : !BIO_ISHSTOLI!
 echo.
 
 if not exist "%JOY%\yorliqlar.ps1" (

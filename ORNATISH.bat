@@ -16,12 +16,22 @@ set "PY_YUKLASH=https://www.python.org/ftp/python/3.12.10/python-3.12.10-amd64.e
 rem ============================================================
 
 rem --- Administrator huquqi tekshiriladi ---
+rem Ish stoli manzili ko'tarilishdan OLDIN aniqlanib, argument sifatida
+rem uzatiladi. Sababi: UAC boshqa hisob bilan ko'tarilsa, ko'tarilgan
+rem jarayon uchun "ish stoli" o'sha administratorning papkasi bo'lib
+rem qoladi va yorliqlar foydalanuvchiga ko'rinmay qolardi.
 net session >nul 2>&1
 if errorlevel 1 (
     echo.
     echo   Administrator huquqi kerak. Ruxsat oynasi chiqadi...
-    powershell -NoProfile -Command "Start-Process -FilePath '%~f0' -Verb RunAs" >nul 2>&1
+    for /f "usebackq delims=" %%D in (`powershell -NoProfile -Command "[Environment]::GetFolderPath('Desktop')"`) do set "BIO_ISHSTOLI=%%D"
+    powershell -NoProfile -Command "Start-Process -FilePath '%~f0' -ArgumentList '\"!BIO_ISHSTOLI!\"' -Verb RunAs" >nul 2>&1
     exit /b
+)
+
+set "BIO_ISHSTOLI=%~1"
+if not defined BIO_ISHSTOLI (
+    for /f "usebackq delims=" %%D in (`powershell -NoProfile -Command "[Environment]::GetFolderPath('Desktop')"`) do set "BIO_ISHSTOLI=%%D"
 )
 
 cls
@@ -222,6 +232,8 @@ if errorlevel 1 (
     echo    Ogohlantirish: yorliqlarni yaratib bo'lmadi.
     echo    "%JOY%" papkasidagi .lnk fayllarini o'zingiz ish stoliga ko'chiring
     echo    yoki "%JOY%\Yorliqlarni_tiklash.bat" faylini ishga tushiring.
+) else (
+    echo    Ko'rinmasa - ish stolida bir marta F5 bosing.
 )
 
 if exist "%ZIP%" del /q "%ZIP%" >nul 2>&1
@@ -251,15 +263,25 @@ rem Explorer orqali ochamiz. Sabab: ORNATISH.bat administrator huquqi bilan
 rem ishlaydi, "start" esa shu huquqni dasturga ham beradi - keyin oddiy
 rem "Serverni to'xtatish" yorlig'i uni to'xtata olmaydi. Explorer dasturni
 rem foydalanuvchining odatdagi huquqi bilan ochadi.
+rem
+rem Bu yerda avval "Ishga tushirilsinmi? [Y/N]" savoli bor edi. U olib
+rem tashlandi: "choice" buyrug'i bosilgan TUGMANI emas, chiqqan HARFNI
+rem tekshiradi. Klaviatura tili rus yoki o'zbek kirillchasida tursa,
+rem Y tugmasi "Н" harfini beradi - choice uni qabul qilmay faqat ovoz
+rem chiqaradi va oyna qotib qolgandek ko'rinadi. Endi dastur shunchaki
+rem ishga tushiriladi; kerak bo'lmasa "Serverni to'xtatish" bosiladi.
 if defined SERVER_ISHLAGAN (
     echo    Server yangi versiya bilan qayta ishga tushirilmoqda...
-    explorer.exe "%JOY%\Ishga_tushirish.vbs"
-    goto :tamom
+) else (
+    echo    Dastur ishga tushirilmoqda - Chrome o'zi ochiladi...
 )
-
-choice /c YN /n /m "   Hozir ishga tushirilsinmi?   [Y = ha, N = yo'q] "
-if errorlevel 2 goto :tamom
 explorer.exe "%JOY%\Ishga_tushirish.vbs"
+
+echo.
+echo    Keyingi safar ochish uchun ish stolidagi "%YORLIQ%" yorlig'ini bosing.
+echo    To'xtatish uchun - "%YORLIQ2%".
+echo.
+pause
 goto :tamom
 
 
