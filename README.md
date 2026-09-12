@@ -77,10 +77,20 @@ Versiya raqami repozitoriyning ildizidagi `versiya.txt` faylida turadi.
 
 **Mijoz tomonida:** `ORNATISH.bat` ni yana ishga tushirish kifoya. U:
 
-* GitHub'dagi `versiya.txt` ni o'qiydi va kompyuterdagisi bilan solishtiradi;
-* raqamlar bir xil bo'lsa — hech nima ko'chirmaydi, "oxirgi versiya turibdi" deydi;
-* farq bo'lsa — bazadan `db_zaxira_oxirgi.sqlite3` nusxasini olib, dastur
-  fayllarini yangilaydi va `migrate` ni bajaradi.
+1. **ishlab turgan serverni to'xtatadi** — server `--noreload` bilan ishlaydi,
+   ya'ni yangi fayllar faqat u qayta ishga tushgandan keyin kuchga kiradi;
+2. GitHub'dan arxivni to'g'ridan-to'g'ri yuklab oladi (versiya alohida
+   o'qilmaydi: GitHub fayllarni 5 daqiqagacha keshlaydi va push qilingan zahoti
+   eski raqam kelib, yangilanish o'tkazib yuborilardi);
+3. bazadan `db_zaxira_oxirgi.sqlite3` nusxasini olib, dastur fayllarini
+   yangilaydi (robocopy o'zgarmagan fayllarni o'tkazib yuboradi) va `migrate`
+   ni bajaradi;
+4. **serverni yangi versiya bilan o'zi qayta ishga tushiradi** (agar u ish
+   boshida ishlab turgan bo'lsa).
+
+> Versiya raqami saytning chap pastki burchagida ko'rinadi. U ishga tushish
+> paytida o'qiladi — demak eski raqam turgan bo'lsa, server qayta ishga
+> tushmagan bo'ladi.
 
 **Ma'lumotlar bazasi hech qachon almashtirilmaydi.** Yangilashda `db.sqlite3`,
 `maxfiy_kalit.txt` va `port.txt` fayllariga tegilmaydi — o'quvchilar, to'lovlar,

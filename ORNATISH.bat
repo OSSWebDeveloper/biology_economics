@@ -71,48 +71,46 @@ del /q "%TEMP%\bio_pyv.txt" >nul 2>&1
 echo    Python !PYV! - tayyor.
 
 rem ============================================================
-call :sarlavha "2/7   Versiya solishtirilmoqda"
+call :sarlavha "2/7   Ishlab turgan server to'xtatilmoqda"
+rem ============================================================
+rem Server --noreload rejimida ishlaydi: yangi fayllar faqat u qayta ishga
+rem tushgandan keyin kuchga kiradi. Shu sababli avval to'xtatiladi - shunda
+rem fayllar ham, ma'lumotlar bazasi ham band bo'lmaydi.
+set "PORT_JORIY=%PORT%"
+if exist "%JOY%\port.txt" set /p PORT_JORIY=<"%JOY%\port.txt"
+
+set "SERVER_ISHLAGAN="
+for /f "tokens=5" %%P in ('netstat -ano ^| findstr /c:":!PORT_JORIY! " ^| findstr /i "LISTENING"') do (
+    taskkill /PID %%P /T /F >nul 2>&1
+    set "SERVER_ISHLAGAN=1"
+)
+
+if defined SERVER_ISHLAGAN (
+    rem fayl qulflari bo'shashi uchun bir-ikki soniya kutamiz
+    ping -n 3 127.0.0.1 >nul 2>&1
+    echo    Server to'xtatildi - oxirida yangi versiya bilan qayta ochiladi.
+) else (
+    echo    Ishlab turgan server topilmadi.
+)
+
+rem ============================================================
+call :sarlavha "3/7   Yangi nusxa yuklab olinmoqda"
 rem ============================================================
 set "ESKI_V=o'rnatilmagan"
 if exist "%JOY%\versiya.txt" set /p ESKI_V=<"%JOY%\versiya.txt"
 
-set "YANGI_V="
-set "RAW=!GITHUB:https://github.com/=https://raw.githubusercontent.com/!"
-del /q "%TEMP%\bio_versiya.txt" >nul 2>&1
-powershell -NoProfile -Command "[Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri '!RAW!/%TARMOQ%/versiya.txt' -OutFile '%TEMP%\bio_versiya.txt'" >nul 2>&1
-if exist "%TEMP%\bio_versiya.txt" set /p YANGI_V=<"%TEMP%\bio_versiya.txt"
-del /q "%TEMP%\bio_versiya.txt" >nul 2>&1
-
-echo    Qurilmada : !ESKI_V!
-if defined YANGI_V (
-    echo    GitHub'da : !YANGI_V!
-) else (
-    echo    GitHub'da : aniqlanmadi
-)
-
-set "YANGILASH=1"
-if defined YANGI_V if /i "!ESKI_V!"=="!YANGI_V!" if exist "%JOY%\manage.py" set "YANGILASH="
-
-if defined YANGILASH (
-    echo    Natija    : dastur yangilanadi.
-) else (
-    echo    Natija    : oxirgi versiya turibdi, fayllar o'zgarmaydi.
-)
-
-rem ============================================================
-call :sarlavha "3/7   Dastur yuklab olinmoqda"
-rem ============================================================
 set "ZIP=%TEMP%\bio_moliya.zip"
 set "VAQT=%TEMP%\bio_moliya_manba"
 set "MANBA="
-
-if not defined YANGILASH (
-    echo    O'tkazib yuborildi.
-    goto :kutubxonalar
-)
-
+if exist "%ZIP%" del /q "%ZIP%" >nul 2>&1
 if exist "%VAQT%" rd /s /q "%VAQT%" >nul 2>&1
-powershell -NoProfile -Command "[Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri '%GITHUB%/archive/refs/heads/%TARMOQ%.zip' -OutFile '%ZIP%'" >nul 2>&1
+
+rem GitHub fayllarni besh daqiqagacha keshda ushlab turadi. Shuning uchun
+rem versiya alohida o'qilmaydi (kesh tufayli eski raqam kelib, yangilanish
+rem o'tkazib yuborilar edi) - to'g'ridan-to'g'ri arxiv olinadi, manzilga
+rem tasodifiy raqam qo'shilib keshdan emas, serverdan olish so'raladi.
+set "CB=%RANDOM%%RANDOM%"
+powershell -NoProfile -Command "[Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri '%GITHUB%/archive/refs/heads/%TARMOQ%.zip?nocache=!CB!' -Headers @{'Cache-Control'='no-cache';'Pragma'='no-cache'} -OutFile '%ZIP%'" >nul 2>&1
 if not errorlevel 1 (
     powershell -NoProfile -Command "Expand-Archive -LiteralPath '%ZIP%' -DestinationPath '%VAQT%' -Force" >nul 2>&1
     for /d %%D in ("%VAQT%\*") do set "MANBA=%%D"
@@ -126,16 +124,40 @@ if defined MANBA (
         set "MANBA=!SHUYER!"
     )
 )
-if not defined MANBA goto :xato_internet
+if not defined MANBA (
+    if exist "%JOY%\manage.py" (
+        echo    Internetdan yuklab bo'lmadi - o'rnatilgan nusxa saqlanib qoladi.
+    ) else (
+        goto :xato_internet
+    )
+)
+
+set "YANGI_V=aniqlanmadi"
+if defined MANBA (
+    pushd "!MANBA!"
+    if exist "versiya.txt" set /p YANGI_V=<versiya.txt
+    popd
+)
+
+echo    Qurilmada : !ESKI_V!
+echo    Yangi     : !YANGI_V!
 
 rem ============================================================
 call :sarlavha "4/7   Fayllar yangilanmoqda"
 rem ============================================================
 if not exist "%JOY%" mkdir "%JOY%"
 
-if /i "!MANBA!"=="%JOY%" (
-    echo    Dastur allaqachon shu papkada - ko'chirish shart emas.
-) else (
+rem Versiyalar teng bo'lsa ham nusxa ko'chiriladi: robocopy o'zgarmagan
+rem fayllarni o'tkazib yuboradi, shu bilan "yangilandi deydi-yu, aslida
+rem eski fayl qolib ketadi" degan holat butunlay yo'qoladi.
+set "KOCHIR=1"
+if not defined MANBA set "KOCHIR="
+if defined MANBA if /i "!MANBA!"=="%JOY%" set "KOCHIR="
+
+if not defined MANBA echo    Yangi fayllar yo'q - o'tkazib yuborildi.
+if defined MANBA if /i "!MANBA!"=="%JOY%" echo    Dastur allaqachon shu papkada - ko'chirish shart emas.
+
+if defined KOCHIR (
     if exist "%JOY%\db.sqlite3" (
         copy /y "%JOY%\db.sqlite3" "%JOY%\db_zaxira_oxirgi.sqlite3" >nul 2>&1
         echo    Bazadan zaxira olindi: db_zaxira_oxirgi.sqlite3
@@ -148,7 +170,6 @@ if /i "!MANBA!"=="%JOY%" (
 icacls "%JOY%" /grant "*S-1-5-32-545:(OI)(CI)M" /T /C /Q >nul 2>&1
 echo    Yozish huquqi berildi.
 
-:kutubxonalar
 rem ============================================================
 call :sarlavha "5/7   Kutubxonalar tekshirilmoqda"
 rem ============================================================
@@ -223,15 +244,21 @@ echo    Dastur papkasi : %JOY%
 echo    Xato izlash    : %JOY%\Tekshirish.bat
 echo.
 echo    Yangilanish chiqqanda shu faylni yana ishga tushiring -
-echo    versiya solishtiriladi, baza esa saqlanib qoladi.
+echo    baza saqlanib qoladi, server esa o'zi qayta ishga tushadi.
 echo.
 
-choice /c YN /n /m "   Hozir ishga tushirilsinmi?   [Y = ha, N = yo'q] "
-if errorlevel 2 goto :tamom
 rem Explorer orqali ochamiz. Sabab: ORNATISH.bat administrator huquqi bilan
 rem ishlaydi, "start" esa shu huquqni dasturga ham beradi - keyin oddiy
 rem "Serverni to'xtatish" yorlig'i uni to'xtata olmaydi. Explorer dasturni
 rem foydalanuvchining odatdagi huquqi bilan ochadi.
+if defined SERVER_ISHLAGAN (
+    echo    Server yangi versiya bilan qayta ishga tushirilmoqda...
+    explorer.exe "%JOY%\Ishga_tushirish.vbs"
+    goto :tamom
+)
+
+choice /c YN /n /m "   Hozir ishga tushirilsinmi?   [Y = ha, N = yo'q] "
+if errorlevel 2 goto :tamom
 explorer.exe "%JOY%\Ishga_tushirish.vbs"
 goto :tamom
 
