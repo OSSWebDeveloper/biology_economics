@@ -20,7 +20,14 @@ from payments.services import (
     oyni_qayta_hisobla,
 )
 
-from .forms import ArxivForm, ChiqarishForm, GuruhForm, OquvchiForm, QaytarishForm
+from .forms import (
+    ArxivForm,
+    ChiqarishForm,
+    GuruhForm,
+    GuruhKochirishForm,
+    OquvchiForm,
+    QaytarishForm,
+)
 from .models import Arxiv, Guruh, Oquvchi
 
 
@@ -235,14 +242,64 @@ def oquvchi_ochirish(request, pk):
     return render(request, "students/ochirish.html", {"oquvchi": obyekt})
 
 
-# ------------------------------------------------------------------ arxiv
-
-
 def _qaytish_manzili(request, standart):
+    """Oynachadan kelgan "keyingi" manzil - qayerdan ochilgan bo'lsa o'sha yer."""
     keyingi = request.POST.get("keyingi") or request.GET.get("keyingi")
     if keyingi and keyingi.startswith("/"):
         return keyingi
     return standart
+
+
+# --------------------------------------------------- guruhni o'zgartirish
+
+
+def oquvchi_guruh_oyna(request, pk):
+    """"Guruhni o'zgartirish" tugmasi ochadigan oynacha."""
+    obyekt = get_object_or_404(_koradigan_oquvchilar(request.user), pk=pk)
+    keyingi = request.GET.get("keyingi") or ""
+    return render(request, "students/_guruh_kochirish.html", {
+        "oquvchi": obyekt,
+        "form": GuruhKochirishForm(oquvchi=obyekt, foydalanuvchi=request.user),
+        "keyingi": keyingi if keyingi.startswith("/") else "",
+    })
+
+
+def oquvchi_guruh_kochirish(request, pk):
+    """O'quvchini boshqa guruhga o'tkazadi (moliyaviy tarix saqlanadi)."""
+    obyekt = get_object_or_404(_koradigan_oquvchilar(request.user), pk=pk)
+    qaytish = _qaytish_manzili(request, reverse("students:oquvchi", args=[pk]))
+    if request.method != "POST":
+        return redirect(qaytish)
+
+    form = GuruhKochirishForm(request.POST, oquvchi=obyekt, foydalanuvchi=request.user)
+    if not form.is_valid():
+        xatolar = "; ".join(" ".join(x) for x in form.errors.values())
+        messages.error(request, f"Guruh o'zgartirilmadi. {xatolar}")
+        return redirect(qaytish)
+
+    yangi_guruh = form.cleaned_data["guruh"]
+    eski_nomi = obyekt.guruh.nomi if obyekt.guruh else "guruhsiz"
+    eski_narx = obyekt.amaldagi_oylik
+
+    if form.cleaned_data["narx"] == GuruhKochirishForm.ESKI_NARX:
+        # Narx o'quvchining o'ziga yoziladi - guruh narxi endi ta'sir qilmaydi
+        obyekt.oylik_toluv = eski_narx
+    else:
+        # Guruh narxi qo'llanishi uchun shaxsiy narx olib tashlanadi
+        obyekt.oylik_toluv = None
+
+    obyekt.guruh = yangi_guruh
+    obyekt.save()
+
+    xabar = f"{obyekt.toliq_ism}: {eski_nomi} -> {yangi_guruh.nomi}."
+    if obyekt.amaldagi_oylik != eski_narx:
+        xabar += (f" Oylik to'lov {eski_narx:,.0f} dan "
+                  f"{obyekt.amaldagi_oylik:,.0f} so'mga o'zgardi.").replace(",", " ")
+    messages.success(request, xabar)
+    return redirect(qaytish)
+
+
+# ------------------------------------------------------------------ arxiv
 
 
 def oquvchi_arxiv_oyna(request, pk):

@@ -154,7 +154,7 @@ class Arxiv(models.Model):
     class Sabab(models.TextChoices):
         OQISHGA_KIRDI = "oqish", "O'qishga kirdi"
         SERTIFIKAT = "sertifikat", "Sertifikat oldi"
-        HAYDALDI = "haydaldi", "Guruhdan haydaldi"
+        CHETLATILDI = "chetlatildi", "Guruhdan chetlatildi"
 
     oquvchi = models.OneToOneField(
         Oquvchi, verbose_name="O'quvchi", on_delete=models.CASCADE,

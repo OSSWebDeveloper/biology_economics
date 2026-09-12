@@ -343,7 +343,7 @@ class ArxivlashTest(TestCase):
         javob = self.client.get(
             reverse("students:oquvchi_arxiv_oyna", args=[self.oquvchi.pk]))
         self.assertEqual(javob.status_code, 200)
-        for nomi in ("qishga kirdi", "Sertifikat oldi", "Guruhdan haydaldi"):
+        for nomi in ("qishga kirdi", "Sertifikat oldi", "Guruhdan chetlatildi"):
             self.assertContains(javob, nomi)
 
     def test_oqishga_kirdi_ballari_saqlanadi(self):
@@ -356,7 +356,7 @@ class ArxivlashTest(TestCase):
         self.assertEqual(yozuv.guruh, self.guruh)
 
     def test_arxivlangan_guruhdan_chiqariladi(self):
-        self.arxivla(sabab="haydaldi")
+        self.arxivla(sabab="chetlatildi")
         self.oquvchi.refresh_from_db()
         self.assertIsNone(self.oquvchi.guruh)
         self.assertFalse(self.oquvchi.faol)
@@ -375,7 +375,7 @@ class ArxivlashTest(TestCase):
         self.assertIsNone(yozuv.biologiya_bali)
 
     def test_haydalganda_qoshimcha_maydonlar_tozalanadi(self):
-        self.arxivla(sabab="haydaldi", biologiya_bali="90", sertifikat="bor edi")
+        self.arxivla(sabab="chetlatildi", biologiya_bali="90", sertifikat="bor edi")
         yozuv = Arxiv.objects.get(oquvchi=self.oquvchi)
         self.assertEqual(yozuv.sertifikat, "")
         self.assertIsNone(yozuv.biologiya_bali)
@@ -386,7 +386,7 @@ class ArxivlashTest(TestCase):
         self.assertFalse(Arxiv.objects.exists())
 
     def test_arxivlangan_royxatda_korinmaydi(self):
-        self.arxivla(sabab="haydaldi")
+        self.arxivla(sabab="chetlatildi")
         self.client.get(reverse("students:oquvchilar"))  # xabarni iste'mol qiladi
         for manzil in ("", "?royxat=chiqarilgan", "?royxat=hammasi",
                        "?royxat=qarzdor&qamrov=hammasi"):
@@ -402,23 +402,23 @@ class ArxivlashTest(TestCase):
         self.assertContains(javob, "11-sinf")
 
     def test_yorliqlar_ajratadi(self):
-        self.arxivla(sabab="haydaldi")
+        self.arxivla(sabab="chetlatildi")
         manzil = reverse("students:arxiv")
-        self.assertContains(self.client.get(manzil + "?bolim=haydaldi"), "Rahmonov Jasur")
+        self.assertContains(self.client.get(manzil + "?bolim=chetlatildi"), "Rahmonov Jasur")
         self.assertNotContains(self.client.get(manzil + "?bolim=oqish"), "Rahmonov Jasur")
 
     def test_ikki_marta_arxivlanmaydi(self):
-        self.arxivla(sabab="haydaldi")
+        self.arxivla(sabab="chetlatildi")
         self.arxivla(sabab="oqish", biologiya_bali="80", jami_ball="170")
         self.assertEqual(Arxiv.objects.count(), 1)
-        self.assertEqual(Arxiv.objects.get().sabab, Arxiv.Sabab.HAYDALDI)
+        self.assertEqual(Arxiv.objects.get().sabab, Arxiv.Sabab.CHETLATILDI)
 
     def test_oqituvchi_oz_arxivini_koradi(self):
         oqituvchi = Foydalanuvchi.objects.create_user(
             username="olim", password="parol12345", rol=Foydalanuvchi.Rol.OQITUVCHI)
         self.guruh.oqituvchi = oqituvchi
         self.guruh.save()
-        self.arxivla(sabab="haydaldi")
+        self.arxivla(sabab="chetlatildi")
 
         self.client.login(username="olim", password="parol12345")
         self.assertContains(self.client.get(reverse("students:arxiv")), "Rahmonov Jasur")
@@ -427,10 +427,77 @@ class ArxivlashTest(TestCase):
         self.assertEqual(javob.status_code, 200)
 
     def test_arxivdan_chiqariladi(self):
-        self.arxivla(sabab="haydaldi")
+        self.arxivla(sabab="chetlatildi")
         yozuv = Arxiv.objects.get()
         self.client.get(reverse("students:oquvchilar"))  # xabarni iste'mol qiladi
         self.client.post(reverse("students:arxivdan_chiqarish", args=[yozuv.pk]))
         self.assertFalse(Arxiv.objects.exists())
         javob = self.client.get(reverse("students:oquvchilar") + "?royxat=chiqarilgan")
         self.assertContains(javob, "Rahmonov Jasur")
+
+
+class GuruhKochirishTest(TestCase):
+    """O'quvchini bir guruhdan boshqasiga o'tkazish."""
+
+    def setUp(self):
+        Foydalanuvchi.objects.create_user(
+            username="admin1", password="parol12345", rol=Foydalanuvchi.Rol.ADMIN)
+        self.eski = Guruh.objects.create(nomi="9-sinf", oylik_toluv=Decimal(500000))
+        self.yangi = Guruh.objects.create(nomi="11-sinf", oylik_toluv=Decimal(700000))
+        self.oquvchi = oquvchi_yarat(self.eski, "Jasur", "Rahmonov")
+        Tranzaksiya.objects.create(
+            oquvchi=self.oquvchi, tur=Tranzaksiya.Tur.TOLOV, summa=Decimal(300000),
+            sana=date(2026, 9, 5), usul=Usul.NAQD)
+        self.client.login(username="admin1", password="parol12345")
+
+    def kochir(self, **maydonlar):
+        return self.client.post(
+            reverse("students:oquvchi_guruh_kochirish", args=[self.oquvchi.pk]),
+            maydonlar)
+
+    def test_oynacha_ochiladi(self):
+        javob = self.client.get(
+            reverse("students:oquvchi_guruh_oyna", args=[self.oquvchi.pk]))
+        self.assertEqual(javob.status_code, 200)
+        # Yangi guruh narxi bilan ko'rinadi, hozirgi guruh ro'yxatda yo'q
+        self.assertContains(javob, "11-sinf - 700 000")
+        self.assertNotContains(javob, "9-sinf - 500 000")
+
+    def test_yangi_guruh_narxi_qollanadi(self):
+        self.kochir(guruh=str(self.yangi.pk), narx="yangi")
+        self.oquvchi.refresh_from_db()
+        self.assertEqual(self.oquvchi.guruh, self.yangi)
+        self.assertIsNone(self.oquvchi.oylik_toluv)
+        self.assertEqual(self.oquvchi.amaldagi_oylik, Decimal(700000))
+
+    def test_eski_narx_saqlanadi(self):
+        self.kochir(guruh=str(self.yangi.pk), narx="eski")
+        self.oquvchi.refresh_from_db()
+        self.assertEqual(self.oquvchi.guruh, self.yangi)
+        self.assertEqual(self.oquvchi.amaldagi_oylik, Decimal(500000))
+
+    def test_tolovlar_tarixi_saqlanadi(self):
+        self.kochir(guruh=str(self.yangi.pk), narx="yangi")
+        self.assertEqual(self.oquvchi.tranzaksiyalar.count(), 1)
+        self.assertEqual(self.oquvchi.balans, Decimal(300000))
+
+    def test_guruhsiz_yuborilsa_ozgarmaydi(self):
+        self.kochir(guruh="", narx="yangi")
+        self.oquvchi.refresh_from_db()
+        self.assertEqual(self.oquvchi.guruh, self.eski)
+
+    def test_oqituvchi_begona_guruhga_kochira_olmaydi(self):
+        oqituvchi = Foydalanuvchi.objects.create_user(
+            username="olim", password="parol12345", rol=Foydalanuvchi.Rol.OQITUVCHI)
+        self.eski.oqituvchi = oqituvchi
+        self.eski.save()
+        self.client.login(username="olim", password="parol12345")
+        self.kochir(guruh=str(self.yangi.pk), narx="yangi")
+        self.oquvchi.refresh_from_db()
+        self.assertEqual(self.oquvchi.guruh, self.eski)
+
+    def test_kartochkada_tugma_bor(self):
+        javob = self.client.get(reverse("students:oquvchi", args=[self.oquvchi.pk]))
+        self.assertContains(javob, "Guruhni o'zgartirish")
+        self.assertContains(
+            javob, reverse("students:oquvchi_guruh_oyna", args=[self.oquvchi.pk]))

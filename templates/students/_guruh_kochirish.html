@@ -1,0 +1,44 @@
+{% load moliya %}
+<div class="oyna-sarlavha">
+  <div>
+    <h2 style="margin-bottom:2px">Guruhni o'zgartirish</h2>
+    <div class="bosq">
+      {{ oquvchi.toliq_ism }} &middot; hozir:
+      <b>{{ oquvchi.guruh.nomi|default:"guruhsiz" }}</b>
+      ({{ oquvchi.amaldagi_oylik|som }} so'm)
+    </div>
+  </div>
+  <button type="button" class="yopish" data-yopish>&times;</button>
+</div>
+
+<form method="post" action="{% url 'students:oquvchi_guruh_kochirish' oquvchi.pk %}" novalidate>
+  {% csrf_token %}
+  <input type="hidden" name="keyingi" value="{{ keyingi|default:request.get_full_path }}">
+
+  <div class="oyna-ich">
+    {% include "_maydon.html" with maydon=form.guruh %}
+
+    <div class="maydon">
+      <label>Oylik kurs to'lovi</label>
+      <div class="usul-tanlov" style="flex-direction:column">
+        {% for tanlov in form.narx %}
+          <label class="usul" style="justify-content:flex-start">
+            {{ tanlov.tag }} <span>{{ tanlov.choice_label }}</span>
+          </label>
+        {% endfor %}
+      </div>
+      {% for xato in form.narx.errors %}<div class="xato">{{ xato }}</div>{% endfor %}
+    </div>
+
+    <p class="och mayda">
+      O'quvchining to'lovlari, qarzi va butun moliyaviy tarixi saqlanib qoladi -
+      faqat guruhi almashadi. Narx o'zgarsa, shu oyning hisobiga ham ta'sir
+      qiladi: oylik hisob oy oxirida amaldagi narx bo'yicha yoziladi.
+    </p>
+  </div>
+
+  <div class="oyna-past">
+    <button type="button" class="tugma" data-yopish>Bekor qilish</button>
+    <button type="submit" class="tugma asosiy">O'tkazish</button>
+  </div>
+</form>

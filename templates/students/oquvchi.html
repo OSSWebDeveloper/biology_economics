@@ -73,6 +73,12 @@
       {% if oquvchi.guruh %}guruh narxi: {{ oquvchi.guruh.oylik_toluv|som }}
       {% else %}guruhga biriktirilmagan{% endif %}
     </div>
+    {% if not oquvchi.arxiv %}
+    <button type="button" class="tugma kichik" style="margin-top:10px"
+            data-oynacha="{% url 'students:oquvchi_guruh_oyna' oquvchi.pk %}">
+      Guruhni o'zgartirish
+    </button>
+    {% endif %}
   </div>
 </div>
 

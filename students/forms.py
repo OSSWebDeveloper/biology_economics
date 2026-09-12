@@ -135,3 +135,39 @@ class ArxivForm(forms.ModelForm):
             tozalangan["biologiya_bali"] = None
             tozalangan["jami_ball"] = None
         return tozalangan
+
+
+class GuruhTanlov(forms.ModelChoiceField):
+    """Ro'yxatda guruh nomi bilan birga uning oylik narxi ham ko'rinadi."""
+
+    def label_from_instance(self, obyekt):
+        narx = f"{obyekt.oylik_toluv:,.0f}".replace(",", " ")
+        return f"{obyekt.nomi} - {narx} so'm"
+
+
+class GuruhKochirishForm(forms.Form):
+    """O'quvchini bir guruhdan boshqasiga o'tkazish."""
+
+    YANGI_NARX = "yangi"
+    ESKI_NARX = "eski"
+
+    guruh = GuruhTanlov(
+        label="Yangi guruh", queryset=Guruh.objects.none(),
+        empty_label="-- Guruh tanlang --",
+    )
+    narx = forms.ChoiceField(
+        label="Oylik kurs to'lovi", widget=forms.RadioSelect,
+        choices=[(YANGI_NARX, "Yangi guruh narxi qo'llansin"),
+                 (ESKI_NARX, "Hozirgi narx saqlab qolinsin")],
+        initial=YANGI_NARX,
+    )
+
+    def __init__(self, *args, oquvchi=None, foydalanuvchi=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        guruhlar = Guruh.objects.filter(faol=True)
+        if foydalanuvchi is not None and not foydalanuvchi.admin_mi:
+            # O'qituvchi faqat o'z guruhlari orasida ko'chira oladi
+            guruhlar = guruhlar.filter(oqituvchi=foydalanuvchi)
+        if oquvchi is not None and oquvchi.guruh_id:
+            guruhlar = guruhlar.exclude(pk=oquvchi.guruh_id)
+        self.fields["guruh"].queryset = guruhlar

@@ -275,6 +275,23 @@ O'quvchi kartochkasida **"Ro'yxatdan chiqarish"** tugmasi:
 
 Butunlay o'chirish (tarixi bilan) faqat adminda va alohida tasdiqlash bilan.
 
+### Guruhni o'zgartirish
+
+O'quvchi kartochkasidagi **"Guruh"** kartochkasida **"Guruhni o'zgartirish"**
+tugmasi bor. Oynachada yangi guruh tanlanadi (ro'yxatda har bir guruhning
+oylik narxi ham ko'rinadi) va narx bilan nima bo'lishi belgilanadi:
+
+* **Yangi guruh narxi qo'llansin** — o'quvchining shaxsiy narxi olib tashlanadi,
+  endi guruh narxi amal qiladi;
+* **Hozirgi narx saqlab qolinsin** — amaldagi narx o'quvchining o'ziga yoziladi,
+  guruh narxi unga ta'sir qilmaydi.
+
+To'lovlar, qarz va butun moliyaviy tarix saqlanib qoladi — faqat guruhi
+almashadi. Narx o'zgarsa, shu oyning hisobiga ham ta'sir qiladi: oylik hisob
+oy oxirida amaldagi narx bo'yicha yoziladi.
+
+O'qituvchi faqat **o'z guruhlari** orasida ko'chira oladi, admin — hammasi.
+
 ### Arxivlash
 
 O'quvchi kursni butunlay tugatganda **"Arxiv"** tugmasi bosiladi (ro'yxat
@@ -284,7 +301,7 @@ qatorida ham, kartochkada ham bor). Oynachada sabab tanlanadi:
 |---|---|
 | **O'qishga kirdi** | biologiya bali va jami ball |
 | **Sertifikat oldi** | sertifikat raqami/darajasi |
-| **Guruhdan haydaldi** | yo'q |
+| **Guruhdan chetlatildi** | yo'q |
 
 Saqlangach o'quvchi **guruhdan chiqariladi** (guruh ro'yxatlariga va
 hisobotlariga aralashmaydi), ro'yxatdan olinadi va **Arxiv** bo'limiga o'tadi.
@@ -293,7 +310,7 @@ yo'qolmasligi uchun narx o'quvchining o'ziga ko'chiriladi va oxirgi
 tugallanmagan oy qatnashgan kunlari bo'yicha yopiladi.
 
 Arxiv bo'limi yorliqlarga bo'lingan: **Hammasi / O'qishga kirdi / Sertifikat
-oldi / Guruhdan haydaldi**. Xato arxivlangan bo'lsa — **"Arxivdan chiqarish"**;
+oldi / Guruhdan chetlatildi**. Xato arxivlangan bo'lsa — **"Arxivdan chiqarish"**;
 o'quvchi "Chiqarilganlar" ro'yxatiga qaytadi, so'ng kartochkasidan ro'yxatga
 qaytarilib guruh tayinlanadi.
 
@@ -320,7 +337,8 @@ qaytarilib guruh tayinlanadi.
 | **O'quvchilar → Ro'yxat** | qidiruv, guruh/to'lov holati bo'yicha filtr; qatorga bosilsa to'lov oynachasi ochiladi |
 | **Ro'yxat → Qarzdorlar** | faqat qarzi bor o'quvchilar: jami qarz, eng katta qarz, oxirgi to'lov sanasi; chiqarilganlarni ham qo'shib ko'rsatish mumkin |
 | **Guruhlar** | guruh nomi, dars jadvali, guruhning standart oylik to'lovi |
-| **Arxiv** | kursni tugatganlar: o'qishga kirdi / sertifikat oldi / haydaldi yorliqlari, ballari va oxirgi balansi |
+| **O'quvchi kartochkasi** | to'lov kiritish, hisob-kitob tarixi, guruhni o'zgartirish, arxivlash |
+| **Arxiv** | kursni tugatganlar: o'qishga kirdi / sertifikat oldi / chetlatildi yorliqlari, ballari va oxirgi balansi |
 | **Kurs to'lovlari** | barcha to'lovlar; amal turi, naqd/plastik, karta va sana bo'yicha filtr |
 | **Xodimlar** | oylik maosh, shu oy avansi, qoldiq, saytga kirish logini |
 | **Oylik va avans** | xodimlarga berilgan pullar; naqd/plastik alohida |
