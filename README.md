@@ -42,6 +42,26 @@ Ish stolidagi ikkita yorliq:
 | **Dasturga kirish** | server fon rejimida (oynasiz) ishga tushadi va sayt **Chrome**'da ochiladi. Server allaqachon ishlayotgan bo'lsa — faqat Chrome ochiladi |
 | **Serverni to'xtatish** | ishlab turgan serverni to'xtatadi va tasdiq oynasini ko'rsatadi |
 
+### Soat yonidagi belgi (trey)
+
+Server ishga tushganda soat yonida dastur belgisi paydo bo'ladi. **Belgi
+turgan bo'lsa — server ishlayapti, yo'q bo'lsa — ishlamayapti.**
+
+| Amal | Natija |
+|---|---|
+| **chap tugma** | saytni Chrome'da ochadi |
+| **o'ng tugma** | "Dasturni yangilash" (ORNATISH.bat) va "Serverni to'xtatish" |
+
+Belgi `Belgi.ps1` skripti — tashqi kutubxona kerak emas, Windows'ning o'z
+.NET shakllari ishlatiladi. `Ishga_tushirish.vbs` uni ko'rinmas rejimda
+chaqiradi; ikkinchi nusxa ochilmaydi (mutex). Har 3 sekundda port
+tekshiriladi: server o'chsa belgi yo'qoladi, server 5 daqiqa ishlamasa
+skript o'zini yopadi.
+
+> Windows yangi trey belgilarini odatda **"^" strelkasi ostiga** yashiradi.
+> Doim ko'rinib turishi uchun uni bir marta sichqoncha bilan panelga tortib
+> chiqaring.
+
 > Yorliqlar **foydalanuvchining o'z ish stoliga** qo'yiladi. Manzil UAC
 > oynasidan OLDIN aniqlanadi: agar administrator huquqi boshqa hisob bilan
 > berilsa, "ish stoli" o'sha hisobniki bo'lib qolar va yorliq ko'rinmay

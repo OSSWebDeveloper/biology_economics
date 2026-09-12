@@ -46,11 +46,23 @@ If Not ServerTayyor(url) Then
     End If
 End If
 
+BelginiYoq joy
 BrauzerdaOch url
 WScript.Quit 0
 
 
 ' ------------------------------------------------------------ yordamchilar
+
+Sub BelginiYoq(papka)
+    ' Soat yonidagi (trey) belgi: server ishlayotganini ko'rsatib turadi.
+    ' Belgi.ps1 ning o'zi ikkinchi nusxa ochilishiga yo'l qo'ymaydi,
+    ' shuning uchun bu yerda tekshirish shart emas.
+    Dim belgi
+    belgi = papka & "\Belgi.ps1"
+    If Not fso.FileExists(belgi) Then Exit Sub
+    shell.Run "powershell.exe -NoProfile -ExecutionPolicy Bypass " & _
+              "-WindowStyle Hidden -File """ & belgi & """", 0, False
+End Sub
 
 Function PortniOqi(papka)
     Dim f

@@ -251,6 +251,11 @@ echo    Ish stolida ikkita yorliq paydo bo'ldi:
 echo      "%YORLIQ%"  - sayt fon rejimida ishga tushadi va Chrome'da ochiladi
 echo      "%YORLIQ2%"  - ishlab turgan serverni to'xtatadi
 echo.
+echo    Server ishlayotganda soat yonida (treyda) yashil barg belgisi turadi:
+echo      chap tugma - saytni ochadi, o'ng tugma - yangilash va to'xtatish.
+echo    Belgi ko'rinmasa, soat yonidagi "^" strelkasini bosib, uni
+echo    sichqoncha bilan panelga tortib chiqaring.
+echo.
 echo    Manzil         : http://127.0.0.1:%PORT%/
 echo    Dastur papkasi : %JOY%
 echo    Xato izlash    : %JOY%\Tekshirish.bat
