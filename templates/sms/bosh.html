@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+
+{% block sarlavha %}Xabarnoma - {{ SAYT_NOMI }}{% endblock %}
+{% block bolim_nomi %}Xabarnoma{% endblock %}
+
+{% block ichki %}
+<div class="setka k3" style="margin-bottom:16px">
+  <div class="stat kok">
+    <div class="yorliq">Ulangan qurilmalar</div>
+    <div class="qiymat" id="stat-jami">{{ qurilmalar.jami }}</div>
+    <div class="izoh">saytga ulangan telefonlar</div>
+  </div>
+  <div class="stat yashil">
+    <div class="yorliq">Onlayn</div>
+    <div class="qiymat" id="stat-onlayn">{{ qurilmalar.onlayn }}</div>
+    <div class="izoh">hozir internetda</div>
+  </div>
+  <div class="stat sariq">
+    <div class="yorliq">Navbatda</div>
+    <div class="qiymat">{{ sanoq.kutmoqda }}</div>
+    <div class="izoh">yuborilishini kutayotgan xabar</div>
+  </div>
+</div>
+
+{% include "sms/_tab.html" %}
+
+<div class="panel" style="margin-bottom:16px">
+  <div class="panel-sarlavha">Yangi qurilmani ulash</div>
+  <div class="panel-ich">
+    {% if kod %}
+      <div class="ulanish-kodi" id="kod">{{ kod.korinish }}</div>
+      <div class="bosq" style="margin-top:8px">
+        Kod <b id="kod-vaqt">{{ kod.qolgan_soniya }}</b> soniyadan keyin eskiradi.
+      </div>
+      <ol class="kod-qadamlar">
+        <li>Telefonda <b>Kurs SMS</b> ilovasini oching.</li>
+        <li>Sozlamalarda sayt manzilini yozing.</li>
+        <li>"Ulanish kodi" maydoniga yuqoridagi 12 raqamni kiriting va <b>Ulanish</b> ni bosing.</li>
+      </ol>
+      <form method="post" action="{% url 'sms:kod_yarat' %}" style="margin-top:12px">
+        {% csrf_token %}
+        <button type="submit" class="tugma">Yangi kod olish</button>
+      </form>
+    {% else %}
+      <p class="bosq" style="margin:0 0 12px">
+        Telefonni ulash uchun bir martalik 12 xonalik kod kerak.
+        Kod {{ 15 }} daqiqa amal qiladi.
+      </p>
+      <form method="post" action="{% url 'sms:kod_yarat' %}">
+        {% csrf_token %}
+        <button type="submit" class="tugma asosiy">Ulanish kodini olish</button>
+      </form>
+    {% endif %}
+  </div>
+</div>
+
+<div class="panel" style="margin-bottom:16px">
+  <div class="panel-sarlavha">
+    Saytga ulangan qurilmalar
+    <span class="bosq" id="holat-vaqti"></span>
+  </div>
+  <div class="panel-ich zich">
+    {% if qurilmalar.royxat %}
+    <div class="jadval-qobiq">
+      <table class="jadval">
+        <thead>
+          <tr>
+            <th>Qurilma</th>
+            <th>SIM kartalar</th>
+            <th>Holati</th>
+            <th class="ong">Jo'natgani</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for q in qurilmalar.royxat %}
+          <tr data-qurilma="{{ q.pk }}">
+            <td>
+              <div class="qurilma-qator">
+                <span class="qurilma-nuqta {{ q.holat_kodi }}"></span>
+                <div>
+                  <b>{{ q.nomi }}</b>
+                  <div class="bosq">
+                    {% if q.android %}Android {{ q.android }}{% endif %}
+                    {% if q.ilova_versiya %}&middot; ilova v{{ q.ilova_versiya }}{% endif %}
+                    {% if q.batareya %}&middot; batareya {{ q.batareya }}%{% endif %}
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td>
+              {% if q.simlar.all %}
+              <div class="sim-royxat">
+                {% for sim in q.simlar.all %}
+                <form method="post" action="{% url 'sms:sim_ochir' sim.pk %}"
+                      class="sim-qator {% if not sim.faol %}ochiq{% endif %}">
+                  {% csrf_token %}
+                  <input type="checkbox" {% if sim.faol %}checked{% endif %}
+                         onchange="this.form.submit()">
+                  <span>{{ sim.nomi }}{% if sim.raqam %} <span class="bosq">{{ sim.raqam }}</span>{% endif %}</span>
+                </form>
+                {% endfor %}
+              </div>
+              {% else %}
+                <span class="bosq">SIM ma'lumoti yo'q</span>
+              {% endif %}
+            </td>
+            <td>
+              <span class="nishon {% if q.holat_kodi == 'onlayn' %}yashil{% elif q.holat_kodi == 'ochiq' %}qizil{% else %}kulrang{% endif %}"
+                    data-holat>{{ q.holat_nomi }}</span>
+              <div class="bosq" data-aloqa>{{ q.aloqa_matni }}</div>
+            </td>
+            <td class="ong">
+              {{ q.jonatgani }}
+              {% if q.jarayonda %}<div class="bosq">{{ q.jarayonda }} ta jarayonda</div>{% endif %}
+            </td>
+            <td>
+              <div class="tugmalar">
+                <form method="post" action="{% url 'sms:qurilma_ochir' q.pk %}">
+                  {% csrf_token %}
+                  <button type="submit" class="tugma kichik">
+                    {% if q.faol %}O'chirish{% else %}Yoqish{% endif %}
+                  </button>
+                </form>
+                <form method="post" action="{% url 'sms:qurilma_uzish' q.pk %}"
+                      onsubmit="return confirm('{{ q.nomi }} saytdan uzilsinmi? Qaytadan ulash uchun yangi kod kerak bo\'ladi.')">
+                  {% csrf_token %}
+                  <button type="submit" class="tugma kichik xavf">Uzish</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+      <div class="hech-narsa">
+        Hali birorta qurilma ulanmagan.<br>
+        Yuqoridagi tugma bilan ulanish kodini oling.
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-sarlavha">Oxirgi hodisalar</div>
+  <div class="panel-ich">
+    {% for b in bildirishnomalar %}
+      <div class="hodisa">
+        <span class="vaqt">{{ b.yaratilgan|date:"d.m H:i" }}</span>
+        <span class="nishon {% if b.turi == 'ulandi' %}yashil{% elif b.turi == 'xato' %}qizil{% elif b.turi == 'uzildi' %}kulrang{% else %}kok{% endif %}">
+          {{ b.get_turi_display }}
+        </span>
+        <span>{{ b.matn }}</span>
+      </div>
+    {% empty %}
+      <div class="bosq">Hodisa yo'q.</div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
+
+{% block skript %}
+<script>
+(function () {
+  var kodVaqt = document.getElementById("kod-vaqt");
+  if (kodVaqt) {
+    var qoldi = parseInt(kodVaqt.textContent, 10) || 0;
+    setInterval(function () {
+      qoldi -= 1;
+      if (qoldi <= 0) { location.reload(); return; }
+      kodVaqt.textContent = qoldi;
+    }, 1000);
+  }
+
+  var jamiOldin = parseInt(document.getElementById("stat-jami").textContent, 10) || 0;
+
+  function yangila() {
+    fetch("{% url 'sms:holat_json' %}", {headers: {"X-Requested-With": "fetch"}})
+      .then(function (j) { return j.json(); })
+      .then(function (m) {
+        document.getElementById("stat-jami").textContent = m.jami;
+        document.getElementById("stat-onlayn").textContent = m.onlayn;
+        document.getElementById("holat-vaqti").textContent =
+          "yangilandi: " + new Date().toLocaleTimeString("ru-RU");
+
+        m.qurilmalar.forEach(function (q) {
+          var qator = document.querySelector('tr[data-qurilma="' + q.id + '"]');
+          if (!qator) return;
+          var nuqta = qator.querySelector(".qurilma-nuqta");
+          if (nuqta) nuqta.className = "qurilma-nuqta " + q.holat;
+          var nishon = qator.querySelector("[data-holat]");
+          if (nishon) {
+            nishon.textContent = q.holat_nomi;
+            nishon.className = "nishon " + (q.holat === "onlayn" ? "yashil"
+              : q.holat === "ochiq" ? "qizil" : "kulrang");
+          }
+          var aloqa = qator.querySelector("[data-aloqa]");
+          if (aloqa) aloqa.textContent = q.aloqa;
+        });
+
+        // Yangi qurilma ulansa sahifani yangilaymiz - jadvalda ko'rinsin
+        if (m.jami !== jamiOldin) { location.reload(); }
+      })
+      .catch(function () { /* internet uzilgan bo'lishi mumkin */ });
+  }
+
+  setInterval(yangila, 15000);
+})();
+</script>
+{% endblock %}

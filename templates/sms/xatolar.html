@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block sarlavha %}Jo'natilmagan xabarlar - {{ SAYT_NOMI }}{% endblock %}
+{% block bolim_nomi %}Jo'natilmagan xabarlar{% endblock %}
+
+{% block ichki %}
+{% include "sms/_tab.html" %}
+
+<div class="panel">
+  <div class="panel-sarlavha">
+    Jo'natilmagan xabarlar
+    <span class="bosq">{{ soni }} ta</span>
+  </div>
+  <div class="panel-ich zich">
+    {% if royxat %}
+    <div style="padding:12px 16px;border-bottom:1px solid var(--chegara)">
+      <form method="post" action="{% url 'sms:hammasini_qayta_urin' %}"
+            onsubmit="return confirm('{{ soni }} ta xabarning hammasi qayta urinishga qo\'yilsinmi?')">
+        {% csrf_token %}
+        <button type="submit" class="tugma asosiy">Hammasini qayta urinish</button>
+      </form>
+    </div>
+
+    <div class="jadval-qobiq">
+      <table class="jadval">
+        <thead>
+          <tr>
+            <th>O'quvchi</th>
+            <th>Kimga</th>
+            <th>Telefon</th>
+            <th>Qurilma</th>
+            <th>Sababi</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for x in royxat %}
+          <tr>
+            <td class="ism"><b>{{ x.oquvchi.toliq_ism }}</b></td>
+            <td>{{ x.get_qabul_qiluvchi_display }}</td>
+            <td class="bir-qator">{{ x.telefon }}</td>
+            <td>
+              {{ x.qurilma.nomi|default:"-" }}
+              {% if x.sim %}<div class="bosq">{{ x.sim.nomi }}</div>{% endif %}
+            </td>
+            <td>
+              <span class="nishon qizil">{{ x.xato_matni|default:"noma'lum xato" }}</span>
+              <div class="bosq">{{ x.urinishlar }} marta urinildi</div>
+            </td>
+            <td>
+              <form method="post" action="{% url 'sms:qayta_urin' x.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="tugma kichik">Qayta urinib ko'rish</button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+      <div class="hech-narsa">
+        Jo'natilmagan xabar yo'q - hammasi yetib borgan.
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

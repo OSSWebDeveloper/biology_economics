@@ -43,6 +43,16 @@
         <span class="belgi">&#128176;</span> Oylik va avans
       </a>
 
+      {% if SMS_YOQILGAN %}
+      <div class="bolim">Xabarnoma</div>
+      <a href="{% url 'sms:bosh' %}" class="{% if ns == 'sms' and un == 'bosh' %}faol{% endif %}">
+        <span class="belgi">&#128241;</span> Qurilmalar
+      </a>
+      <a href="{% url 'sms:xabarlar' %}" class="{% if ns == 'sms' and un == 'xabarlar' %}faol{% endif %}">
+        <span class="belgi">&#9993;</span> SMS xabarlar
+      </a>
+      {% endif %}
+
       <div class="bolim">Hisobot</div>
       <a href="{% url 'dashboard:moliya' %}" class="{% if un == 'moliya' %}faol{% endif %}">
         <span class="belgi">&#128200;</span> Moliya (statistika)

@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+
+{% block sarlavha %}Xabarlar - {{ SAYT_NOMI }}{% endblock %}
+{% block bolim_nomi %}Xabarlar{% endblock %}
+
+{% block ichki %}
+<div class="setka k4" style="margin-bottom:16px">
+  <div class="stat sariq">
+    <div class="yorliq">Navbatda</div>
+    <div class="qiymat">{{ sanoq.kutmoqda }}</div>
+    <div class="izoh">yuborilmagan</div>
+  </div>
+  <div class="stat kok">
+    <div class="yorliq">Jarayonda</div>
+    <div class="qiymat">{{ sanoq.jarayonda }}</div>
+    <div class="izoh">qurilmalarda</div>
+  </div>
+  <div class="stat yashil">
+    <div class="yorliq">Jo'natildi</div>
+    <div class="qiymat">{{ sanoq.jonatildi }}</div>
+  </div>
+  <div class="stat qizil">
+    <div class="yorliq">Jo'natilmadi</div>
+    <div class="qiymat">{{ sanoq.xato }}</div>
+  </div>
+</div>
+
+{% include "sms/_tab.html" %}
+
+<form method="post" action="{% url 'sms:yuborish' %}" id="yuborish-forma">
+  {% csrf_token %}
+  <div class="panel" style="margin-bottom:16px">
+    <div class="panel-sarlavha">
+      Qaysi qurilmalardan yuborilsin
+      <span class="bosq">{{ qurilmalar.onlayn }} ta onlayn / {{ qurilmalar.jami }} ta ulangan</span>
+    </div>
+    <div class="panel-ich">
+      {% if qurilmalar.royxat %}
+      <div class="kanal-tanlov">
+        {% for q in qurilmalar.royxat %}
+        <div class="kanal {% if not q.onlayn %}oflayn{% endif %}">
+          <div class="kanal-bosh">
+            <span class="qurilma-nuqta {{ q.holat_kodi }}"></span>
+            <label class="belgilash">
+              <input type="checkbox" name="qurilma" value="{{ q.pk }}"
+                     class="qurilma-belgi" data-qurilma="{{ q.pk }}"
+                     {% if not q.faol %}disabled{% endif %}>
+              <span>
+                <b>{{ q.nomi }}</b>
+                <span class="nishon {% if q.holat_kodi == 'onlayn' %}yashil{% elif q.holat_kodi == 'ochiq' %}qizil{% else %}kulrang{% endif %}">
+                  {{ q.holat_nomi }}
+                </span>
+                <span class="bosq">{{ q.aloqa_matni }}</span>
+              </span>
+            </label>
+            {% if q.tanlanadigan_simlar|length > 1 %}
+              <button type="button" class="tugma kichik sim-ochish" data-qurilma="{{ q.pk }}">
+                SIM tanlash &#9662;
+              </button>
+            {% endif %}
+          </div>
+
+          {% if q.tanlanadigan_simlar|length > 1 %}
+          <div class="kanal-simlar" id="simlar-{{ q.pk }}" hidden>
+            {% for sim in q.tanlanadigan_simlar %}
+            <label class="belgilash">
+              <input type="checkbox" name="sim" value="{{ sim.pk }}"
+                     class="sim-belgi" data-qurilma="{{ q.pk }}">
+              <span>{{ sim.nomi }}{% if sim.raqam %} <span class="bosq">{{ sim.raqam }}</span>{% endif %}</span>
+            </label>
+            {% endfor %}
+            <div class="bosq">
+              Hech biri belgilanmasa, telefonning standart SIM kartasi ishlatiladi.
+            </div>
+          </div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="taqsim-izoh" id="taqsim-izoh">
+        Qurilma tanlang - {{ navbat_soni }} ta xabar tanlangan kanallarga teng bo'linadi.
+      </div>
+
+      <div class="tugmalar" style="margin-top:14px">
+        <button type="submit" class="tugma asosiy" id="yuborish-tugma"
+                {% if not navbat_soni %}disabled{% endif %}>
+          Yuborish
+        </button>
+        <span class="bosq" style="align-self:center">
+          {% if navbat_soni %}{{ navbat_soni }} ta xabar tayyor{% else %}Navbat bo'sh{% endif %}
+        </span>
+      </div>
+      {% else %}
+        <div class="hech-narsa">
+          Ulangan qurilma yo'q.
+          <a href="{% url 'sms:bosh' %}">Qurilma ulash</a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</form>
+
+<div class="panel" style="margin-bottom:16px">
+  <div class="panel-sarlavha">
+    Navbatdagi xabarlar
+    <form method="post" action="{% url 'sms:navbatni_tayyorla' %}" style="display:inline">
+      {% csrf_token %}
+      <button type="submit" class="tugma kichik">Navbatni yangilash</button>
+    </form>
+  </div>
+  <div class="panel-ich zich">
+    {% if navbat %}
+    <div class="jadval-qobiq">
+      <table class="jadval">
+        <thead>
+          <tr>
+            <th>O'quvchi</th>
+            <th>Kimga</th>
+            <th>Telefon</th>
+            <th class="ong">Qarz</th>
+            <th>Matn</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for x in navbat %}
+          <tr>
+            <td class="ism"><b>{{ x.oquvchi.toliq_ism }}</b></td>
+            <td>{{ x.get_qabul_qiluvchi_display }}</td>
+            <td class="bir-qator">{{ x.telefon }}</td>
+            <td class="ong pul">{{ x.summa|floatformat:0 }}</td>
+            <td class="bosq">{{ x.matn|truncatechars:70 }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+      <div class="hech-narsa">
+        Navbat bo'sh. Eslatmalar har oyning 1-sanasida o'zi tayyorlanadi,
+        yoki yuqoridagi "Navbatni yangilash" tugmasi bilan hozir tayyorlanadi.
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+{% if jarayonda %}
+<div class="panel">
+  <div class="panel-sarlavha">Qurilmalarga berilgan xabarlar</div>
+  <div class="panel-ich zich">
+    <div class="jadval-qobiq">
+      <table class="jadval">
+        <thead>
+          <tr>
+            <th>O'quvchi</th>
+            <th>Telefon</th>
+            <th>Qurilma</th>
+            <th>SIM</th>
+            <th>Holati</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for x in jarayonda %}
+          <tr>
+            <td class="ism">{{ x.oquvchi.toliq_ism }}</td>
+            <td class="bir-qator">{{ x.telefon }}</td>
+            <td>{{ x.qurilma.nomi|default:"-" }}</td>
+            <td>{{ x.sim.nomi|default:"standart" }}</td>
+            <td><span class="nishon {{ x.holat_rangi }}">{{ x.get_holat_display }}</span></td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block skript %}
+<script>
+(function () {
+  var navbatSoni = {{ navbat_soni|default:0 }};
+  var izoh = document.getElementById("taqsim-izoh");
+  var tugma = document.getElementById("yuborish-tugma");
+
+  // "SIM tanlash" tugmasi - qurilma ostidagi SIM ro'yxatini ochadi/yopadi
+  document.querySelectorAll(".sim-ochish").forEach(function (t) {
+    t.addEventListener("click", function () {
+      var quti = document.getElementById("simlar-" + t.dataset.qurilma);
+      if (quti) quti.hidden = !quti.hidden;
+    });
+  });
+
+  // SIM belgilansa, qurilmaning o'zi ham belgilanadi
+  document.querySelectorAll(".sim-belgi").forEach(function (s) {
+    s.addEventListener("change", function () {
+      if (s.checked) {
+        var q = document.querySelector('.qurilma-belgi[data-qurilma="' + s.dataset.qurilma + '"]');
+        if (q && !q.checked) { q.checked = true; }
+      }
+      hisobla();
+    });
+  });
+
+  // Qurilma belgisi olib tashlansa, uning SIM lari ham bo'shaydi
+  document.querySelectorAll(".qurilma-belgi").forEach(function (q) {
+    q.addEventListener("change", function () {
+      if (!q.checked) {
+        document.querySelectorAll('.sim-belgi[data-qurilma="' + q.dataset.qurilma + '"]')
+          .forEach(function (s) { s.checked = false; });
+      } else {
+        var quti = document.getElementById("simlar-" + q.dataset.qurilma);
+        if (quti) quti.hidden = false;
+      }
+      hisobla();
+    });
+  });
+
+  function kanallarSoni() {
+    var soni = 0;
+    document.querySelectorAll(".qurilma-belgi:checked").forEach(function (q) {
+      var simlar = document.querySelectorAll(
+        '.sim-belgi[data-qurilma="' + q.dataset.qurilma + '"]:checked');
+      soni += simlar.length > 0 ? simlar.length : 1;
+    });
+    return soni;
+  }
+
+  function hisobla() {
+    var kanallar = kanallarSoni();
+    if (tugma) tugma.disabled = (kanallar === 0 || navbatSoni === 0);
+    if (!izoh) return;
+
+    if (kanallar === 0) {
+      izoh.textContent = "Qurilma tanlang - " + navbatSoni +
+        " ta xabar tanlangan kanallarga teng bo'linadi.";
+      return;
+    }
+    if (navbatSoni === 0) {
+      izoh.textContent = "Navbat bo'sh - yuboriladigan xabar yo'q.";
+      return;
+    }
+    var asos = Math.floor(navbatSoni / kanallar);
+    var qoldiq = navbatSoni % kanallar;
+    var matn = navbatSoni + " ta xabar " + kanallar + " ta kanalga bo'linadi: " +
+      "har biriga " + asos + " ta";
+    if (qoldiq > 0) { matn += ", " + qoldiq + " tasiga bittadan ko'proq"; }
+    izoh.textContent = matn + ".";
+  }
+
+  hisobla();
+})();
+</script>
+{% endblock %}

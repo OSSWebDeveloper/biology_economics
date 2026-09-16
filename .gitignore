@@ -7,12 +7,17 @@
 .vscode/
 _TEST_*
 __pycache__/
+asboblar/
 db.sqlite3
 db.sqlite3-journal
 db_zaxira_*.sqlite3
+ilova/*.apk
+manzil.txt
 maxfiy_kalit.txt
 port.txt
 server.log
+sms_kalit.txt
 staticfiles/
+tailscale_manzil.txt
 venv/
 zaxira/

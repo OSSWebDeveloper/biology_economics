@@ -9,6 +9,24 @@ Joriy versiya: [`versiya.txt`](versiya.txt)
 
 ---
 
+## 0. Sayt qayerda ishlaydi
+
+Ikkita yo'l bor, ikkalasi ham bir xil koddan:
+
+| Yo'l | Qachon | Qo'llanma |
+|---|---|---|
+| **Mijozning kompyuterida** (localhost) | Boshlang'ich holat. Kompyuter yoniq bo'lishi kerak, telefon faqat bir xil Wi-Fi da ulanadi | 1-bo'lim (pastda) |
+| **Ochiq internetda** (PythonAnywhere) | Telefon istalgan joydan ulanishi va kompyuter o'chiq bo'lsa ham sayt ishlashi kerak bo'lganda | [`PYTHONANYWHERE.md`](PYTHONANYWHERE.md) |
+
+Ikkovini ajratadigan narsa — loyiha papkasidagi **`manzil.txt`** fayli:
+bo'lsa — ochiq server rejimi (`DEBUG` o'chiq, faqat o'sha domen, HTTPS majburiy),
+bo'lmasa — hozirgidek localhost. Fayl GitHub ga tushmaydi.
+
+> **Ikkalasini bir vaqtda ishlatmang.** Har birining o'z bazasi bo'lib qoladi
+> va to'lovlar ikki joyda alohida yuriladi.
+
+---
+
 ## 1. Mijoz kompyuteriga o'rnatish — `ORNATISH.bat`
 
 Bitta faylni **administrator nomidan** ishga tushirish kifoya
@@ -100,6 +118,54 @@ set "PORT=8000"
 | `Toxtatish.bat` | Fon rejimidagi serverni to'xtatadi |
 | `Tekshirish.bat` | Serverni oynali rejimda ochadi — xatoni ko'rish uchun |
 | `server.log` | Server jurnali; nimadir ishlamasa avval shuni oching |
+| `QURILMA_QOSHISH.bat` | SMS yuboradigan telefonni sozlaydi (pastga qarang) |
+| `ilova\kurs_sms.apk` | Telefonga o'rnatiladigan "Kurs SMS" ilovasi |
+
+### Telefon bilan aloqa (Tailscale)
+
+`ORNATISH.bat` ning oxirgi qadami **Tailscale** ni o'rnatadi. Bu bepul
+dastur kompyuter bilan telefonni bitta **shaxsiy tarmoqqa** ulaydi.
+
+Sayt internetga **chiqarilmaydi**: domen, oq IP, router sozlash kerak emas.
+Faqat sizning hisobingizga ulangan qurilmalar saytni ko'radi. Brandmauerga
+ham shunga mos qoida qo'yiladi — `8000` porti faqat shaxsiy tarmoq
+(`100.64.0.0/10`) uchun ochiq, oddiy Wi-Fi yoki kafe tarmog'idan yopiq.
+
+`Server.bat` Tailscale bor bo'lsa `0.0.0.0` da tinglaydi, yo'q bo'lsa
+avvalgidek faqat `127.0.0.1` da — ya'ni Tailscale o'rnatilmagan
+kompyuterda hech nima o'zgarmaydi.
+
+---
+
+## 1.1. SMS yuboradigan telefon — `QURILMA_QOSHISH.bat`
+
+Telefonni USB kabel bilan ulang va shu faylni ishga tushiring. Qolganini
+skript o'zi qiladi:
+
+| Qadam | Nima qiladi |
+|---|---|
+| 1-3 | Saytni, ilova faylini va `adb` ni tekshiradi (`adb` yo'q bo'lsa Google saytidan o'zi yuklab oladi) |
+| 4 | Telefonni kutadi; topilmasa yoki ruxsat berilmasa — nima qilish kerakligini yozadi |
+| 5 | Telefonga **Tailscale** ni o'rnatadi va shaxsiy tarmoqqa qo'shilishini kutadi |
+| 6 | **Kurs SMS** ilovasini o'rnatadi (eskisi bo'lsa ustidan yangilaydi) |
+| 7 | Ruxsatlar (SMS, SIM, bildirishnoma), batareya va fon cheklovlari, SMS chegarasi |
+| 8 | Saytda **12 xonalik kodni o'zi yaratadi** va telefonga uzatadi |
+
+**Telefonda oldindan kerak:** Sozlamalar → Telefon haqida → "Build number"
+ni 7 marta bosing → Dasturchi sozlamalari → **USB debugging = yoq**.
+
+**Telefonda faqat uchta narsa bosiladi:**
+1. "USB orqali nosozliklarni tuzatishga ruxsat berilsinmi?" → Ruxsat berish
+2. Tailscale da hisobga kirish (kompyuterdagi bilan **bir xil** hisob)
+3. Kurs SMS da "Ulanish" tugmasi
+
+12 xonalik kodni qo'lda terish kerak emas — skript o'zi yaratib, o'zi
+uzatadi. Telefondagi tasdiq oynasi ataylab qoldirilgan: unda qaysi saytga
+ulanayotganingiz yoziladi, shunda boshqa ilova soxta manzil bilan ulab
+yubora olmaydi.
+
+Ikkinchi, uchinchi telefon qo'shish ham xuddi shunday — har biriga alohida
+kalit beriladi, xabarlar ular orasida teng bo'linadi.
 
 ---
 
@@ -365,7 +431,13 @@ qaytarilib guruh tayinlanadi.
 | **Xodimlar** | oylik maosh, shu oy avansi, qoldiq, saytga kirish logini |
 | **Oylik va avans** | xodimlarga berilgan pullar; naqd/plastik alohida |
 | **Moliya (statistika)** | kirim/chiqim, sof foyda, yig'ilish foizi, 12 oylik grafik, guruhlar kesimi |
+| **Xabarnoma → Qurilmalar** | ulanish kodi, ulangan telefonlar, onlayn holati, SIM kartalar, hodisalar |
+| **Xabarnoma → SMS xabarlar** | navbat, qurilma/SIM tanlab yuborish, jarayondagilar, jo'natilmaganlar |
 | **Shaxsiy sahifam** | o'z familiyasi, ismi, logini va parolini o'zgartirish |
+
+> "Xabarnoma" bo'limi `config/settings.py` dagi `SMS_ESLATMA_YOQILGAN`
+> sozlamasiga bog'liq. `False` qilinsa bo'lim menyudan ham, manzillardan
+> ham butunlay yo'qoladi. Batafsil: `sms/API.md`.
 
 ---
 

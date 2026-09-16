@@ -4,6 +4,7 @@ from accounts.permissions import admin_talab
 
 from payments.models import Tranzaksiya
 from payments.services import barcha_hisoblarni_yangila
+from sms.services import avtomatik_tekshir
 from staff.services import maoshlarni_yangila
 
 from .services import (
@@ -21,6 +22,8 @@ def bosh(request):
     """Bosh sahifa. Admin va o'qituvchi uchun boshqa-boshqa ko'rinish."""
     barcha_hisoblarni_yangila()
     maoshlarni_yangila()
+    # Oylik SMS eslatmasi (SMS_ESLATMA_YOQILGAN o'chiq bo'lsa - hech nima qilmaydi)
+    avtomatik_tekshir()
 
     if not request.user.admin_mi:
         return _oqituvchi_bosh(request)

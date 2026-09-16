@@ -395,3 +395,47 @@ label.belgilash input { width: auto; }
   body { background: #fff; }
   .panel { box-shadow: none; }
 }
+
+/* ---------- SMS / Xabarnoma bo'limi ---------- */
+.ulanish-kodi {
+  font-size: 2.1rem; font-weight: 700; letter-spacing: .14em;
+  font-variant-numeric: tabular-nums; color: var(--asosiy);
+  background: var(--kok-fon); border: 1px dashed var(--asosiy);
+  border-radius: 10px; padding: 14px 18px; display: inline-block;
+}
+.kod-qadamlar { margin: 12px 0 0; padding-left: 18px; font-size: .85rem; color: var(--matn-och); }
+.kod-qadamlar li { margin-bottom: 4px; }
+
+.qurilma-qator { display: flex; align-items: center; gap: 10px; }
+.qurilma-nuqta { width: 9px; height: 9px; border-radius: 50%; background: #cbd5e1; flex: none; }
+.qurilma-nuqta.onlayn { background: var(--yashil); box-shadow: 0 0 0 3px var(--yashil-fon); }
+.qurilma-nuqta.oflayn { background: #cbd5e1; }
+.qurilma-nuqta.ochiq { background: var(--qizil); }
+
+.sim-royxat { display: grid; gap: 6px; margin-top: 6px; }
+.sim-qator {
+  display: flex; align-items: center; gap: 8px; font-size: .82rem;
+  padding: 5px 8px; border: 1px solid var(--chegara); border-radius: 6px;
+  background: #fbfcfd;
+}
+.sim-qator.ochiq { opacity: .55; }
+.sim-qator input { width: auto; margin: 0; }
+
+.kanal-tanlov { display: grid; gap: 10px; }
+.kanal {
+  border: 1px solid var(--chegara); border-radius: 10px; padding: 12px 14px;
+  background: #fff;
+}
+.kanal.oflayn { background: #fbfcfd; }
+.kanal-bosh { display: flex; align-items: center; gap: 10px; }
+.kanal-bosh label.belgilash { flex: 1; }
+.kanal-simlar { margin: 10px 0 0 26px; display: grid; gap: 6px; }
+.kanal-simlar[hidden] { display: none; }
+
+.taqsim-izoh {
+  font-size: .82rem; color: var(--matn-och); background: var(--kok-fon);
+  border-radius: 8px; padding: 10px 12px; margin-top: 12px;
+}
+.hodisa { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--chegara); font-size: .85rem; }
+.hodisa:last-child { border-bottom: none; }
+.hodisa .vaqt { color: var(--matn-och); white-space: nowrap; font-size: .78rem; }

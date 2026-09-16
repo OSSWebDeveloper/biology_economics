@@ -52,7 +52,7 @@ set "SHUYER=%~dp0"
 if "!SHUYER:~-1!"=="\" set "SHUYER=!SHUYER:~0,-1!"
 
 rem ============================================================
-call :sarlavha "1/7   Python tekshirilmoqda"
+call :sarlavha "1/8   Python tekshirilmoqda"
 rem ============================================================
 set "PY="
 py -3 -c "import sys; raise SystemExit(0 if sys.version_info >= (3,12) else 1)" >nul 2>&1
@@ -81,7 +81,7 @@ del /q "%TEMP%\bio_pyv.txt" >nul 2>&1
 echo    Python !PYV! - tayyor.
 
 rem ============================================================
-call :sarlavha "2/7   Ishlab turgan server to'xtatilmoqda"
+call :sarlavha "2/8   Ishlab turgan server to'xtatilmoqda"
 rem ============================================================
 rem Server --noreload rejimida ishlaydi: yangi fayllar faqat u qayta ishga
 rem tushgandan keyin kuchga kiradi. Shu sababli avval to'xtatiladi - shunda
@@ -104,7 +104,7 @@ if defined SERVER_ISHLAGAN (
 )
 
 rem ============================================================
-call :sarlavha "3/7   Yangi nusxa yuklab olinmoqda"
+call :sarlavha "3/8   Yangi nusxa yuklab olinmoqda"
 rem ============================================================
 set "ESKI_V=o'rnatilmagan"
 if exist "%JOY%\versiya.txt" set /p ESKI_V=<"%JOY%\versiya.txt"
@@ -153,7 +153,7 @@ echo    Qurilmada : !ESKI_V!
 echo    Yangi     : !YANGI_V!
 
 rem ============================================================
-call :sarlavha "4/7   Fayllar yangilanmoqda"
+call :sarlavha "4/8   Fayllar yangilanmoqda"
 rem ============================================================
 if not exist "%JOY%" mkdir "%JOY%"
 
@@ -181,7 +181,7 @@ icacls "%JOY%" /grant "*S-1-5-32-545:(OI)(CI)M" /T /C /Q >nul 2>&1
 echo    Yozish huquqi berildi.
 
 rem ============================================================
-call :sarlavha "5/7   Kutubxonalar tekshirilmoqda"
+call :sarlavha "5/8   Kutubxonalar tekshirilmoqda"
 rem ============================================================
 if not exist "%JOY%\manage.py" goto :xato_nusxa
 set "VPY=%JOY%\.venv\Scripts\python.exe"
@@ -206,7 +206,7 @@ del /q "%TEMP%\bio_djv.txt" >nul 2>&1
 echo    Django !DJV! - tayyor.
 
 rem ============================================================
-call :sarlavha "6/7   Ma'lumotlar bazasi tekshirilmoqda"
+call :sarlavha "6/8   Ma'lumotlar bazasi tekshirilmoqda"
 rem ============================================================
 pushd "%JOY%"
 > "%JOY%\port.txt" echo %PORT%
@@ -220,7 +220,7 @@ if errorlevel 1 (
 popd
 
 rem ============================================================
-call :sarlavha "7/7   Ish stoliga yorliqlar qo'yilmoqda"
+call :sarlavha "7/8   Ish stoliga yorliqlar qo'yilmoqda"
 rem ============================================================
 rem Nomlar muhit o'zgaruvchisi orqali uzatiladi - buyruq satridagi
 rem apostrof turli kompyuterlarda turlicha o'qilib ketmasligi uchun
@@ -235,6 +235,11 @@ if errorlevel 1 (
 ) else (
     echo    Ko'rinmasa - ish stolida bir marta F5 bosing.
 )
+
+rem ============================================================
+call :sarlavha "8/8   Telefon bilan aloqa (Tailscale)"
+rem ============================================================
+call :tailscale
 
 if exist "%ZIP%" del /q "%ZIP%" >nul 2>&1
 if exist "%VAQT%" rd /s /q "%VAQT%" >nul 2>&1
@@ -259,6 +264,10 @@ echo.
 echo    Manzil         : http://127.0.0.1:%PORT%/
 echo    Dastur papkasi : %JOY%
 echo    Xato izlash    : %JOY%\Tekshirish.bat
+echo.
+echo    SMS yuboradigan telefon qo'shish uchun:
+echo      telefonni USB bilan ulang va "%JOY%\QURILMA_QOSHISH.bat"
+echo      faylini ishga tushiring - qolganini u o'zi qiladi.
 echo.
 echo    Yangilanish chiqqanda shu faylni yana ishga tushiring -
 echo    baza saqlanib qoladi, server esa o'zi qayta ishga tushadi.
@@ -299,6 +308,74 @@ echo.
 echo  ------------------------------------------------------------
 echo   %~1
 echo  ------------------------------------------------------------
+exit /b 0
+
+rem ------------------------------------------------------------
+rem  Tailscale: kompyuter bilan telefonni bitta SHAXSIY tarmoqqa
+rem  ulaydi. SMS eslatmalarini telefon jo'natadi, telefon esa saytni
+rem  shu tarmoq orqali ko'radi. Sayt internetga CHIQARILMAYDI -
+rem  domen, oq IP, router sozlash kerak emas.
+rem ------------------------------------------------------------
+:tailscale
+set "TS=%ProgramFiles%\Tailscale\tailscale.exe"
+if exist "%TS%" goto :ts_bor
+
+echo    SMS xabarlarni telefon jo'natadi. Buning uchun kompyuter bilan
+echo    telefonni bitta shaxsiy tarmoqqa ulaydigan Tailscale dasturi kerak.
+echo    U bepul va sayt internetga ochilmaydi - faqat sizning
+echo    qurilmalaringiz ko'radi.
+echo.
+set "TSJ=h"
+set /p TSJ="   Tailscale o'rnatilsinmi? [H/y]: "
+if /i "%TSJ%"=="y" (
+    echo    O'tkazib yuborildi. Keyinroq shu faylni qayta ishga tushirsangiz bo'ladi.
+    exit /b 0
+)
+
+echo    Yuklab olinmoqda (37 MB)...
+curl -L -s -o "%TEMP%\ts-setup.msi" "https://pkgs.tailscale.com/stable/tailscale-setup-latest-amd64.msi"
+if not exist "%TEMP%\ts-setup.msi" (
+    echo    Yuklab bo'lmadi - internetni tekshiring. Bu qadam o'tkazib yuborildi.
+    exit /b 0
+)
+echo    O'rnatilmoqda...
+msiexec /i "%TEMP%\ts-setup.msi" /qn /norestart
+del /q "%TEMP%\ts-setup.msi" >nul 2>&1
+if not exist "%TS%" (
+    echo    Tailscale o'rnatilmadi. Bu qadam o'tkazib yuborildi.
+    exit /b 0
+)
+echo    O'rnatildi.
+
+:ts_bor
+rem Hisobga kirilganmi?
+"%TS%" status > "%TEMP%\ts_holat.txt" 2>&1
+findstr /i /c:"Logged out" "%TEMP%\ts_holat.txt" >nul
+if not errorlevel 1 (
+    echo.
+    echo    Endi hisobingizga kirish kerak - brauzer o'zi ochiladi.
+    echo    Google yoki Microsoft hisobingiz bilan kiring.
+    echo.
+    echo    DIQQAT: telefonda ham AYNAN SHU hisobga kirasiz.
+    echo.
+    "%TS%" up --hostname=kurs-sayt
+)
+del /q "%TEMP%\ts_holat.txt" >nul 2>&1
+
+rem Port faqat shaxsiy tarmoqdan ochiq bo'lsin (100.64.0.0/10 - Tailscale
+rem diapazoni). Oddiy Wi-Fi yoki kafe tarmog'idan hech kim kira olmaydi.
+netsh advfirewall firewall delete rule name="Bio Moliya - Tailscale (%PORT%)" >nul 2>&1
+netsh advfirewall firewall add rule name="Bio Moliya - Tailscale (%PORT%)" dir=in action=allow protocol=TCP localport=%PORT% remoteip=100.64.0.0/10 >nul 2>&1
+echo    Brandmauer: %PORT% porti faqat shaxsiy tarmoq uchun ochildi.
+
+set "TS_IP="
+for /f "usebackq delims=" %%i in (`"%TS%" ip -4 2^>nul`) do if not defined TS_IP set "TS_IP=%%i"
+if defined TS_IP (
+    echo    Telefon uchun manzil: http://%TS_IP%:%PORT%
+    > "%JOY%\tailscale_manzil.txt" echo http://%TS_IP%:%PORT%
+) else (
+    echo    Hisobga hali kirilmagan - telefon uchun manzil keyin aniqlanadi.
+)
 exit /b 0
 
 :xato

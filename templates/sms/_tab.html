@@ -1,0 +1,11 @@
+{% with un=request.resolver_match.url_name %}
+<div class="tab-menyu">
+  <a href="{% url 'sms:bosh' %}" class="{% if un == 'bosh' %}faol{% endif %}">Qurilmalar</a>
+  <a href="{% url 'sms:xabarlar' %}" class="{% if un == 'xabarlar' %}faol{% endif %}">
+    Xabarlar{% if sanoq.kutmoqda %} <span class="nishon kok">{{ sanoq.kutmoqda }}</span>{% endif %}
+  </a>
+  <a href="{% url 'sms:xatolar' %}" class="{% if un == 'xatolar' %}faol{% endif %}">
+    Jo'natilmaganlar{% if sanoq.xato %} <span class="nishon qizil">{{ sanoq.xato }}</span>{% endif %}
+  </a>
+</div>
+{% endwith %}
