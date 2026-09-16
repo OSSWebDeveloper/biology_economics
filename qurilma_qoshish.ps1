@@ -3,9 +3,20 @@
 # ---------------------------------------------------------------------
 #  SMS yuboradigan telefonni noldan to'liq sozlaydi:
 #    - adb (Android asbobi) - yo'q bo'lsa o'zi yuklab oladi
-#    - telefonga Tailscale + Kurs SMS ilovasi
+#    - telefonga Kurs SMS ilovasi (kerak bo'lsa Tailscale ham)
 #    - barcha ruxsatlar, batareya va fon cheklovlari
-#    - saytga ulanish (12 xonalik kodni o'zi yaratib, o'zi uzatadi)
+#    - saytga ulanish (12 xonalik kod bilan)
+#
+#  IKKI REJIM:
+#    1) Mahalliy - sayt shu kompyuterda. Tailscale orqali ulanadi, ulanish
+#       kodini skript o'zi yaratadi. Qo'shimcha parametr kerak emas.
+#    2) Hosting - sayt ochiq internetda (PythonAnywhere). Tailscale kerak
+#       emas. Kodni saytdan olib, shu yerga berasiz:
+#
+#         QURILMA_QOSHISH.bat -Manzil https://mrclayd12.pythonanywhere.com -Kod 049125081866
+#
+#       Manzil bir marta berilsa `qurilma_manzil.txt` ga eslab qolinadi va
+#       keyingi safar faqat -Kod yetadi.
 #
 #  Telefonda oldindan "USB debugging" yoqilgan bo'lishi kerak:
 #    Sozlamalar -> Telefon haqida -> "Build number" ni 7 marta bosing
@@ -16,7 +27,9 @@
 
 param(
     [switch]$Savolsiz,     # hech narsa so'ramaydi
-    [switch]$FaqatIlova    # Tailscale qadamlarini o'tkazib yuboradi
+    [switch]$FaqatIlova,   # Tailscale qadamlarini o'tkazib yuboradi
+    [string]$Manzil = "",  # saytning ochiq manzili (https://...pythonanywhere.com)
+    [string]$Kod = ""      # saytdan olingan 12 xonalik ulanish kodi
 )
 
 $ErrorActionPreference = "Continue"
@@ -27,6 +40,22 @@ $TS_PAKET  = "com.tailscale.ipn"
 $ASBOB     = Join-Path $SAYT "asboblar"
 $TS_EXE    = "$env:ProgramFiles\Tailscale\tailscale.exe"
 $VPY       = Join-Path $SAYT ".venv\Scripts\python.exe"
+
+# --- Hosting rejimi -----------------------------------------------------
+# Sayt ochiq internetda bo'lsa (masalan PythonAnywhere), Tailscale ham,
+# mahalliy server ham, mahalliy baza ham kerak emas: ulanish kodi saytning
+# o'zida yaratiladi va bu skriptga -Kod bilan beriladi.
+#
+# DIQQAT: PowerShell o'zgaruvchilari registrga sezgir emas - $Manzil va
+# $manzil bitta o'zgaruvchi. Shu sabab 5-qadamdagi tozalash shartli.
+$MANZIL_FAYLI = Join-Path $SAYT "qurilma_manzil.txt"
+if (-not $Manzil -and (Test-Path $MANZIL_FAYLI)) {
+    $Manzil = (Get-Content $MANZIL_FAYLI -Raw).Trim()
+}
+$Manzil  = ("" + $Manzil).Trim().TrimEnd('/')
+$HOSTING = ($Manzil -match '^https?://') -and
+           ($Manzil -notmatch '^https?://(localhost|127\.|192\.168\.|10\.|100\.)')
+if ($HOSTING) { $FaqatIlova = $true }
 
 $TS_APK_URL = "https://pkgs.tailscale.com/stable/tailscale-android-universal-1.102.4.apk"
 $ADB_URL    = "https://dl.google.com/android/repository/platform-tools-latest-windows.zip"
@@ -112,22 +141,28 @@ Sarlavha "1. Sayt tekshirilmoqda"
 if (-not (Test-Path (Join-Path $SAYT "manage.py"))) {
     Toxta "Bu skript sayt papkasida turishi kerak." "Hozirgi joy: $SAYT"
 }
-if (-not (Test-Path $VPY)) {
-    # Ishlab chiqish kompyuterida .venv bo'lmasligi mumkin - umumiy Python
-    $umumiy = Get-Command python.exe -ErrorAction SilentlyContinue
-    if ($umumiy) {
-        $VPY = $umumiy.Source
-        Oddiy "(.venv yo'q - umumiy Python ishlatiladi)"
-    } else {
-        Toxta "Sayt to'liq o'rnatilmagan (.venv topilmadi)." "Avval ORNATISH.bat ni ishga tushiring."
-    }
-}
-Yaxshi "Sayt: $SAYT"
-
 $PORT = "8000"
-$portFayl = Join-Path $SAYT "port.txt"
-if (Test-Path $portFayl) { $PORT = (Get-Content $portFayl -Raw).Trim() }
-Oddiy "Port: $PORT"
+
+if ($HOSTING) {
+    Yaxshi "Sayt ochiq internetda: $Manzil"
+    Oddiy "Tailscale va mahalliy server kerak emas."
+} else {
+    if (-not (Test-Path $VPY)) {
+        # Ishlab chiqish kompyuterida .venv bo'lmasligi mumkin - umumiy Python
+        $umumiy = Get-Command python.exe -ErrorAction SilentlyContinue
+        if ($umumiy) {
+            $VPY = $umumiy.Source
+            Oddiy "(.venv yo'q - umumiy Python ishlatiladi)"
+        } else {
+            Toxta "Sayt to'liq o'rnatilmagan (.venv topilmadi)." "Avval ORNATISH.bat ni ishga tushiring."
+        }
+    }
+    Yaxshi "Sayt: $SAYT"
+
+    $portFayl = Join-Path $SAYT "port.txt"
+    if (Test-Path $portFayl) { $PORT = (Get-Content $portFayl -Raw).Trim() }
+    Oddiy "Port: $PORT"
+}
 
 # ---------------------------------------------------------- 2) ilova APK si
 Sarlavha "2. Ilova fayli"
@@ -234,7 +269,9 @@ $sdk  = Xususiyat "ro.build.version.sdk"
 Yaxshi "Telefon: $nomi (Android $(Xususiyat 'ro.build.version.release'), SDK $sdk)"
 
 # --------------------------------------------------- 5) shaxsiy tarmoq
-$manzil = ""
+# Hosting rejimida manzil allaqachon ma'lum (yuqorida $Manzil ga yozilgan va
+# PowerShell da $manzil o'sha o'zgaruvchining o'zi) - tozalanmaydi.
+if (-not $HOSTING) { $manzil = "" }
 
 if (-not $FaqatIlova) {
     Sarlavha "5. Shaxsiy tarmoq (Tailscale)"
@@ -396,7 +433,7 @@ if (-not $manzil) {
         $ishlayapti = $true
     } catch { $ishlayapti = $false }
 
-    if (-not $ishlayapti) {
+    if (-not $ishlayapti -and -not $HOSTING) {
         Oddiy "Server ishlamayapti - ishga tushirilmoqda..."
         Start-Process -FilePath (Join-Path $SAYT "Server.bat") -WindowStyle Hidden
         for ($i = 0; $i -lt 15; $i++) {
@@ -410,18 +447,36 @@ if (-not $manzil) {
     }
 
     if (-not $ishlayapti) {
-        Ogoh "Saytga ulanib bo'lmadi. Ish stolidagi 'Dasturga kirish' ni bosing"
-        Oddiy "va shu skriptni qaytadan ishga tushiring."
+        if ($HOSTING) {
+            Ogoh "Saytga ulanib bo'lmadi: $manzil"
+            Oddiy "Internet bormi va manzil to'g'rimi, tekshiring."
+        } else {
+            Ogoh "Saytga ulanib bo'lmadi. Ish stolidagi 'Dasturga kirish' ni bosing"
+            Oddiy "va shu skriptni qaytadan ishga tushiring."
+        }
     } else {
         Yaxshi "Sayt javob bermoqda"
 
-        # Ulanish kodi saytning o'zida yaratiladi - qo'lda ko'chirish kerak emas
-        $kodChiqish = Django "from sms.models import UlanishKodi; print('KOD=' + UlanishKodi.yarat().kod)"
         $kod = ""
-        if ($kodChiqish -match "KOD=(\d{12})") { $kod = $Matches[1] }
+        if ($HOSTING) {
+            # Sayt boshqa kompyuterda turibdi - kodni mahalliy bazadan olib
+            # bo'lmaydi, u saytning o'zida yaratiladi.
+            $kod = ("" + $Kod) -replace '\D', ''
+            if ($kod.Length -ne 12 -and -not $Savolsiz) {
+                Write-Host ""
+                Oddiy "Saytga kiring: $manzil"
+                Oddiy "Xabarnoma -> 'Ulanish kodini olish' -> 12 xonalik kod"
+                $kod = (Read-Host "  Kodni shu yerga yozing") -replace '\D', ''
+            }
+            if ($kod.Length -ne 12) { $kod = "" }
+        } else {
+            # Ulanish kodi saytning o'zida yaratiladi - qo'lda ko'chirish kerak emas
+            $kodChiqish = Django "from sms.models import UlanishKodi; print('KOD=' + UlanishKodi.yarat().kod)"
+            if ($kodChiqish -match "KOD=(\d{12})") { $kod = $Matches[1] }
+        }
 
         if (-not $kod) {
-            Ogoh "Ulanish kodi yaratilmadi."
+            Ogoh "Ulanish kodi olinmadi."
             Oddiy "Saytda 'Xabarnoma' bo'limi yoqilganmi, tekshiring"
             Oddiy "(config\settings.py -> SMS_ESLATMA_YOQILGAN = True)."
         } else {
@@ -443,17 +498,24 @@ if (-not $manzil) {
                        "`n    print('KUTMOQDA')"
 
             $ulandi = $false
-            for ($i = 0; $i -lt 60; $i++) {
-                Start-Sleep -Seconds 3
-                $javob = Django $tekshir
-                if ($javob -match "ULANDI=(.+)") {
-                    Oddiy ("Saytda: " + $Matches[1].Trim())
-                    $ulandi = $true
-                    break
+            if ($HOSTING) {
+                # Sayt boshqa kompyuterda - bazasini bu yerdan o'qib bo'lmaydi.
+                Oddiy "Ulanganini saytdagi 'Xabarnoma' bo'limida ko'rasiz."
+                $Manzil | Set-Content -Path $MANZIL_FAYLI -Encoding utf8
+                Oddiy "Manzil eslab qolindi - keyingi safar -Manzil yozilmasa ham bo'ladi."
+            } else {
+                for ($i = 0; $i -lt 60; $i++) {
+                    Start-Sleep -Seconds 3
+                    $javob = Django $tekshir
+                    if ($javob -match "ULANDI=(.+)") {
+                        Oddiy ("Saytda: " + $Matches[1].Trim())
+                        $ulandi = $true
+                        break
+                    }
                 }
+                if ($ulandi) { Yaxshi "QURILMA SAYTGA ULANDI" }
+                else { Ogoh "Ulanish tasdiqlanmadi - telefonda 'Ulanish' bosilganmi?" }
             }
-            if ($ulandi) { Yaxshi "QURILMA SAYTGA ULANDI" }
-            else { Ogoh "Ulanish tasdiqlanmadi - telefonda 'Ulanish' bosilganmi?" }
         }
     }
 }

@@ -157,18 +157,45 @@ python manage.py check --deploy
 
 ## 9. Telefondagi ilovani ulash
 
-1. Saytda: **Xabarnoma → Ulanish kodini olish** (12 xonalik kod, 15 daqiqa).
-2. Telefonda **Kurs SMS → Sozlamalar → Sayt manzili**:
+**Ilovani qayta qurish shart emas** — mavjud APK (v1.1.0) istalgan manzilga,
+shu jumladan HTTPS ga ulanaveradi. Ikki yo'l bor.
+
+### 9a. USB orqali (tavsiya) — bir bosishda
+
+1. Saytga kiring → **Xabarnoma → Ulanish kodini olish** (12 xonalik kod,
+   15 daqiqa amal qiladi).
+2. Telefonni USB bilan ulang (telefonda **USB debugging** yoqilgan bo'lsin:
+   Sozlamalar → Telefon haqida → "Build number" ni 7 marta bosing →
+   Dasturchi sozlamalari → USB debugging).
+3. Kompyuterda:
 
    ```
-   https://mrclayd12.pythonanywhere.com
+   QURILMA_QOSHISH.bat -Kod 049125081866
    ```
 
-   ⚠️ **`https://` ni albatta yozing.** Yozilmasa ilova `http://` deb oladi,
-   server esa uni HTTPS ga buradi va ulanish xato beradi.
-3. Kodni kiriting → **Ulanish**. Ikkala tomonda "ulandi" bildirishnomasi
-   chiqadi.
-4. Telefondagi **Tailscale** endi kerak emas — o'chirsangiz ham bo'ladi.
+   Skript ilovani o'rnatadi, barcha ruxsatlarni beradi, batareya cheklovini
+   olib tashlaydi, SMS chegarasini 200 ga oshiradi va manzil bilan kodni
+   telefonga uzatadi. Telefon ekranida faqat **Ulanish** tugmasi bosiladi.
+
+Manzil `qurilma_manzil.txt` da eslab qolingan. Boshqa saytga ulash kerak
+bo'lsa: `QURILMA_QOSHISH.bat -Manzil https://boshqa.sayt -Kod 0491...`
+
+Sayt ochiq internetda bo'lgani uchun skript **Tailscale qadamlarini
+o'tkazib yuboradi** — shaxsiy tarmoq endi kerak emas.
+
+### 9b. Qo'lda
+
+Telefonda **Kurs SMS → Sozlamalar → Sayt manzili**:
+
+```
+https://mrclayd12.pythonanywhere.com
+```
+
+⚠️ **`https://` ni albatta yozing.** Yozilmasa ilova `http://` deb oladi,
+server esa uni HTTPS ga buradi va ulanish xato beradi.
+
+Keyin kodni kiriting → **Ulanish**. Ikkala tomonda "ulandi" bildirishnomasi
+chiqadi. Telefondagi **Tailscale** endi kerak emas.
 
 ## 10. Sinov
 
