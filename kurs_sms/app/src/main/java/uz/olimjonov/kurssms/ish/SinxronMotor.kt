@@ -42,7 +42,12 @@ class SinxronMotor(context: Context) {
         val xato: Int = 0,
         val xabar: String = "",
         val muvaffaqiyatli: Boolean = true,
-    )
+        /** Sayt hozir qurilmalarni qabul qilmayapti (xato emas - kutish kerak). */
+        val yopiq: Boolean = false,
+    ) {
+        /** Shu siklda biror ish bajarildimi. */
+        val ishBajarildi: Boolean get() = jonatildi > 0 || xato > 0
+    }
 
     suspend fun bajar(): Xulosa = qulf.withLock {
         val xulosa = ishla()
@@ -74,6 +79,14 @@ class SinxronMotor(context: Context) {
                 prefs.engYangiVersiya = holat.qiymat.engYangiVersiya
                 if (holat.qiymat.qurilma.isNotBlank()) {
                     prefs.qurilmaNomi = holat.qiymat.qurilma
+                }
+                // Admin saytda "qabul oynasi" ni ochmagan - hozircha ish yo'q.
+                // Bu xato emas: navbatni ham so'ramaymiz, kutamiz.
+                if (holat.qiymat.yopiq) {
+                    return Xulosa(
+                        xabar = "Sayt hali qabul qilmayapti",
+                        yopiq = true,
+                    )
                 }
             }
         }

@@ -17,7 +17,8 @@ from django.views.decorators.http import require_POST
 from accounts.permissions import admin_talab
 
 from . import services, sozlamalar
-from .models import Bildirishnoma, Qurilma, SimKarta, SmsXabar, UlanishKodi
+from .models import (Bildirishnoma, QabulOynasi, Qurilma, SimKarta, SmsXabar,
+                     UlanishKodi)
 
 
 def yoqilgan_talab(view_func):
@@ -140,12 +141,33 @@ def xabarlar(request):
                  .order_by("qurilma", "id")[:200])
 
     return render(request, "sms/xabarlar.html", {
+        "oyna": QabulOynasi.oxirgi(),
+        "oyna_daqiqa": QabulOynasi.DAQIQA,
         "qurilmalar": qurilmalar,
         "navbat": navbat,
         "navbat_soni": SmsXabar.objects.filter(holat=SmsXabar.Holat.NAVBATDA).count(),
         "jarayonda": jarayonda,
         "sanoq": services.navbat_holati(),
     })
+
+
+@admin_talab
+@yoqilgan_talab
+@require_POST
+def oynani_och(request):
+    """Qurilmalarning so'rovlarini qabul qilish oynasini ochadi.
+
+    Ilova fonda aylanib turmagani uchun sayt ham doim quloq solib turmaydi.
+    Admin shu tugmani bosadi, keyin telefon egasi ilovani ochib "Ulanish" ni
+    bosadi - shu vaqtdagina so'rovlar qabul qilinadi.
+    """
+    QabulOynasi.och(request.user)
+    messages.success(
+        request,
+        f"Qabul oynasi ochildi - {QabulOynasi.DAQIQA} daqiqa. "
+        "Endi telefon egasi ilovani ochib 'Ulanish' ni bossin.",
+    )
+    return redirect("sms:xabarlar")
 
 
 @admin_talab

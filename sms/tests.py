@@ -12,7 +12,8 @@ from payments.models import Tranzaksiya
 from students.models import Arxiv, Oquvchi
 
 from . import services, sozlamalar
-from .models import Bildirishnoma, Qurilma, SimKarta, SmsXabar, UlanishKodi
+from .models import (Bildirishnoma, QabulOynasi, Qurilma, SimKarta, SmsXabar,
+                     UlanishKodi)
 
 # Sentabr tugagan, 1-oktabrda eslatma tayyorlanadi
 OKTABR = date(2025, 10, 1)
@@ -386,6 +387,7 @@ class ApiTest(TestCase):
         oquvchi_yarat()
         services.eslatmalarni_navbatga_qoy(OKTABR)
         self.qurilma = qurilma_yarat("Telefon A", simlar=2)
+        QabulOynasi.och()      # qabul oynasi ochiq bo'lmasa API javob bermaydi
 
     def sarlavha(self, kalit=None):
         return {"x-sms-kalit": kalit or self.qurilma.kalit}
@@ -604,13 +606,15 @@ class RejalashtiruvchisizTest(TestCase):
     """Navbat telefon murojaat qilganda ham tayyorlanadi.
 
     Ochiq serverda (PythonAnywhere bepul tarifida) rejalashtirilgan vazifa
-    yo'q, shuning uchun oylik navbat ilovaning davriy so'rovi bilan
-    tayyorlanadi - hech kim saytni ochmasa ham.
+    yo'q. Ilova endi fonda aylanib turmaydi, lekin qabul oynasi ochilib
+    telefon ulanganda navbat shu yerda ham tekshiriladi - ya'ni admin
+    xabar yuborish uchun kirgan paytning o'zida tayyorlanib qoladi.
     """
 
     def setUp(self):
         oquvchi_yarat()
         self.qurilma = qurilma_yarat("Telefon A", simlar=1)
+        QabulOynasi.och()
 
     def sorov(self):
         return self.client.get(reverse("sms_api:tekshir"),
@@ -641,3 +645,83 @@ class RejalashtiruvchisizTest(TestCase):
             self.sorov()
             self.sorov()
         self.assertEqual(SmsXabar.objects.count(), 2)
+
+
+@override_settings(**YOQ)
+class QabulOynasiTest(TestCase):
+    """Qurilma so'rovlari faqat qabul oynasi ochiq bo'lgandagina qabul qilinadi.
+
+    Ilova fonda aylanib turmaydi (batareya + saytning cheklangan CPU vaqti).
+    Admin oynani ochadi, telefon egasi ilovani ochadi - ish shu oralig'da
+    bo'ladi.
+    """
+
+    def setUp(self):
+        oquvchi_yarat()
+        services.eslatmalarni_navbatga_qoy(OKTABR)
+        self.qurilma = qurilma_yarat("Telefon A", simlar=1)
+
+    def sarlavha(self):
+        return {"x-sms-kalit": self.qurilma.kalit}
+
+    # --- yopiq holat ---
+
+    def test_oyna_yopiq_bolsa_tekshir_ishlamaydi(self):
+        javob = self.client.get(reverse("sms_api:tekshir"), headers=self.sarlavha())
+        self.assertEqual(javob.status_code, 200)   # xato emas - "hozir ish yo'q"
+        self.assertTrue(javob.json()["yopiq"])
+        self.assertFalse(javob.json()["ok"])
+
+    def test_oyna_yopiq_bolsa_navbat_berilmaydi(self):
+        sim = self.qurilma.simlar.first()
+        services.taqsimla([(self.qurilma, sim)])
+
+        javob = self.client.get(reverse("sms_api:navbat"), headers=self.sarlavha())
+        self.assertTrue(javob.json()["yopiq"])
+        self.assertNotIn("xabarlar", javob.json())
+        # xabarlar qurilmada qolgan holatida turibdi - yo'qolmadi
+        self.assertEqual(
+            SmsXabar.objects.filter(holat=SmsXabar.Holat.BERILDI).count(), 2)
+
+    def test_oyna_yopiq_bolsa_ham_natija_qabul_qilinadi(self):
+        """Eng muhimi: jo'natilgan SMS natijasi hech qachon yo'qolmasligi kerak."""
+        sim = self.qurilma.simlar.first()
+        services.taqsimla([(self.qurilma, sim)])
+        xabar = services.qurilma_navbati(self.qurilma)[0]
+
+        javob = self.client.post(
+            reverse("sms_api:holat"),
+            data=json.dumps({"natijalar": [{"id": xabar.pk, "holat": "jonatildi"}]}),
+            content_type="application/json",
+            headers=self.sarlavha(),
+        )
+        self.assertEqual(javob.status_code, 200)
+        self.assertTrue(javob.json()["ok"])
+        xabar.refresh_from_db()
+        self.assertEqual(xabar.holat, SmsXabar.Holat.JONATILDI)
+
+    # --- ochiq holat ---
+
+    def test_oyna_ochilsa_ishlaydi(self):
+        QabulOynasi.och()
+        javob = self.client.get(reverse("sms_api:tekshir"), headers=self.sarlavha())
+        self.assertTrue(javob.json()["ok"])
+        self.assertNotIn("yopiq", javob.json())
+
+    def test_oyna_muddati_otsa_yopiladi(self):
+        oyna = QabulOynasi.och()
+        self.assertTrue(QabulOynasi.ochiqmi())
+
+        # vaqtni orqaga surib, muddati o'tgan qilamiz
+        QabulOynasi.objects.filter(pk=oyna.pk).update(
+            ochilgan=timezone.now() - timedelta(minutes=QabulOynasi.DAQIQA + 1))
+
+        self.assertFalse(QabulOynasi.ochiqmi())
+        javob = self.client.get(reverse("sms_api:tekshir"), headers=self.sarlavha())
+        self.assertTrue(javob.json()["yopiq"])
+
+    def test_qolgan_vaqt_korsatiladi(self):
+        oyna = QabulOynasi.och()
+        self.assertGreater(oyna.qolgan_soniya, 0)
+        self.assertLessEqual(oyna.qolgan_soniya, QabulOynasi.DAQIQA * 60)
+        self.assertIn(":", oyna.qolgan_matni)

@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -36,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import uz.olimjonov.kurssms.ish.SessiyaXizmati
 import uz.olimjonov.kurssms.ui.AsosiyViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -44,12 +46,15 @@ import java.util.Locale
 @Composable
 fun BoshEkran(
     holat: AsosiyViewModel.Holat,
+    sessiya: SessiyaXizmati.Holat,
     smsRuxsat: Boolean,
     batareyaErkin: Boolean,
     onRuxsatSora: () -> Unit,
     onBatareya: () -> Unit,
     onSozlama: () -> Unit,
     onYoqOchir: (Boolean) -> Unit,
+    onSessiyaBoshla: () -> Unit,
+    onSessiyaToxtat: () -> Unit,
     onHozirTekshir: () -> Unit,
     onTozala: () -> Unit,
 ) {
@@ -111,23 +116,70 @@ fun BoshEkran(
 
             HolatKartasi(holat, onYoqOchir)
 
-            Button(
+            // --- Jo'natish sessiyasi ------------------------------------
+            // Ilova fonda aylanib turmaydi: har safar jo'natish kerak
+            // bo'lganda telefon egasi shu tugmani bosadi.
+            if (sessiya.ishlayapti) {
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(18.dp),
+                                strokeWidth = 2.dp,
+                            )
+                            Spacer(Modifier.size(10.dp))
+                            Text(
+                                "Ishlamoqda - ${sessiya.qolganMatni} qoldi",
+                                style = MaterialTheme.typography.titleSmall,
+                            )
+                        }
+                        if (sessiya.matn.isNotBlank()) {
+                            Spacer(Modifier.size(6.dp))
+                            Text(
+                                sessiya.matn,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        Spacer(Modifier.size(10.dp))
+                        OutlinedButton(onClick = onSessiyaToxtat) { Text("To'xtatish") }
+                    }
+                }
+            } else {
+                Button(
+                    onClick = onSessiyaBoshla,
+                    enabled = holat.ulangan,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Icon(Icons.Filled.Send, contentDescription = null)
+                    Spacer(Modifier.size(8.dp))
+                    Text("Ulanish va jo'natish")
+                }
+                Text(
+                    "Saytda xabar tayyor bo'lganda shu tugmani bosing. Ilova " +
+                        "ishini bajarib bo'lgach yoki ${SessiyaXizmati.MUDDAT_DAQIQA} " +
+                        "daqiqada ish kelmasa o'zi to'xtaydi.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+
+            OutlinedButton(
                 onClick = onHozirTekshir,
-                enabled = !holat.ishlamoqda && holat.ulangan,
+                enabled = !holat.ishlamoqda && holat.ulangan && !sessiya.ishlayapti,
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 if (holat.ishlamoqda) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(18.dp),
                         strokeWidth = 2.dp,
-                        color = MaterialTheme.colorScheme.onPrimary,
                     )
                     Spacer(Modifier.size(8.dp))
                     Text("Tekshirilmoqda...")
                 } else {
                     Icon(Icons.Filled.Refresh, contentDescription = null)
                     Spacer(Modifier.size(8.dp))
-                    Text("Hozir tekshirish")
+                    Text("Bir marta tekshirish")
                 }
             }
 

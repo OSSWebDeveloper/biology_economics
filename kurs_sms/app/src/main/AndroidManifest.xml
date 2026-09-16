@@ -11,8 +11,11 @@
     <!-- Natija haqida bildirishnoma (Android 13+ da so'raladi) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
-    <!-- Telefon yoqilganda tekshiruvni tiklash -->
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- Jo'natish sessiyasi: foydalanuvchi "Ulanish" ni bosganda qisqa
+         muddatli xizmat ishga tushadi (eng ko'pi 15 daqiqa). Ilova fonda
+         doimiy aylanib turmaydi. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
 
     <!-- Ikki SIM bo'lsa, qaysi biridan yuborishni tanlash uchun -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
@@ -45,16 +48,13 @@
             </intent-filter>
         </activity>
 
-        <!-- Telefon qayta yoqilganda yoki ilova yangilanganda tekshiruvni tiklaydi -->
-        <receiver
-            android:name=".ish.YoqishReceiver"
-            android:enabled="true"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
-            </intent-filter>
-        </receiver>
+        <!-- Bitta jo'natish sessiyasi. Foydalanuvchi ilovada "Ulanish" ni
+             bosganda boshlanadi, ishini bajarib bo'lgach yoki 15 daqiqada
+             ish kelmasa - o'zi to'xtaydi. -->
+        <service
+            android:name=".ish.SessiyaXizmati"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
     </application>
 
 </manifest>

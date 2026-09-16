@@ -19,6 +19,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -33,6 +34,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.viewmodel.compose.viewModel
+import uz.olimjonov.kurssms.ish.SessiyaXizmati
 import uz.olimjonov.kurssms.ui.AsosiyViewModel
 import uz.olimjonov.kurssms.ui.ekran.BoshEkran
 import uz.olimjonov.kurssms.ui.ekran.SozlamaEkran
@@ -166,12 +168,15 @@ private fun Ilova(
 
         else -> BoshEkran(
             holat = vm.holat,
+            sessiya = SessiyaXizmati.holat.collectAsState().value,
             smsRuxsat = smsRuxsat,
             batareyaErkin = batareyaErkin,
             onRuxsatSora = { soruvchi.launch(arrayOf(Manifest.permission.SEND_SMS)) },
             onBatareya = { batareyaniSora(kontekst) },
             onSozlama = { ekran = "sozlama" },
             onYoqOchir = { vm.yoqOchir(it) },
+            onSessiyaBoshla = { vm.sessiyaniBoshla() },
+            onSessiyaToxtat = { vm.sessiyaniToxtat() },
             onHozirTekshir = { vm.hozirTekshir() },
             onTozala = { vm.jurnalniTozala() },
         )

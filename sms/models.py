@@ -294,3 +294,79 @@ class SmsXabar(models.Model):
             self.Holat.XATO: "qizil",
             self.Holat.BEKOR: "kulrang",
         }.get(self.holat, "kulrang")
+
+
+class QabulOynasi(models.Model):
+    """Qurilmalarning so'rovlarini qabul qilish oynasi.
+
+    Telefondagi ilova endi fonda aylanib turmaydi - batareyani ham,
+    saytning cheklangan CPU vaqtini ham tejash uchun. Uning o'rniga:
+
+      1. Admin xabarlarni qurilmaga beradi ("Yuborish");
+      2. Admin shu oynani ochadi - sayt `DAQIQA` daqiqa davomida
+         qurilmalarning so'rovlarini qabul qiladi;
+      3. Telefon egasi ilovani ochib "Ulanish" ni bosadi, ilova ishini
+         qilib bo'lgach o'zi to'xtaydi.
+
+    Oyna yopiq bo'lsa `/sms/tekshir/` va `/sms/navbat/` darhol "yopiq" deb
+    javob beradi - bazaga ham, hisob-kitobga ham tegilmaydi.
+
+    Natija qaytarish (`/sms/holat/`) va ulanish (`/sms/ulan/`) BU OYNAGA
+    BOG'LIQ EMAS: telefon SMS ni jo'natib bo'lib, natijasini oyna yopilgandan
+    keyin yuborsa ham, u yo'qolmasligi kerak.
+    """
+
+    DAQIQA = 15   # oyna shuncha vaqt ochiq turadi
+
+    ochilgan = models.DateTimeField("Ochilgan vaqt", auto_now_add=True)
+    ochgan = models.ForeignKey(
+        settings.AUTH_USER_MODEL, verbose_name="Kim ochdi",
+        on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="qabul_oynalari",
+    )
+
+    class Meta:
+        verbose_name = "Qabul oynasi"
+        verbose_name_plural = "Qabul oynalari"
+        ordering = ["-ochilgan"]
+
+    def __str__(self):
+        return f"{self.ochilgan:%Y-%m-%d %H:%M}"
+
+    @property
+    def tugaydi(self):
+        return self.ochilgan + timedelta(minutes=self.DAQIQA)
+
+    @property
+    def ochiq(self):
+        return timezone.now() < self.tugaydi
+
+    @property
+    def qolgan_soniya(self):
+        """Oyna yopilishiga qancha qolgani (yopiq bo'lsa 0)."""
+        qoldi = (self.tugaydi - timezone.now()).total_seconds()
+        return max(0, int(qoldi))
+
+    @property
+    def qolgan_matni(self):
+        soniya = self.qolgan_soniya
+        if not soniya:
+            return "yopiq"
+        daqiqa, soniya = divmod(soniya, 60)
+        return f"{daqiqa}:{soniya:02d}"
+
+    @classmethod
+    def och(cls, foydalanuvchi=None):
+        """Yangi oyna ochadi (eskisi ustiga yozilmaydi - tarix qoladi)."""
+        return cls.objects.create(
+            ochgan=foydalanuvchi if getattr(foydalanuvchi, "pk", None) else None
+        )
+
+    @classmethod
+    def oxirgi(cls):
+        return cls.objects.order_by("-ochilgan").first()
+
+    @classmethod
+    def ochiqmi(cls):
+        oyna = cls.oxirgi()
+        return bool(oyna and oyna.ochiq)

@@ -28,6 +28,12 @@ data class SaytHolat(
     val qurilma: String,
     val navbatda: Int,
     val engYangiVersiya: String,
+    /**
+     * Sayt hozir qurilmalarni qabul qilmayapti (admin "qabul oynasi" ni
+     * ochmagan yoki muddati o'tgan). Bu XATO EMAS - shunchaki hozircha ish
+     * yo'q degani, shuning uchun sayt buni 200 bilan qaytaradi.
+     */
+    val yopiq: Boolean = false,
 )
 
 /** Ulanish natijasi (`/sms/ulan/`). */
@@ -131,6 +137,7 @@ class SaytApi(manzil: String, private val kalit: String = "") {
                             qurilma = obj.optString("qurilma", ""),
                             navbatda = obj.optInt("navbatda", 0),
                             engYangiVersiya = obj.optString("eng_yangi_versiya", ""),
+                            yopiq = obj.optBoolean("yopiq", false),
                         )
                     )
                 } catch (e: Exception) {

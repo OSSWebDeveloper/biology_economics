@@ -14,6 +14,7 @@ urlpatterns = [
 
     path("xabarlar/", views.xabarlar, name="xabarlar"),
     path("xabarlar/yuborish/", views.yuborish, name="yuborish"),
+    path("xabarlar/oyna/", views.oynani_och, name="oynani_och"),
     path("xabarlar/tayyorla/", views.navbatni_tayyorla, name="navbatni_tayyorla"),
 
     path("xatolar/", views.xatolar, name="xatolar"),

@@ -27,6 +27,36 @@
 
 {% include "sms/_tab.html" %}
 
+<div class="panel" style="margin-bottom:16px">
+  <div class="panel-sarlavha">
+    Qurilmalarni qabul qilish
+    {% if oyna and oyna.ochiq %}
+    <span class="nishon yashil">Ochiq - {{ oyna.qolgan_matni }} qoldi</span>
+    {% else %}
+    <span class="nishon kulrang">Yopiq</span>
+    {% endif %}
+  </div>
+  <div class="panel-ich">
+    <p class="bosq" style="margin-top:0">
+      Telefondagi ilova fonda ishlamaydi - batareyani va saytning cheklangan
+      imkoniyatini tejash uchun. Shuning uchun tartib shunday:
+      avval xabarlarni <b>Yuborish</b> bilan qurilmaga bering, keyin shu
+      tugmani bosing, so'ng telefon egasi ilovani ochib <b>Ulanish</b> ni
+      bossin. Oyna yopiq bo'lganda sayt qurilma so'rovlarini qabul qilmaydi.
+    </p>
+    <form method="post" action="{% url 'sms:oynani_och' %}">
+      {% csrf_token %}
+      <button type="submit" class="tugma">
+        {% if oyna and oyna.ochiq %}
+        Yana {{ oyna_daqiqa }} daqiqaga uzaytirish
+        {% else %}
+        Qabul qilishni boshlash ({{ oyna_daqiqa }} daqiqa)
+        {% endif %}
+      </button>
+    </form>
+  </div>
+</div>
+
 <form method="post" action="{% url 'sms:yuborish' %}" id="yuborish-forma">
   {% csrf_token %}
   <div class="panel" style="margin-bottom:16px">

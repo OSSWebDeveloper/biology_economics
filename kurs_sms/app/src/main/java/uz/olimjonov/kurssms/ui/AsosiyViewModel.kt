@@ -12,7 +12,7 @@ import uz.olimjonov.kurssms.data.Jurnal
 import uz.olimjonov.kurssms.data.Prefs
 import uz.olimjonov.kurssms.data.Yozuv
 import uz.olimjonov.kurssms.ish.SinxronMotor
-import uz.olimjonov.kurssms.ish.SmsIsh
+import uz.olimjonov.kurssms.ish.SessiyaXizmati
 import uz.olimjonov.kurssms.ish.Ulanish
 import uz.olimjonov.kurssms.sms.Sim
 import uz.olimjonov.kurssms.sms.SimRoyxati
@@ -87,7 +87,6 @@ class AsosiyViewModel(ilova: Application) : AndroidViewModel(ilova) {
             holat = if (xato == null) {
                 // Ulangandan keyin avtomatik tekshirish o'zi yoqiladi
                 prefs.yoqilgan = true
-                SmsIsh.yoq(kontekst, prefs.oraliq)
                 yangila()
                 holat.copy(
                     ishlamoqda = false,
@@ -105,7 +104,7 @@ class AsosiyViewModel(ilova: Application) : AndroidViewModel(ilova) {
     fun uzil() {
         prefs.ulanishniOchir()
         prefs.yoqilgan = false
-        SmsIsh.ochir(kontekst)
+        SessiyaXizmati.toxtat(kontekst)
         jurnal.qosh("malumot", "Saytdan uzildi")
         yangila()
         holat = holat.copy(xabar = "Saytdan uzildi", yaxshi = null)
@@ -118,20 +117,35 @@ class AsosiyViewModel(ilova: Application) : AndroidViewModel(ilova) {
         prefs.oraliq = oraliq
         prefs.tanaffus = tanaffus
         prefs.birMartada = birMartada
-        if (prefs.yoqilgan && prefs.ulangan) {
-            SmsIsh.yoq(kontekst, prefs.oraliq)
-        }
         yangila()
     }
 
     fun yoqOchir(yoq: Boolean) {
         prefs.yoqilgan = yoq
-        if (yoq && prefs.ulangan) {
-            SmsIsh.yoq(kontekst, prefs.oraliq)
-        } else {
-            SmsIsh.ochir(kontekst)
-        }
+        if (!yoq) SessiyaXizmati.toxtat(kontekst)
         yangila()
+    }
+
+    // ------------------------------------------------------------- sessiya
+
+    /**
+     * Jo'natish sessiyasini boshlaydi.
+     *
+     * Ilova fonda aylanib turmaydi: telefon egasi har safar jo'natish kerak
+     * bo'lganda shu tugmani bosadi. Xizmat ishini bajarib bo'lgach yoki
+     * [SessiyaXizmati.MUDDAT_DAQIQA] daqiqada ish kelmasa o'zi to'xtaydi.
+     */
+    fun sessiyaniBoshla() {
+        if (!prefs.ulangan) {
+            holat = holat.copy(yaxshi = false, xabar = "Avval saytga ulaning")
+            return
+        }
+        SessiyaXizmati.boshla(kontekst)
+        holat = holat.copy(xabar = "", yaxshi = null)
+    }
+
+    fun sessiyaniToxtat() {
+        SessiyaXizmati.toxtat(kontekst)
     }
 
     // ---------------------------------------------------------------- amallar

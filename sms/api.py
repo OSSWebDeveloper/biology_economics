@@ -19,7 +19,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 
 from . import services, sozlamalar
-from .models import Qurilma, SmsXabar
+from .models import QabulOynasi, Qurilma, SmsXabar
 
 
 def _tana(request):
@@ -74,6 +74,31 @@ def api(view):
     return orab
 
 
+def oyna_kerak(view):
+    """Qabul oynasi ochiq bo'lgandagina ishlaydigan API.
+
+    Ilova fonda aylanib turmaydi: admin saytda oynani ochgandan keyingina
+    qurilmalar so'rov yuboradi. Oyna yopiq bo'lsa bu yerda darhol qaytamiz -
+    bazaga ham, hisob-kitobga ham tegilmaydi (bepul tarifdagi CPU vaqtini
+    shu tejaydi).
+
+    Javob ataylab **200** bo'ladi: ilova buni xato deb emas, "hozircha ish
+    yo'q, to'xta" deb tushunishi kerak.
+    """
+
+    @wraps(view)
+    def orab(request, qurilma, *args, **kwargs):
+        if not QabulOynasi.ochiqmi():
+            return JsonResponse({
+                "ok": False,
+                "yopiq": True,
+                "xato": "Sayt hozir qurilmalarni qabul qilmayapti",
+            })
+        return view(request, qurilma, *args, **kwargs)
+
+    return orab
+
+
 # --------------------------------------------------------------------------
 
 @ochiq_api
@@ -108,6 +133,7 @@ def ulan(request):
 
 @api
 @require_GET
+@oyna_kerak
 def tekshir(request, qurilma):
     """Aloqa signali va qisqa holat. Ilova buni davriy chaqiradi.
 
@@ -155,6 +181,7 @@ def simlar(request, qurilma):
 
 @api
 @require_GET
+@oyna_kerak
 def navbat(request, qurilma):
     """Shu qurilmaga berilgan xabarlarni beradi."""
     services.aloqani_belgila(qurilma)

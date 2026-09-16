@@ -25,10 +25,15 @@ Ilova loyihasi shu repozitoriyda: `kurs_sms/` papkasi.
   Xabarlar -> qurilma/SIM belgilash
      -> "Yuborish"
      xabarlar teng bo'linadi ("berildi")
-                                   <───     GET  /sms/tekshir/  (har 15 daqiqada, "tirikman")
+  Xabarlar -> "Qabul qilishni boshlash"
+     15 daqiqalik qabul oynasi ochiladi
+                                            telefon egasi ilovada
+                                            "Ulanish va jo'natish" ni bosadi
+                                   <───     GET  /sms/tekshir/  (har 30 soniyada)
                                    <───     GET  /sms/navbat/   (o'ziga tegishlilari)
                                             SIM kartadan SMS jo'natadi
                                    <───     POST /sms/holat/    (jo'natildi / xato)
+                                            ish tugadi -> ilova O'ZI TO'XTAYDI
      "jo'natildi" yoki "Jo'natilmaganlar"
      bo'limida "Qayta urinib ko'rish"
 ```
@@ -66,7 +71,24 @@ Ilova loyihasi shu repozitoriyda: `kurs_sms/` papkasi.
 | `/xabarnoma/xatolar/` | Jo'natilmagan xabarlar + "Qayta urinib ko'rish" |
 
 Qurilma **onlayn** deb hisoblanadi, agar oxirgi 20 daqiqa ichida aloqa
-bo'lgan bo'lsa (`Qurilma.ONLAYN_DAQIQA`).
+bo'lgan bo'lsa (`Qurilma.ONLAYN_DAQIQA`). Ilova endi fonda aylanib
+turmagani uchun qurilma odatda **oflayn** ko'rinadi - bu normal holat,
+u faqat jo'natish sessiyasi paytida onlayn bo'ladi.
+
+### Qabul oynasi
+
+Ilova telefonda fonda ishlamaydi: na batareyani, na saytning cheklangan
+CPU vaqtini bekorga yemaydi. Shuning uchun sayt ham doim quloq solib
+turmaydi.
+
+**Xabarlar** bo'limidagi "Qabul qilishni boshlash" tugmasi
+`QabulOynasi.DAQIQA` (15) daqiqalik oyna ochadi. Oyna yopiq bo'lsa
+`/sms/tekshir/` va `/sms/navbat/` darhol `{"ok": false, "yopiq": true}`
+qaytaradi - bazaga ham, hisob-kitobga ham tegilmaydi.
+
+`POST /sms/holat/` (natija) va `POST /sms/ulan/` (ulanish) **oynaga bog'liq
+emas**: telefon SMS ni jo'natib bo'lib, natijasini oyna yopilgandan keyin
+yuborsa ham u yo'qolmasligi kerak.
 
 Qurilmani **o'chirish** - vaqtincha ishlatmaslik (xabarlari navbatga qaytadi).
 **Uzish** - butunlay o'chirish; qaytadan ulash uchun yangi kod kerak.
@@ -128,6 +150,15 @@ Ixtiyoriy: `?batareya=77&versiya=1.0.0`
   "eng_yangi_versiya": "1.0.0"
 }
 ```
+
+Qabul oynasi yopiq bo'lsa (HTTP **200**, xato emas):
+
+```json
+{"ok": false, "yopiq": true, "xato": "Sayt hozir qurilmalarni qabul qilmayapti"}
+```
+
+Ilova buni xato deb emas, "hozircha ish yo'q, kutaman" deb tushunadi va
+sessiya muddati tugaguncha har 30 soniyada qayta so'raydi.
 
 Har chaqirilganda qurilmaning "oxirgi aloqa" vaqti yangilanadi - saytda
 **onlayn** shu bilan ko'rinadi. `eng_yangi_versiya` - saytdagi
