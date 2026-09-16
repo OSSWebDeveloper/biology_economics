@@ -33,10 +33,24 @@
         Kod <b id="kod-vaqt">{{ kod.qolgan_soniya }}</b> soniyadan keyin eskiradi.
       </div>
       <ol class="kod-qadamlar">
-        <li>Telefonda <b>Kurs SMS</b> ilovasini oching.</li>
-        <li>Sozlamalarda sayt manzilini yozing.</li>
-        <li>"Ulanish kodi" maydoniga yuqoridagi 12 raqamni kiriting va <b>Ulanish</b> ni bosing.</li>
+        <li>Telefonni <b>USB kabel</b> bilan kompyuterga ulang
+          (telefonda <b>USB debugging</b> yoqilgan bo'lsin).</li>
+        <li>Sayt papkasida shu buyruqni ishga tushiring:
+          <div class="buyruq-qator">
+            <code id="buyruq">QURILMA_QOSHISH.bat -Kod {{ kod.kod }}</code>
+            <button type="button" class="tugma kichik" id="nusxa">Nusxa olish</button>
+          </div>
+        </li>
+        <li>Telefon ekranida <b>Ulanish</b> tugmasini bosing - tamom.</li>
       </ol>
+      <p class="bosq" style="margin:10px 0 0">
+        Skript ilovani o'zi o'rnatadi, SMS/SIM/bildirishnoma ruxsatlarini
+        beradi, batareya cheklovini olib tashlaydi va sayt manzili bilan
+        kodni telefonga uzatadi - telefonda hech narsa yozish kerak emas.
+        <br>
+        Kabelsiz ulash kerak bo'lsa: ilovada <b>Sozlamalar</b> -> sayt
+        manzili -> yuqoridagi kodni kiriting.
+      </p>
       <form method="post" action="{% url 'sms:kod_yarat' %}" style="margin-top:12px">
         {% csrf_token %}
         <button type="submit" class="tugma">Yangi kod olish</button>
@@ -207,6 +221,29 @@
   }
 
   setInterval(yangila, 15000);
+})();
+
+// Ulanish buyrug'idan nusxa olish
+(function () {
+  var tugma = document.getElementById("nusxa");
+  var buyruq = document.getElementById("buyruq");
+  if (!tugma || !buyruq) return;
+
+  tugma.addEventListener("click", function () {
+    var matn = buyruq.textContent.trim();
+    var eski = tugma.textContent;
+    function bildir(natija) {
+      tugma.textContent = natija;
+      setTimeout(function () { tugma.textContent = eski; }, 1500);
+    }
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(matn)
+        .then(function () { bildir("Nusxa olindi"); })
+        .catch(function () { bildir("Nusxa olinmadi"); });
+    } else {
+      bildir("Nusxa olinmadi");
+    }
+  });
 })();
 </script>
 {% endblock %}

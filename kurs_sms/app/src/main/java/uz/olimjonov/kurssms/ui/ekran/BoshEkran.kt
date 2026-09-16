@@ -278,13 +278,19 @@ private fun HolatKartasi(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = if (holat.yoqilgan) "Avtomatik tekshirish yoqilgan"
-                        else "Avtomatik tekshirish o'chiq",
+                        text = if (holat.yoqilgan) "Jo'natishga tayyor"
+                        else "Jo'natish o'chirilgan",
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
-                        text = "Har ${holat.oraliq} daqiqada saytdan yangi xabar so'raladi",
+                        // Ilova fonda aylanmaydi - 1.3.0 dan boshlab ish faqat
+                        // foydalanuvchi tugmani bosganda bajariladi.
+                        text = if (holat.yoqilgan) {
+                            "Ilova fonda ishlamaydi - har safar tugmani bosasiz"
+                        } else {
+                            "O'chirilgan: tugma bosilsa ham ish bajarilmaydi"
+                        },
                         style = MaterialTheme.typography.bodySmall,
                     )
                 }

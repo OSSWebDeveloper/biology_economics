@@ -243,7 +243,7 @@ SMS_TEST_RAQAM = ""
 # solishtiradi va eskirgan bo'lsa foydalanuvchini ogohlantiradi
 # (saytning versiya.txt mantig'i bilan bir xil). Yangi APK chiqarilganda
 # shu raqam ham yangilanadi.
-SMS_ILOVA_VERSIYA = "1.3.0"
+SMS_ILOVA_VERSIYA = "1.3.1"
 
 # Oflayn qurilmada qotib qolgan xabarlar shuncha daqiqadan keyin
 # navbatga qaytariladi va boshqa qurilmaga berilishi mumkin.

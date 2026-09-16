@@ -406,6 +406,18 @@ label.belgilash input { width: auto; }
 .kod-qadamlar { margin: 12px 0 0; padding-left: 18px; font-size: .85rem; color: var(--matn-och); }
 .kod-qadamlar li { margin-bottom: 4px; }
 
+/* Ulanish buyrug'i: telefonni USB bilan ulab bitta qatorni ishga tushirish */
+.buyruq-qator {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 6px 0 4px;
+}
+.buyruq-qator code {
+  flex: 1 1 260px; min-width: 0; overflow-x: auto; white-space: nowrap;
+  padding: 7px 10px; border-radius: 6px;
+  background: var(--fon-och, #f1f5f9); border: 1px solid var(--chegara, #e2e8f0);
+  font-family: Consolas, "Courier New", monospace; font-size: .82rem;
+  color: var(--matn, #0f172a);
+}
+
 .qurilma-qator { display: flex; align-items: center; gap: 10px; }
 .qurilma-nuqta { width: 9px; height: 9px; border-radius: 50%; background: #cbd5e1; flex: none; }
 .qurilma-nuqta.onlayn { background: var(--yashil); box-shadow: 0 0 0 3px var(--yashil-fon); }
