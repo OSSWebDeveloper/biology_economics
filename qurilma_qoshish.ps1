@@ -53,6 +53,11 @@ if (-not $Manzil -and (Test-Path $MANZIL_FAYLI)) {
     $Manzil = (Get-Content $MANZIL_FAYLI -Raw).Trim()
 }
 $Manzil  = ("" + $Manzil).Trim().TrimEnd('/')
+
+# -Kod parametri ham shu sababdan darhol boshqa nomga ko'chiriladi: quyida
+# `$kod` ishlatiladi va u PowerShell uchun `$Kod` ning o'zi - parametr
+# qiymati yo'qolib qoladi.
+$BERILGAN_KOD = ("" + $Kod).Trim()
 $HOSTING = ($Manzil -match '^https?://') -and
            ($Manzil -notmatch '^https?://(localhost|127\.|192\.168\.|10\.|100\.)')
 if ($HOSTING) { $FaqatIlova = $true }
@@ -461,7 +466,7 @@ if (-not $manzil) {
         if ($HOSTING) {
             # Sayt boshqa kompyuterda turibdi - kodni mahalliy bazadan olib
             # bo'lmaydi, u saytning o'zida yaratiladi.
-            $kod = ("" + $Kod) -replace '\D', ''
+            $kod = $BERILGAN_KOD -replace '\D', ''
             if ($kod.Length -ne 12 -and -not $Savolsiz) {
                 Write-Host ""
                 Oddiy "Saytga kiring: $manzil"
