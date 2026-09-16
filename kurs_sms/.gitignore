@@ -1,0 +1,12 @@
+*.iml
+*.jks
+*.keystore
+.DS_Store
+.gradle/
+.idea/
+.kotlin/
+build/
+captures/
+kalit.properties
+local.properties
+sayt.txt

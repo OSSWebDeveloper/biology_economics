@@ -174,7 +174,8 @@ Sarlavha "2. Ilova fayli"
 
 $APK = Join-Path $SAYT "ilova\kurs_sms.apk"
 # Ishlab chiqish kompyuterida yangiroq nusxa bo'lsa - o'shanisi
-$DEV_APK = "D:\kurs_sms\app\build\outputs\apk\release\app-release.apk"
+# Ilova manbasi shu repozitoriyning ichida (kurs_sms papkasi).
+$DEV_APK = Join-Path $SAYT "kurs_sms\app\build\outputs\apk\release\app-release.apk"
 if ((Test-Path $DEV_APK) -and (Test-Path $APK)) {
     if ((Get-Item $DEV_APK).LastWriteTime -gt (Get-Item $APK).LastWriteTime) {
         Copy-Item $DEV_APK $APK -Force

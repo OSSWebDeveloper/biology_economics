@@ -5,7 +5,7 @@ eslatmasi **navbatga** yoziladi. Sayt SMS jo'natmaydi: admin qaysi telefon va
 qaysi SIM kartadan yuborishni tanlaydi, xabarlar o'sha qurilmalarga **teng**
 bo'linadi, telefondagi **Kurs SMS** ilovasi esa ularni olib jo'natadi.
 
-Ilova loyihasi: `D:\kurs_sms`.
+Ilova loyihasi shu repozitoriyda: `kurs_sms/` papkasi.
 
 ---
 
@@ -218,7 +218,7 @@ qo'yiladi. Sayt bosh sahifasi ochilganda ham navbat o'zi tekshiriladi.
 
 ## 6. Birinchi marta sozlash
 
-1. Telefonga `app-release.apk` ni o'rnating (`D:\kurs_sms`).
+1. Telefonga ilovani o'rnating: `QURILMA_QOSHISH.bat` (manbasi `kurs_sms/`).
 2. Ilovada sayt manzilini yozing.
 3. Saytda **Xabarnoma → Ulanish kodini olish**.
 4. Kodni ilovaga kiriting → **Ulanish**. Ikkala tomonda ham "ulandi"
